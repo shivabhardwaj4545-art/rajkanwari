@@ -245,9 +245,9 @@ cartRouter.patch('/items/:id', async (req, res) => {
       SELECT ci.id, ci.variant_id, ci.quantity, pv.stock
       FROM cart_items ci
       JOIN product_variants pv ON pv.id = ci.variant_id
-      WHERE ci.id = ? AND ci.cart_id = ?
+      WHERE (ci.id = ? OR ci.variant_id = ?) AND ci.cart_id = ?
     `)
-    .get(id, cart.id)) as { id: string; variant_id: string; quantity: number | string; stock: number | string } | undefined;
+    .get(id, id, cart.id)) as { id: string; variant_id: string; quantity: number | string; stock: number | string } | undefined;
 
   if (!cartItem) {
     return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Cart item not found' } });
@@ -257,12 +257,12 @@ cartRouter.patch('/items/:id', async (req, res) => {
   const itemStock = Number(cartItem.stock);
 
   if (parsedQty <= 0) {
-    await db.prepare('DELETE FROM cart_items WHERE id = ?').run(id);
+    await db.prepare('DELETE FROM cart_items WHERE id = ?').run(cartItem.id);
   } else {
     const clampedQty = Math.min(itemStock, parsedQty);
     await db.prepare('UPDATE cart_items SET quantity = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(
       clampedQty,
-      id
+      cartItem.id
     );
   }
 
@@ -278,7 +278,7 @@ cartRouter.delete('/items/:id', async (req, res) => {
   const { id } = req.params;
   const { cart, userId } = await getOrCreateCart(req, res);
 
-  await db.prepare('DELETE FROM cart_items WHERE id = ? AND cart_id = ?').run(id, cart.id);
+  await db.prepare('DELETE FROM cart_items WHERE (id = ? OR variant_id = ?) AND cart_id = ?').run(id, id, cart.id);
 
   const response = await buildCartResponse(cart, userId);
   return res.json(response);
