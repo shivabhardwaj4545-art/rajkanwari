@@ -34,8 +34,8 @@ for (const table of tablesToClean) {
 console.log('ðŸ§¹ Existing data wiped.');
 
 // â”€â”€ 1. Users â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const ownerPassword = process.env.RAJKANWARI_OWNER_PASSWORD || process.env.SHIKKIS_OWNER_PASSWORD || 'rajkanwari_dev_owner_2026!';
-const customerPassword = process.env.RAJKANWARI_CUSTOMER_PASSWORD || process.env.SHIKKIS_CUSTOMER_PASSWORD || 'rajkanwari_dev_cust_2026!';
+const ownerPassword = process.env.RAJKANWARI_OWNER_PASSWORD || process.env.SHIKKIS_OWNER_PASSWORD || '123456';
+const customerPassword = process.env.RAJKANWARI_CUSTOMER_PASSWORD || process.env.SHIKKIS_CUSTOMER_PASSWORD || '123456';
 
 const ownerHash = bcrypt.hashSync(ownerPassword, 12);
 const customerHash = bcrypt.hashSync(customerPassword, 12);
