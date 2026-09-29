@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import bcrypt from 'bcryptjs';
 import db from './client.js';
 import { seedFullDatabase } from './seedFull.js';
 
@@ -305,14 +306,15 @@ async function seedIfEmpty(): Promise<void> {
     const userCount = Number(userRes?.cnt ?? 0);
     const productCount = Number(productRes?.cnt ?? 0);
 
-    if (userCount > 0 && productCount > 0) {
-      console.log(`ℹ️ Database already contains ${productCount} products and ${userCount} users.`);
-      return;
+    if (userCount === 0 || productCount === 0) {
+      console.log('🌱 Empty catalog or users detected. Seeding full catalog, banners, offers, orders & admin account...');
+      await seedFullDatabase(db);
+      console.log('✅ Full Database Seeding Complete!');
     }
 
-    console.log('🌱 Empty catalog or users detected. Seeding full catalog, banners, offers, orders & admin account...');
-    await seedFullDatabase(db);
-    console.log('✅ Full Database Seeding Complete!');
+    // Ensure seed admin and customer account password hashes match 123456
+    const passwordHash = bcrypt.hashSync('123456', 12);
+    await db.prepare("UPDATE users SET password_hash = ? WHERE email IN ('owner@rajkanwari.in', 'owner@shikkis.in', 'priya@example.com')").run(passwordHash);
   } catch (err) {
     console.error('Error auto-seeding database:', err);
   }

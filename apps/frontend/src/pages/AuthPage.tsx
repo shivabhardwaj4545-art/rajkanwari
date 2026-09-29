@@ -40,19 +40,18 @@ export const AuthPage: React.FC = () => {
 
   // Initialize Google Identity Services SDK
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).google?.accounts?.id && !user) {
+    const googleClientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID;
+    if (typeof window !== 'undefined' && (window as any).google?.accounts?.id && !user && googleClientId) {
       try {
         (window as any).google.accounts.id.initialize({
-          client_id:
-            (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID ||
-            '583686598477-ai66in9imtus9n7ar6i64hdrbfsm92ud.apps.googleusercontent.com',
+          client_id: googleClientId,
           callback: async (response: any) => {
             if (response.credential) {
               setSubmitting(true);
               setErrorMsg(null);
               try {
                 const res = await api.googleLogin(response.credential);
-                localStorage.setItem('shikkis_access_token', res.accessToken);
+                localStorage.setItem('rajkanwari_access_token', res.accessToken);
                 await initAuth();
                 setSuccessMsg('Successfully signed in with Google!');
                 setTimeout(() => navigate('/catalog'), 800);
@@ -66,17 +65,17 @@ export const AuthPage: React.FC = () => {
         });
 
         const container = document.getElementById('google-btn-container');
-        if (container) {
+        if (container && container.children.length === 0) {
           (window as any).google.accounts.id.renderButton(container, {
             theme: 'outline',
             size: 'large',
-            width: '100%',
+            width: 320,
             text: 'continue_with',
             shape: 'pill',
           });
         }
       } catch (e) {
-        console.error('Google Auth init error:', e);
+        // Ignore Google Auth initialization errors silently
       }
     }
   }, [mode, user, initialized, initAuth, navigate]);
@@ -397,14 +396,16 @@ export const AuthPage: React.FC = () => {
             )}
 
             {/* Google OAuth Sign-In Divider & Container */}
-            <div className="mt-6 pt-5 border-t border-border">
-              <div className="relative flex justify-center text-xs uppercase mb-4">
-                <span className="bg-surface px-2 text-text-muted font-medium tracking-wider">
-                  Or continue with
-                </span>
+            {(import.meta as any).env?.VITE_GOOGLE_CLIENT_ID && (
+              <div className="mt-6 pt-5 border-t border-border">
+                <div className="relative flex justify-center text-xs uppercase mb-4">
+                  <span className="bg-surface px-2 text-text-muted font-medium tracking-wider">
+                    Or continue with
+                  </span>
+                </div>
+                <div id="google-btn-container" className="flex justify-center min-h-[44px]" />
               </div>
-              <div id="google-btn-container" className="flex justify-center min-h-[44px]" />
-            </div>
+            )}
 
           </div>
         )}
