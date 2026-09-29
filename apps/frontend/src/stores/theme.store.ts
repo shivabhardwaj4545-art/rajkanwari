@@ -57,7 +57,7 @@ export const useThemeStore = create<ThemeState>()(
         },
       }),
       {
-        name: 'shikkis-theme', // localStorage key per AGENTS.md
+        name: 'rajkanwari-theme', // localStorage key for Rajkanwari theme preference
         // Only persist the user's preference, not the resolved value
         partialize: (state) => ({ preference: state.preference }),
         onRehydrateStorage: () => (state) => {

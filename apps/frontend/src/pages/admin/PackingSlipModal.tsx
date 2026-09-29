@@ -62,10 +62,10 @@ export const PackingSlipModal: React.FC<PackingSlipModalProps> = ({ data, onClos
           <div className="flex justify-between items-start border-b border-[var(--border)] pb-4">
             <div>
               <h1 className="text-2xl font-serif font-bold text-[var(--brand-crimson)] tracking-wide">
-                SHIKKIS
+                RAJKANWARI
               </h1>
               <p className="text-xs uppercase tracking-widest text-[var(--text-muted)]">
-                Curated Style • Boutique Warehouse
+                House of Ethnic Wear • A Brand of Dhananya Attire
               </p>
               <p className="text-xs text-[var(--text-muted)] mt-1">
                 100 Feet Rd, Indiranagar, Bengaluru, KA 560038

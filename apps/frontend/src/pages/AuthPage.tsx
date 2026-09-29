@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { api } from '@/lib/api';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { fadeInUp, useMotionSafe } from '@/lib/motion';
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -131,9 +132,9 @@ export const AuthPage: React.FC = () => {
         password: regPassword,
       });
 
-      localStorage.setItem('shikkis_access_token', res.accessToken);
+      localStorage.setItem('rajkanwari_access_token', res.accessToken);
       await initAuth();
-      setSuccessMsg('Account created successfully! Welcome to Shikkis.');
+      setSuccessMsg('Account created successfully! Welcome to Rajkanwari.');
       setTimeout(() => navigate('/catalog'), 800);
     } catch (err: any) {
       setErrorMsg(err?.message || 'Registration failed. Email might already be registered.');
@@ -151,15 +152,16 @@ export const AuthPage: React.FC = () => {
     >
       <div className="mx-auto max-w-md px-4 sm:px-6">
         {/* Header Branding */}
-        <div className="text-center mb-8">
+        <div className="flex flex-col items-center justify-center mb-8 text-center">
           <Link
             to="/"
-            className="font-serif text-3xl font-bold tracking-wide text-text hover:text-brand-crimson transition-colors"
+            className="inline-block text-text hover:opacity-95 transition-opacity focus:outline-none"
+            aria-label="Rajkanwari Home"
           >
-            Shikkis
+            <BrandLogo variant="full" size="lg" />
           </Link>
-          <p className="mt-2 text-xs uppercase tracking-widest text-brand-gold font-medium">
-            Curated Style • Account Portal
+          <p className="mt-3 text-xs uppercase tracking-widest text-brand-gold font-semibold">
+            House of Ethnic Wear • Account Portal
           </p>
         </div>
 

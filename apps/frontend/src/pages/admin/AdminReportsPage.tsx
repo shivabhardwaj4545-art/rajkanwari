@@ -137,7 +137,7 @@ export const AdminReportsPage: React.FC = () => {
   const handleExportSoldCSV = async () => {
     try {
       setExportingSold(true);
-      const token = localStorage.getItem('shikkis_access_token');
+      const token = localStorage.getItem('rajkanwari_access_token') || localStorage.getItem('shikkis_access_token');
       const q = new URLSearchParams();
       if (period) q.append('period', period);
       if (selectedCategory && selectedCategory !== 'all') q.append('category_id', selectedCategory);
@@ -150,7 +150,7 @@ export const AdminReportsPage: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `shikkis-sold-items-${period}-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `rajkanwari-sold-items-${period}-${new Date().toISOString().slice(0, 10)}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();

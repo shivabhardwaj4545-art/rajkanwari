@@ -154,7 +154,7 @@ adminRouter.get('/products', async (req, res, next) => {
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN product_variants pv ON p.id = pv.product_id
       WHERE ${whereClause}
-      GROUP BY p.id
+      GROUP BY p.id, c.name
       ORDER BY ${orderCol} ${sortOrder}
       LIMIT ? OFFSET ?
     `;
@@ -217,7 +217,7 @@ adminRouter.get('/products/export', async (_req, res, next) => {
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN product_variants pv ON p.id = pv.product_id
-      GROUP BY p.id
+      GROUP BY p.id, c.name
       ORDER BY p.name ASC
     `).all() as any[];
 
@@ -2375,4 +2375,102 @@ adminRouter.get('/reports/sold-items', async (req, res, next) => {
     next(err);
   }
 });
+
+// ── Category Management Endpoints ─────────────────────────────────────────────
+
+/**
+ * POST /api/admin/categories
+ * Create a new store category
+ */
+adminRouter.post('/categories', async (req, res, next) => {
+  try {
+    const db = getDb();
+    const { name, description, image_url, display_order } = req.body;
+
+    if (!name || typeof name !== 'string') {
+      return res.status(400).json({ error: 'Category name is required' });
+    }
+
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const id = `cat_${Date.now().toString(36)}`;
+
+    await db.prepare(`
+      INSERT INTO categories (id, name, slug, description, image_url, display_order, is_active)
+      VALUES (?, ?, ?, ?, ?, ?, 1)
+    `).run(
+      id,
+      name.trim(),
+      slug,
+      description || '',
+      image_url || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
+      display_order || 1
+    );
+
+    const created = await db.prepare('SELECT * FROM categories WHERE id = ?').get(id);
+    return res.status(201).json({ data: created });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/**
+ * PUT /api/admin/categories/:id
+ * Update an existing category
+ */
+adminRouter.put('/categories/:id', async (req, res, next) => {
+  try {
+    const db = getDb();
+    const { id } = req.params;
+    const { name, description, image_url, display_order, is_active } = req.body;
+
+    const existing = await db.prepare('SELECT * FROM categories WHERE id = ?').get(id);
+    if (!existing) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+
+    const updatedName = name ? name.trim() : (existing as any).name;
+    const updatedSlug = updatedName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    await db.prepare(`
+      UPDATE categories
+      SET name = ?, slug = ?, description = ?, image_url = ?, display_order = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(
+      updatedName,
+      updatedSlug,
+      description ?? (existing as any).description,
+      image_url ?? (existing as any).image_url,
+      display_order ?? (existing as any).display_order,
+      is_active !== undefined ? (is_active ? 1 : 0) : (existing as any).is_active,
+      id
+    );
+
+    const updated = await db.prepare('SELECT * FROM categories WHERE id = ?').get(id);
+    return res.json({ data: updated });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/**
+ * DELETE /api/admin/categories/:id
+ * Delete a category
+ */
+adminRouter.delete('/categories/:id', async (req, res, next) => {
+  try {
+    const db = getDb();
+    const { id } = req.params;
+
+    const existing = await db.prepare('SELECT * FROM categories WHERE id = ?').get(id);
+    if (!existing) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+
+    await db.prepare('DELETE FROM categories WHERE id = ?').run(id);
+    return res.json({ success: true, message: 'Category deleted successfully' });
+  } catch (err) {
+    return next(err);
+  }
+});
+
 

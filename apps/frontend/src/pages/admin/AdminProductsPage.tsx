@@ -127,7 +127,7 @@ export const AdminProductsPage: React.FC = () => {
   // CSV Export
   const handleExportCsv = async () => {
     try {
-      const token = localStorage.getItem('shikkis_access_token');
+      const token = localStorage.getItem('rajkanwari_access_token') || localStorage.getItem('shikkis_access_token');
       const res = await fetch('/api/admin/products/export', {
         headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       });
@@ -135,7 +135,7 @@ export const AdminProductsPage: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `shikkis-products-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `rajkanwari-products-${new Date().toISOString().slice(0, 10)}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();

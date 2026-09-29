@@ -157,7 +157,7 @@ export const HomePage: React.FC = () => {
               {/* Background Slide Image */}
               <img
                 src={currentBanner?.image_url}
-                alt={currentBanner?.title || 'Shikkis Luxury Wear'}
+                alt={currentBanner?.title || 'Rajkanwari House of Ethnic Wear'}
                 className="h-full w-full object-cover object-center"
               />
 
@@ -176,7 +176,7 @@ export const HomePage: React.FC = () => {
                   <div className="max-w-xl text-white space-y-4 drop-shadow-md">
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-gold/30 px-3 py-1 text-xs font-semibold tracking-wider text-white uppercase backdrop-blur-md border border-brand-gold/50">
                       <Sparkles size={12} className="text-brand-gold" />
-                      Curated Style
+                      House of Ethnic Wear
                     </span>
 
                     <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal leading-[1.1] tracking-tight">

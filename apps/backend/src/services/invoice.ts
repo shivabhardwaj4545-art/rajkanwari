@@ -54,8 +54,8 @@ export async function generateInvoicePDF(order: InvoiceOrderData): Promise<Buffe
       doc.rect(40, 40, 515, 6).fill(crimson);
 
       doc.moveDown(1.5);
-      doc.fillColor(crimson).fontSize(26).font('Helvetica-Bold').text('SHIKKIS', 40, 55);
-      doc.fillColor(gold).fontSize(9).font('Helvetica').text('CURATED STYLE', 42, 85);
+      doc.fillColor(crimson).fontSize(24).font('Helvetica-Bold').text('RAJKANWARI', 40, 55);
+      doc.fillColor(gold).fontSize(7.5).font('Helvetica').text('HOUSE OF ETHNIC WEAR • A BRAND OF DHANANYA ATTIRE', 42, 85);
 
       // Store Details (Right Aligned)
       doc
@@ -185,13 +185,13 @@ export async function generateInvoicePDF(order: InvoiceOrderData): Promise<Buffe
       doc.strokeColor(borderColor).lineWidth(0.5).moveTo(40, footerY).lineTo(555, footerY).stroke();
       doc.fillColor(mutedText).fontSize(7.5).font('Helvetica');
       doc.text(
-        'Thank you for shopping at Shikkis. Authentic Indian & Fusion Handcrafted Wear.',
+        'Thank you for shopping at Rajkanwari — House of Ethnic Wear. A Brand of Dhananya Attire.',
         40,
         footerY + 10,
         { align: 'center', width: 515 }
       );
       doc.text(
-        'All purchases are subject to our 7-day return and exchange policy. For queries, contact us at care@shikkis.com.',
+        'All purchases are subject to our 7-day return and exchange policy. For queries, contact us at hello@rajkanwari.in.',
         40,
         footerY + 22,
         { align: 'center', width: 515 }

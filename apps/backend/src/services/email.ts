@@ -11,8 +11,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const fromName = process.env.SMTP_FROM_NAME || 'Shikkis — Curated Style';
-const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || 'ssharma636076@gmail.com';
+const fromName = process.env.SMTP_FROM_NAME || 'Rajkanwari — House of Ethnic Wear';
+const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || 'hello@rajkanwari.in';
 
 export interface OrderEmailData {
   order_number: string;
@@ -66,15 +66,15 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
       <html>
         <head>
           <meta charset="utf-8" />
-          <title>Order Confirmed — Shikkis</title>
+          <title>Order Confirmed — Rajkanwari</title>
         </head>
         <body style="background-color: #FEFBF8; margin: 0; padding: 20px; font-family: 'Georgia', serif;">
           <table align="center" width="100%" max-width="600" style="max-width: 600px; background-color: #FFFFFF; border: 1px solid #E8D4A0; border-radius: 12px; padding: 30px; border-collapse: collapse;">
             <!-- Header -->
             <tr>
               <td style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #D4AF37;">
-                <h1 style="color: #9B1B30; margin: 0; font-size: 28px; font-weight: bold; font-family: serif;">SHIKKIS</h1>
-                <p style="color: #7A6A5F; margin: 5px 0 0 0; font-size: 12px; font-family: sans-serif; letter-spacing: 2px; text-transform: uppercase;">Curated Indian &amp; Fusion Wear</p>
+                <h1 style="color: #9B1B30; margin: 0; font-size: 28px; font-weight: bold; font-family: serif;">RAJKANWARI</h1>
+                <p style="color: #7A6A5F; margin: 5px 0 0 0; font-size: 12px; font-family: sans-serif; letter-spacing: 2px; text-transform: uppercase;">House of Ethnic Wear • A Brand of Dhananya Attire</p>
               </td>
             </tr>
 
@@ -83,7 +83,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
               <td style="padding: 25px 0 15px 0;">
                 <p style="color: #2C1810; font-size: 16px; margin: 0;">Dear ${orderData.customer.fullName},</p>
                 <p style="color: #7A6A5F; font-size: 14px; line-height: 1.5; font-family: sans-serif; margin-top: 8px;">
-                  Thank you for shopping with Shikkis! Your order <strong style="color: #9B1B30;">#${orderData.order_number}</strong> has been successfully received and is being prepared with utmost care at our Jaipur atelier.
+                  Thank you for shopping with Rajkanwari! Your order <strong style="color: #9B1B30;">#${orderData.order_number}</strong> has been successfully received and is being prepared with utmost care at our Jaipur atelier.
                 </p>
               </td>
             </tr>
@@ -113,7 +113,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
               <td style="text-align: center; padding-top: 25px; border-top: 1px solid #E8D4A0; color: #7A6A5F; font-size: 12px; font-family: sans-serif;">
                 <p style="margin: 0;">If you have any questions, feel free to reply to this email or call us at +91 98765 43210.</p>
                 <p style="margin: 8px 0 0 0;">📍 123 Textile Lane, Jaipur, Rajasthan 302001</p>
-                <p style="margin: 15px 0 0 0; color: #9B1B30; font-weight: bold;">© Shikkis — Handcrafted with Love</p>
+                <p style="margin: 15px 0 0 0; color: #9B1B30; font-weight: bold;">© Rajkanwari — House of Ethnic Wear. A Brand of Dhananya Attire.</p>
               </td>
             </tr>
           </table>
@@ -124,7 +124,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
     await transporter.sendMail({
       from: `"${fromName}" <${fromEmail}>`,
       to: orderData.customer.email,
-      subject: `Order Confirmation — #${orderData.order_number} | Shikkis`,
+      subject: `Order Confirmation — #${orderData.order_number} | Rajkanwari`,
       html: htmlContent,
     });
 

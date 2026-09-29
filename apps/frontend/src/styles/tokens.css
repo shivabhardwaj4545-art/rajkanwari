@@ -1,5 +1,5 @@
 /* =============================================================================
-   SHIKKIS DESIGN TOKENS
+   RAJKANWARI DESIGN TOKENS
    All values from AGENTS.md. CSS custom properties on :root (light theme).
    Dark theme overrides on [data-theme="dark"].
 
@@ -41,12 +41,12 @@
 
 /* ── Dark Theme ────────────────────────────────────────────────────────────── */
 [data-theme='dark'] {
-  --bg: #1a0f0a;           /* Deep warm black */
-  --surface: #241611;      /* Card / panel background */
-  --surface-alt: #2c1810;  /* Subtle accent surfaces */
-  --text: #f5e6d3;         /* Light warm cream */
-  --text-muted: #a8998c;   /* Subdued secondary text */
-  --border: #4a2f25;       /* Warm dark borders */
+  --bg: #0b0b0c;           /* Obsidian Onyx */
+  --surface: #141416;      /* Sleek Charcoal Surface */
+  --surface-alt: #1e1e22;  /* Elevated Dark Slate Surface */
+  --text: #fafafa;         /* Crisp Off-White Text */
+  --text-muted: #a1a1aa;   /* Subdued Silver Gray */
+  --border: #2e2e34;       /* Refined Charcoal Border */
 
   /* Semantic — same hue family but slightly lighter in dark */
   --success: #40916c;

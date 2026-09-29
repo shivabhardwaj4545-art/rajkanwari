@@ -180,7 +180,7 @@ describe('Admin Orders, CRM & Reports API Tests', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.customer.email).toBe('priya@example.com');
-      expect(res.body.analytics.total_orders).toBeGreaterThan(0);
+      expect(Number(res.body.analytics.total_orders)).toBeGreaterThan(0);
       expect(res.body.orders.length).toBeGreaterThan(0);
     });
   });
@@ -193,9 +193,9 @@ describe('Admin Orders, CRM & Reports API Tests', () => {
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.total_revenue).toBeGreaterThan(0);
-      expect(res.body.total_orders).toBeGreaterThan(0);
-      expect(res.body.aov).toBeGreaterThan(0);
+      expect(Number(res.body.total_revenue)).toBeGreaterThan(0);
+      expect(Number(res.body.total_orders)).toBeGreaterThan(0);
+      expect(Number(res.body.aov)).toBeGreaterThan(0);
     });
 
     it('computes 7-day continuous revenue trend in SQL', async () => {

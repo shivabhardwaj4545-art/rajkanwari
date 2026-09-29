@@ -71,7 +71,7 @@ export const AdminCustomersPage: React.FC = () => {
   const handleExportCSV = async () => {
     try {
       setExporting(true);
-      const token = localStorage.getItem('shikkis_access_token');
+      const token = localStorage.getItem('rajkanwari_access_token') || localStorage.getItem('shikkis_access_token');
       const q = search ? `?search=${encodeURIComponent(search)}` : '';
       const res = await fetch(`/api/admin/customers/export${q}`, {
         headers: {
@@ -82,7 +82,7 @@ export const AdminCustomersPage: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `shikkis-customers-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `rajkanwari-customers-${new Date().toISOString().slice(0, 10)}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();

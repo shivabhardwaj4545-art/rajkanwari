@@ -148,7 +148,7 @@ export const AdminLayout: React.FC = () => {
 
           {/* Wordmark */}
           <Link to="/admin" className="flex items-baseline gap-2">
-            <span className="font-serif text-2xl font-bold tracking-wider text-brand-crimson">Shikkis</span>
+            <span className="font-serif text-2xl font-bold tracking-wider text-brand-crimson">Rajkanwari</span>
             <span className="text-[10px] tracking-widest uppercase px-1.5 py-0.5 rounded bg-brand-gold/15 text-brand-gold font-semibold border border-brand-gold/30">
               Admin
             </span>

@@ -21,7 +21,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   demoUsers: [],
 
   setAuthSession: (user: UserProfile, accessToken: string) => {
-    localStorage.setItem('shikkis_access_token', accessToken);
+    localStorage.setItem('rajkanwari_access_token', accessToken);
     set({ user, initialized: true });
   },
 
@@ -44,6 +44,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       } catch {
         // Not logged in or guest: clear stale token if any, stay logged out
+        localStorage.removeItem('rajkanwari_access_token');
         localStorage.removeItem('shikkis_access_token');
         set({ user: null, initialized: true });
       }
@@ -52,11 +53,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  login: async (email: string, password: string = 'shikkis_dev_cust_2026!') => {
+  login: async (email: string, password: string = 'rajkanwari_dev_cust_2026!') => {
     try {
       set({ loading: true });
       const res = await api.login(email, password);
-      localStorage.setItem('shikkis_access_token', res.accessToken);
+      localStorage.setItem('rajkanwari_access_token', res.accessToken);
       set({ user: res.user });
       return true;
     } catch (err) {
@@ -71,6 +72,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ loading: true });
       await api.logout();
+      localStorage.removeItem('rajkanwari_access_token');
       localStorage.removeItem('shikkis_access_token');
       set({ user: null });
     } finally {
@@ -79,7 +81,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   switchUser: async (email: string) => {
-    await get().login(email, 'shikkis_dev_cust_2026!');
+    await get().login(email, 'rajkanwari_dev_cust_2026!');
     window.location.reload();
   },
 }));

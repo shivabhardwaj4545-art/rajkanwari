@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 
 export async function seedFullDatabase(db: any) {
-  console.log('🌱 Starting Shikkis database seeder...');
+  console.log('🌱 Starting Rajkanwari database seeder...');
 
 // Clean existing data
 const tablesToClean = [
@@ -34,8 +34,8 @@ for (const table of tablesToClean) {
 console.log('ðŸ§¹ Existing data wiped.');
 
 // â”€â”€ 1. Users â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const ownerPassword = process.env.SHIKKIS_OWNER_PASSWORD || 'shikkis_dev_owner_2026!';
-const customerPassword = process.env.SHIKKIS_CUSTOMER_PASSWORD || 'shikkis_dev_cust_2026!';
+const ownerPassword = process.env.RAJKANWARI_OWNER_PASSWORD || process.env.SHIKKIS_OWNER_PASSWORD || 'rajkanwari_dev_owner_2026!';
+const customerPassword = process.env.RAJKANWARI_CUSTOMER_PASSWORD || process.env.SHIKKIS_CUSTOMER_PASSWORD || 'rajkanwari_dev_cust_2026!';
 
 const ownerHash = bcrypt.hashSync(ownerPassword, 12);
 const customerHash = bcrypt.hashSync(customerPassword, 12);
@@ -58,7 +58,7 @@ const insertAddress = db.prepare(`
 const ownerId = 'usr_owner_01';
 await insertUser.run({
   id: ownerId,
-  email: 'owner@shikkis.com',
+  email: 'owner@rajkanwari.in',
   password_hash: ownerHash,
   first_name: 'Vikram',
   last_name: 'Singhania',

@@ -314,13 +314,16 @@ export async function calculateCart(
       .prepare('SELECT * FROM offers WHERE UPPER(code) = ?')
       .get(cleanCode)) as OfferDbRow | undefined;
 
-    const nowIso = new Date().toISOString();
+    const nowTime = Date.now();
 
     if (!couponOffer) {
       couponError = 'Invalid coupon code.';
     } else if (!couponOffer.is_active) {
       couponError = 'This coupon is no longer active.';
-    } else if (couponOffer.starts_at > nowIso || couponOffer.ends_at < nowIso) {
+    } else if (
+      new Date(couponOffer.starts_at).getTime() > nowTime ||
+      new Date(couponOffer.ends_at).getTime() < nowTime
+    ) {
       couponError = 'This coupon has expired.';
     } else if (nonStackableAutoApplied) {
       // Reject when a non-stackable auto-offer already applied

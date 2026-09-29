@@ -1,6 +1,7 @@
 import { Instagram, Mail, MapPin, Phone } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 
 const FOOTER_LINKS = {
   Shop: [
@@ -28,13 +29,14 @@ export const Footer: React.FC = () => (
         <div className="md:col-span-2 flex flex-col gap-4">
           <Link
             to="/"
-            className="font-serif text-2xl font-semibold text-text hover:text-brand-crimson transition-colors"
+            className="inline-block text-text hover:opacity-95 transition-opacity focus:outline-none"
+            aria-label="Rajkanwari - House of Ethnic Wear"
           >
-            Shikkis
+            <BrandLogo variant="full" size="lg" />
           </Link>
-          <p className="text-sm text-text-muted max-w-xs leading-relaxed">
-            Curated Indian &amp; fusion wear for men and women. Handcrafted with love, shipped with
-            care.
+          <p className="text-sm text-text-muted max-w-md leading-relaxed">
+            Rajkanwari — House of Ethnic Wear. A Brand of Dhananya Attire. Curated Indian &amp;
+            fusion wear for men and women. Handcrafted with love, shipped with care.
           </p>
 
           {/* ── Contact ─────────────────────────────────────────────────────── */}
@@ -51,11 +53,11 @@ export const Footer: React.FC = () => (
               +91 98765 43210
             </a>
             <a
-              href="mailto:hello@shikkis.in"
+              href="mailto:hello@rajkanwari.in"
               className="flex items-center gap-2 hover:text-text transition-colors"
             >
               <Mail size={13} className="text-brand-gold shrink-0" aria-hidden />
-              hello@shikkis.in
+              hello@rajkanwari.in
             </a>
           </address>
         </div>
@@ -85,16 +87,16 @@ export const Footer: React.FC = () => (
       {/* ── Bottom row ─────────────────────────────────────────────────────── */}
       <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-border pt-6">
         <p className="text-xs text-text-muted">
-          © {new Date().getFullYear()} Shikkis. All rights reserved. All prices in INR.
+          © {new Date().getFullYear()} Rajkanwari — House of Ethnic Wear. A Brand of Dhananya Attire. All rights reserved. All prices in INR.
         </p>
 
         {/* Social */}
         <div className="flex items-center gap-3" role="group" aria-label="Social links">
           <a
-            href="https://instagram.com/shikkis"
+            href="https://instagram.com/rajkanwari"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Follow Shikkis on Instagram"
+            aria-label="Follow Rajkanwari on Instagram"
             className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border-border text-text-muted hover:text-text hover:border-brand-gold transition-colors"
           >
             <Instagram size={16} aria-hidden />

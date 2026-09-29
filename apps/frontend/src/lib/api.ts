@@ -156,6 +156,26 @@ export const api = {
     return request<{ data: CategoryItem[] }>('/categories');
   },
 
+  createCategory: (data: { name: string; description?: string; image_url?: string; display_order?: number }) => {
+    return request<{ data: CategoryItem }>('/admin/categories', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateCategory: (id: string, data: Partial<CategoryItem>) => {
+    return request<{ data: CategoryItem }>(`/admin/categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteCategory: (id: string) => {
+    return request<{ success: boolean }>(`/admin/categories/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
   // Banners
   getActiveBanners: () => {
     return request<{ data: BannerItem[] }>('/banners/active');
