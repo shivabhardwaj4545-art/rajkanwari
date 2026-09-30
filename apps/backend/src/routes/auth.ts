@@ -2,11 +2,13 @@ import bcrypt from 'bcryptjs';
 import { Router } from 'express';
 import { z } from 'zod';
 
+import jwt from 'jsonwebtoken';
 import { getDb } from '../db/client.js';
 import {
   generateAccessToken,
   generateRefreshToken,
   verifyJWT,
+  JWT_SECRET,
 } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 
@@ -288,6 +290,116 @@ authRouter.get('/me', verifyJWT, async (req, res, next) => {
     }
 
     res.json({ user });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/auth/refresh
+ * Silent token renewal using a valid refresh token.
+ */
+authRouter.post('/refresh', async (req, res, next) => {
+  try {
+    const refreshToken = req.body?.refreshToken || req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+      res.status(401).json({
+        error: {
+          code: 'REFRESH_TOKEN_REQUIRED',
+          message: 'Refresh token is required',
+        },
+      });
+      return;
+    }
+
+    let decoded: any;
+    try {
+      decoded = jwt.verify(refreshToken, JWT_SECRET);
+    } catch {
+      res.status(401).json({
+        error: {
+          code: 'INVALID_REFRESH_TOKEN',
+          message: 'Invalid or expired refresh token',
+        },
+      });
+      return;
+    }
+
+    const db = getDb();
+    const tokenRecord = (await db
+      .prepare('SELECT user_id, expires_at FROM refresh_tokens WHERE token_hash = ?')
+      .get(refreshToken)) as any;
+
+    if (!tokenRecord) {
+      res.status(401).json({
+        error: {
+          code: 'REFRESH_TOKEN_NOT_FOUND',
+          message: 'Refresh token not found or revoked',
+        },
+      });
+      return;
+    }
+
+    if (new Date(tokenRecord.expires_at) < new Date()) {
+      res.status(401).json({
+        error: {
+          code: 'REFRESH_TOKEN_EXPIRED',
+          message: 'Refresh token expired',
+        },
+      });
+      return;
+    }
+
+    const user = (await db
+      .prepare('SELECT id, email, first_name, last_name, phone, role, is_active FROM users WHERE id = ?')
+      .get(tokenRecord.user_id)) as any;
+
+    if (!user || !user.is_active) {
+      res.status(401).json({
+        error: {
+          code: 'USER_INACTIVE',
+          message: 'User account is inactive or deleted',
+        },
+      });
+      return;
+    }
+
+    const tokenPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const newAccessToken = generateAccessToken(tokenPayload);
+    const newRefreshToken = generateRefreshToken({ sub: user.id, role: user.role });
+    const newExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    await db.prepare('DELETE FROM refresh_tokens WHERE token_hash = ?').run(refreshToken);
+    await db.prepare(
+      `INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at)
+       VALUES (?, ?, ?, ?)`
+    ).run(`rt_${Date.now()}`, user.id, newRefreshToken, newExpiresAt);
+
+    res.cookie('accessToken', newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        phone: user.phone,
+        role: user.role,
+      },
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
   } catch (err) {
     next(err);
   }

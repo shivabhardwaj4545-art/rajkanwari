@@ -102,7 +102,7 @@ export const AdminLayout: React.FC = () => {
           <div className="space-y-3">
             <button
               onClick={async () => {
-                await login('owner@shikkis.com', 'shikkis_dev_owner_2026!');
+                await login('owner@rajkanwari.in', '123456');
                 window.location.reload();
               }}
               className="w-full py-2.5 rounded-lg bg-brand-crimson text-white font-medium text-xs shadow hover:bg-brand-crimson/90 transition-colors"

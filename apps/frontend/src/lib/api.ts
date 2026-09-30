@@ -105,8 +105,48 @@ export interface SearchProductItem {
   discount_percent: number;
 }
 
-async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('shikkis_access_token') : null;
+export function getAccessToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('rajkanwari_access_token') || localStorage.getItem('shikkis_access_token');
+}
+
+export function getRefreshToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('rajkanwari_refresh_token') || localStorage.getItem('shikkis_refresh_token');
+}
+
+export function setAuthTokens(accessToken: string, refreshToken?: string): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('rajkanwari_access_token', accessToken);
+  localStorage.setItem('shikkis_access_token', accessToken);
+  if (refreshToken) {
+    localStorage.setItem('rajkanwari_refresh_token', refreshToken);
+    localStorage.setItem('shikkis_refresh_token', refreshToken);
+  }
+}
+
+export function clearAuthTokens(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('rajkanwari_access_token');
+  localStorage.removeItem('shikkis_access_token');
+  localStorage.removeItem('rajkanwari_refresh_token');
+  localStorage.removeItem('shikkis_refresh_token');
+}
+
+let isRefreshing = false;
+let refreshSubscribers: Array<(token: string) => void> = [];
+
+function subscribeTokenRefresh(cb: (token: string) => void) {
+  refreshSubscribers.push(cb);
+}
+
+function onRefreshed(token: string) {
+  refreshSubscribers.map((cb) => cb(token));
+  refreshSubscribers = [];
+}
+
+async function request<T>(endpoint: string, options?: RequestInit, isRetry = false): Promise<T> {
+  const token = getAccessToken();
   const res = await fetch(`/api${endpoint}`, {
     credentials: 'include',
     headers: {
@@ -118,6 +158,46 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
   });
 
   if (!res.ok) {
+    // Attempt automatic silent token refresh on 401
+    if (res.status === 401 && !isRetry && !endpoint.startsWith('/auth/login') && !endpoint.startsWith('/auth/refresh')) {
+      const refreshToken = getRefreshToken();
+      if (refreshToken) {
+        if (!isRefreshing) {
+          isRefreshing = true;
+          try {
+            const refreshRes = await fetch('/api/auth/refresh', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ refreshToken }),
+            });
+
+            if (refreshRes.ok) {
+              const data = await refreshRes.json();
+              setAuthTokens(data.accessToken, data.refreshToken);
+              isRefreshing = false;
+              onRefreshed(data.accessToken);
+              return request<T>(endpoint, options, true);
+            } else {
+              clearAuthTokens();
+              isRefreshing = false;
+              refreshSubscribers = [];
+            }
+          } catch {
+            clearAuthTokens();
+            isRefreshing = false;
+            refreshSubscribers = [];
+          }
+        } else {
+          // Wait for concurrent refresh to complete
+          return new Promise<T>((resolve, reject) => {
+            subscribeTokenRefresh(() => {
+              request<T>(endpoint, options, true).then(resolve).catch(reject);
+            });
+          });
+        }
+      }
+    }
+
     const errorData = await res.json().catch(() => ({}));
     const err: any = new Error(errorData?.error?.message || `API error: ${res.status}`);
     err.status = res.status;
@@ -329,6 +409,17 @@ export const api = {
 
   getMe: () => {
     return request<{ user: UserProfile }>('/auth/me');
+  },
+
+  refreshToken: (refreshToken: string) => {
+    return request<{
+      user: UserProfile;
+      accessToken: string;
+      refreshToken: string;
+    }>('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken }),
+    });
   },
 
   logout: () => {

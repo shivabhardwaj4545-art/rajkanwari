@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { api, type UserProfile } from '@/lib/api';
+import { api, clearAuthTokens, getRefreshToken, setAuthTokens, type UserProfile } from '@/lib/api';
 
 interface AuthState {
   user: UserProfile | null;
@@ -11,7 +11,7 @@ interface AuthState {
   login: (email: string, password?: string) => Promise<boolean>;
   logout: () => Promise<void>;
   switchUser: (email: string) => Promise<void>;
-  setAuthSession: (user: UserProfile, accessToken: string) => void;
+  setAuthSession: (user: UserProfile, accessToken: string, refreshToken?: string) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -20,8 +20,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialized: false,
   demoUsers: [],
 
-  setAuthSession: (user: UserProfile, accessToken: string) => {
-    localStorage.setItem('rajkanwari_access_token', accessToken);
+  setAuthSession: (user: UserProfile, accessToken: string, refreshToken?: string) => {
+    setAuthTokens(accessToken, refreshToken);
     set({ user, initialized: true });
   },
 
@@ -43,9 +43,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ user: res.user, initialized: true });
         return;
       } catch {
-        // Not logged in or guest: clear stale token if any, stay logged out
-        localStorage.removeItem('rajkanwari_access_token');
-        localStorage.removeItem('shikkis_access_token');
+        // Try silent refresh if refresh token is available
+        const refreshToken = getRefreshToken();
+        if (refreshToken) {
+          try {
+            const refreshRes = await api.refreshToken(refreshToken);
+            setAuthTokens(refreshRes.accessToken, refreshRes.refreshToken);
+            set({ user: refreshRes.user, initialized: true });
+            return;
+          } catch {
+            // refresh token expired or invalid
+          }
+        }
+        clearAuthTokens();
         set({ user: null, initialized: true });
       }
     } finally {
@@ -57,7 +67,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ loading: true });
       const res = await api.login(email, password);
-      localStorage.setItem('rajkanwari_access_token', res.accessToken);
+      setAuthTokens(res.accessToken, res.refreshToken);
       set({ user: res.user });
       return true;
     } catch (err) {
@@ -72,8 +82,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ loading: true });
       await api.logout();
-      localStorage.removeItem('rajkanwari_access_token');
-      localStorage.removeItem('shikkis_access_token');
+      clearAuthTokens();
       set({ user: null });
     } finally {
       set({ loading: false });

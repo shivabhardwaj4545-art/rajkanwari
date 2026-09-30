@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 
 import type { UserRole } from '@shikkis/types';
 
-const JWT_SECRET = process.env.JWT_SECRET ?? 'rajkanwari-super-secret-jwt-key-change-in-prod';
+export const JWT_SECRET = process.env.JWT_SECRET ?? 'rajkanwari-super-secret-jwt-key-change-in-prod';
 const JWT_ACCESS_EXPIRY = '15m';
 const JWT_REFRESH_EXPIRY = '7d';
 

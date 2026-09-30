@@ -12,7 +12,7 @@ const FOOTER_LINKS = {
   ],
   Help: [
     { label: 'Track Order', to: '/orders' },
-    { label: 'Shipping Policy', to: '/policies/shipping' },
+    { lab 2el: 'Shipping Policy', to: '/policies/shipping' },
     { label: 'Returns & Exchanges', to: '/policies/returns' },
     { label: 'FAQ', to: '/policies/faq' },
     { label: 'Privacy Policy', to: '/policies/privacy' },
