@@ -2,6 +2,7 @@ import { Eye } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import type { ProductItem } from '@/lib/api';
 import { formatDiscount, formatPrice } from '@/lib/format';
 
@@ -12,8 +13,9 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const primaryImg = product.images[0] || '/placeholder.jpg';
-  const secondaryImg = product.images[1];
+  const DEFAULT_ETHNIC_IMAGE = 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80';
+  const primaryImg = product.images?.[0] || DEFAULT_ETHNIC_IMAGE;
+  const secondaryImg = product.images?.[1];
 
   // Stock calculations
   const totalStock = product.total_stock ?? 0;
@@ -40,8 +42,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-surface-alt">
         <Link to={`/products/${product.slug}`} className="block h-full w-full">
           {/* Primary image */}
-          <img
+          <ImageWithFallback
             src={primaryImg}
+            fallbackSrc={DEFAULT_ETHNIC_IMAGE}
             alt={product.name}
             loading="lazy"
             className={[
@@ -53,8 +56,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
 
           {/* Secondary image for crossfade */}
           {secondaryImg && (
-            <img
+            <ImageWithFallback
               src={secondaryImg}
+              fallbackSrc={DEFAULT_ETHNIC_IMAGE}
               alt={`${product.name} alternate view`}
               loading="lazy"
               className={[

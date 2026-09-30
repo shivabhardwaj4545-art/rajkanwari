@@ -1019,6 +1019,9 @@ export interface AdminPackingSlipData {
   created_at: string;
   fulfillment_type: 'delivery' | 'pickup';
   pickup_slot: string | null;
+  payment_status?: string;
+  payment_method?: string;
+  total_amount?: number;
   customer: {
     name: string;
     phone: string;
@@ -1034,6 +1037,7 @@ export interface AdminPackingSlipData {
     size: string;
     color: string;
     quantity: number;
+    price_at_purchase?: number;
   }>;
   total_items: number;
 }

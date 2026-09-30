@@ -126,7 +126,7 @@ export const AdminLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-bg text-text flex flex-col antialiased">
       {/* ── Top Header ──────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 h-16 bg-surface/90 backdrop-blur border-b border-border px-4 lg:px-8 flex items-center justify-between transition-colors">
+      <header className="h-16 shrink-0 z-30 bg-surface border-b border-border shadow-xs px-4 lg:px-8 flex items-center justify-between transition-colors">
         <div className="flex items-center gap-3">
           {/* Mobile drawer trigger */}
           <button

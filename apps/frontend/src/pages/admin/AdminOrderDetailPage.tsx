@@ -13,6 +13,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { api, type AdminOrderDetail, type AdminPackingSlipData } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
 import { PackingSlipModal } from './PackingSlipModal';
@@ -323,13 +324,11 @@ export const AdminOrderDetailPage: React.FC = () => {
                   <tr key={item.id}>
                     <td className="py-3 font-sans">
                       <div className="flex items-center space-x-2.5">
-                        {item.thumbnail && (
-                          <img
-                            src={item.thumbnail}
-                            alt={item.product_name}
-                            className="w-9 h-11 object-cover rounded border border-[var(--border)]"
-                          />
-                        )}
+                        <ImageWithFallback
+                          src={item.thumbnail}
+                          alt={item.product_name}
+                          className="w-9 h-11 object-cover rounded border border-[var(--border)] bg-[var(--surface-alt)]"
+                        />
                         <div>
                           <p className="font-semibold text-[var(--text)]">{item.product_name}</p>
                           <p className="text-[10px] text-[var(--text-muted)] font-mono">

@@ -3,6 +3,7 @@ import {
   CheckCircle2,
   Clock,
   Package,
+  Printer,
   RefreshCw,
   Search,
   ShoppingBag,
@@ -13,8 +14,10 @@ import {
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { api, type AdminOrderItem } from '@/lib/api';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
+import { api, type AdminOrderItem, type AdminPackingSlipData } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
+import { PackingSlipModal } from './PackingSlipModal';
 
 export const AdminOrdersPage: React.FC = () => {
   const navigate = useNavigate();
@@ -24,6 +27,10 @@ export const AdminOrdersPage: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  // Packing slip modal state
+  const [packingSlipData, setPackingSlipData] = useState<AdminPackingSlipData | null>(null);
+  const [loadingSlipId, setLoadingSlipId] = useState<string | null>(null);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -74,6 +81,18 @@ export const AdminOrdersPage: React.FC = () => {
     setDateFrom('');
     setDateTo('');
     setPage(1);
+  };
+
+  const handleOpenPackingSlip = async (orderId: string) => {
+    try {
+      setLoadingSlipId(orderId);
+      const slip = await api.adminGetPackingSlip(orderId);
+      setPackingSlipData(slip);
+    } catch (err: any) {
+      alert('Failed to load packing slip: ' + err.message);
+    } finally {
+      setLoadingSlipId(null);
+    }
   };
 
   // Status style helpers
@@ -319,11 +338,11 @@ export const AdminOrdersPage: React.FC = () => {
                       <div className="flex items-center space-x-1.5">
                         <div className="flex -space-x-2 overflow-hidden">
                           {ord.thumbnails.map((img, idx) => (
-                            <img
+                            <ImageWithFallback
                               key={idx}
                               src={img}
                               alt="thumb"
-                              className="inline-block h-6 w-6 rounded-full ring-2 ring-[var(--surface)] object-cover"
+                              className="inline-block h-6 w-6 rounded-full ring-2 ring-[var(--surface)] object-cover bg-surface-alt"
                             />
                           ))}
                         </div>
@@ -350,14 +369,28 @@ export const AdminOrdersPage: React.FC = () => {
                       {formatPrice(ord.total_amount)}
                     </td>
                     <td className="py-3.5 px-4 text-center">
-                      <Link
-                        to={`/admin/orders/${ord.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-1.5 rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--brand-gold)] hover:border-[var(--brand-gold)] inline-flex items-center"
-                        title="View Order Details"
-                      >
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
+                      <div className="flex items-center justify-center space-x-1.5">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenPackingSlip(ord.id);
+                          }}
+                          disabled={loadingSlipId === ord.id}
+                          className="p-1.5 rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--brand-crimson)] hover:border-[var(--brand-crimson)] inline-flex items-center transition"
+                          title="Print Box Shipping Slip"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                        </button>
+                        <Link
+                          to={`/admin/orders/${ord.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-1.5 rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--brand-gold)] hover:border-[var(--brand-gold)] inline-flex items-center transition"
+                          title="View Order Details"
+                        >
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -386,7 +419,20 @@ export const AdminOrdersPage: React.FC = () => {
                       })}
                     </p>
                   </div>
-                  <div>{getStatusBadge(ord.order_status)}</div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenPackingSlip(ord.id);
+                      }}
+                      className="p-1 rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--brand-crimson)]"
+                      title="Print Slip"
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                    </button>
+                    {getStatusBadge(ord.order_status)}
+                  </div>
                 </div>
 
                 <div className="flex justify-between items-center py-2 border-y border-[var(--border)]/60 text-xs">
@@ -406,11 +452,11 @@ export const AdminOrdersPage: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <div className="flex -space-x-2 overflow-hidden">
                       {ord.thumbnails.map((img, idx) => (
-                        <img
+                        <ImageWithFallback
                           key={idx}
                           src={img}
                           alt="thumb"
-                          className="inline-block h-6 w-6 rounded-full ring-1 ring-[var(--surface)] object-cover"
+                          className="inline-block h-6 w-6 rounded-full ring-1 ring-[var(--surface)] object-cover bg-surface-alt"
                         />
                       ))}
                     </div>
@@ -450,6 +496,14 @@ export const AdminOrdersPage: React.FC = () => {
             </div>
           )}
         </>
+      )}
+
+      {/* Printable Box Shipping Slip Modal */}
+      {packingSlipData && (
+        <PackingSlipModal
+          data={packingSlipData}
+          onClose={() => setPackingSlipData(null)}
+        />
       )}
     </div>
   );

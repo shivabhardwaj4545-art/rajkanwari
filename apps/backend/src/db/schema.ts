@@ -314,7 +314,8 @@ async function seedIfEmpty(): Promise<void> {
 
     // Ensure seed admin and customer account password hashes match 123456
     const passwordHash = bcrypt.hashSync('123456', 12);
-    await db.prepare("UPDATE users SET password_hash = ? WHERE email IN ('owner@rajkanwari.in', 'owner@shikkis.in', 'priya@example.com')").run(passwordHash);
+    await db.prepare("UPDATE users SET email = 'owner@rajkanwari.in' WHERE id = 'usr_owner_01'").run();
+    await db.prepare("UPDATE users SET password_hash = ? WHERE email IN ('owner@rajkanwari.in', 'owner@shikkis.com', 'owner@shikkis.in', 'priya@example.com') OR role = 'owner'").run(passwordHash);
   } catch (err) {
     console.error('Error auto-seeding database:', err);
   }

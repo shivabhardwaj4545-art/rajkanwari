@@ -1796,6 +1796,9 @@ adminRouter.get('/orders/:id/packing-slip', async (req, res, next) => {
       created_at: order.created_at,
       fulfillment_type: order.fulfillment_type,
       pickup_slot: order.pickup_slot,
+      payment_status: order.payment_status,
+      payment_method: order.payment_method,
+      total_amount: order.total_amount,
       customer: {
         name: order.customer_name,
         phone: order.customer_phone,
@@ -1811,6 +1814,7 @@ adminRouter.get('/orders/:id/packing-slip', async (req, res, next) => {
         size: itm.size,
         color: itm.color,
         quantity: itm.quantity,
+        price_at_purchase: itm.price_at_purchase,
       })),
       total_items: items.reduce((sum: number, itm: any) => sum + itm.quantity, 0),
     });
