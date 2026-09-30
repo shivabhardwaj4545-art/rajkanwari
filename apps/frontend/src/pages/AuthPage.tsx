@@ -35,8 +35,12 @@ export const AuthPage: React.FC = () => {
   useEffect(() => {
     if (!initialized) {
       initAuth();
+    } else if (user) {
+      if (user.role === 'owner') {
+        navigate('/admin');
+      }
     }
-  }, [initialized, initAuth]);
+  }, [initialized, user, initAuth, navigate]);
 
   // Initialize Google Identity Services SDK
   useEffect(() => {
@@ -54,7 +58,9 @@ export const AuthPage: React.FC = () => {
                 localStorage.setItem('rajkanwari_access_token', res.accessToken);
                 await initAuth();
                 setSuccessMsg('Successfully signed in with Google!');
-                setTimeout(() => navigate('/catalog'), 800);
+                const loggedUser = useAuthStore.getState().user;
+                const dest = loggedUser?.role === 'owner' ? '/admin' : '/catalog';
+                setTimeout(() => navigate(dest), 600);
               } catch (err: any) {
                 setErrorMsg(err?.message || 'Google sign-in failed. Please try again.');
               } finally {
@@ -95,7 +101,9 @@ export const AuthPage: React.FC = () => {
       const ok = await login(loginEmail.trim(), loginPassword);
       if (ok) {
         setSuccessMsg('Successfully logged in!');
-        setTimeout(() => navigate('/catalog'), 800);
+        const loggedUser = useAuthStore.getState().user;
+        const dest = loggedUser?.role === 'owner' ? '/admin' : '/catalog';
+        setTimeout(() => navigate(dest), 600);
       } else {
         setErrorMsg('Invalid email or password. Please try again.');
       }
