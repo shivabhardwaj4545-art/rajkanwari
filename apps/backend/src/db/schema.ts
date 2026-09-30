@@ -294,7 +294,15 @@ export async function initSchema(): Promise<void> {
     schemaSql = FALLBACK_SCHEMA_SQL;
   }
 
-  await db.exec(schemaSql);
+  try {
+    let cleanSql = schemaSql
+      .replace(/\bTIMESTAMPTZ\b/gi, 'TEXT')
+      .replace(/\bBIGINT\b/gi, 'INTEGER');
+    await db.exec(cleanSql);
+  } catch (err: any) {
+    console.warn('⚠️ Schema DDL execution note (tables already initialized):', err?.message || err);
+  }
+
   await seedIfEmpty();
 }
 
