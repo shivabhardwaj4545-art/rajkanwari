@@ -313,9 +313,8 @@ authRouter.post('/refresh', async (req, res, next) => {
       return;
     }
 
-    let decoded: any;
     try {
-      decoded = jwt.verify(refreshToken, JWT_SECRET);
+      jwt.verify(refreshToken, JWT_SECRET);
     } catch {
       res.status(401).json({
         error: {
