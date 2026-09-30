@@ -325,7 +325,7 @@ export const AdminOrderDetailPage: React.FC = () => {
                     <td className="py-3 font-sans">
                       <div className="flex items-center space-x-2.5">
                         <ImageWithFallback
-                          src={item.thumbnail}
+                          src={item.thumbnail || undefined}
                           alt={item.product_name}
                           className="w-9 h-11 object-cover rounded border border-[var(--border)] bg-[var(--surface-alt)]"
                         />

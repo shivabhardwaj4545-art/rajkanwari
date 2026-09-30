@@ -3,31 +3,34 @@ import React, { useState } from 'react';
 const DEFAULT_ETHNIC_IMAGE_FALLBACK =
   'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=400&q=80';
 
-interface ImageWithFallbackProps extends React.ImgHTMLAttributes<HTMLImageElement> {
-  src?: string | undefined;
-  fallbackSrc?: string | undefined;
+interface ImageWithFallbackProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src'> {
+  src?: string | null | undefined;
+  fallbackSrc?: string | null | undefined;
 }
 
 export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   src,
-  fallbackSrc = DEFAULT_ETHNIC_IMAGE_FALLBACK,
+  fallbackSrc,
   alt = 'Product image',
   className = '',
   ...props
 }) => {
-  const [imgSrc, setImgSrc] = useState<string>(src || fallbackSrc);
+  const resolvedFallback: string = fallbackSrc || DEFAULT_ETHNIC_IMAGE_FALLBACK;
+  const initialSrc: string = (src || resolvedFallback) as string;
+
+  const [imgSrc, setImgSrc] = useState<string>(initialSrc);
   const [hasError, setHasError] = useState(false);
 
   const handleError = () => {
     if (!hasError) {
       setHasError(true);
-      setImgSrc(fallbackSrc);
+      setImgSrc(resolvedFallback);
     }
   };
 
   return (
     <img
-      src={imgSrc || fallbackSrc}
+      src={imgSrc || resolvedFallback}
       alt={alt}
       onError={handleError}
       className={className}
