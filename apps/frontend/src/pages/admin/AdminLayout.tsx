@@ -9,12 +9,10 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  Moon,
   Package,
   PlusCircle,
   ShieldAlert,
   ShoppingBag,
-  Sun,
   Tag,
   Users,
   Warehouse,
@@ -24,6 +22,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { pageTransition, useMotionSafe } from '@/lib/motion';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { useAuthStore } from '@/stores/auth.store';
 
 interface NavItem {
@@ -53,24 +52,10 @@ export const AdminLayout: React.FC = () => {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     initAuth();
   }, [initAuth]);
-
-  // Sync theme
-  useEffect(() => {
-    const theme = document.documentElement.getAttribute('data-theme');
-    setIsDark(theme === 'dark');
-  }, []);
-
-  const toggleTheme = () => {
-    const nextTheme = isDark ? 'light' : 'dark';
-    setIsDark(!isDark);
-    localStorage.setItem('shikkis-theme', nextTheme);
-    document.documentElement.setAttribute('data-theme', nextTheme);
-  };
 
   // Close mobile drawer on route change
   useEffect(() => {
@@ -154,9 +139,9 @@ export const AdminLayout: React.FC = () => {
             {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
 
-          {/* Wordmark */}
-          <Link to="/admin" className="flex items-baseline gap-2">
-            <span className="font-serif text-2xl font-bold tracking-wider text-brand-crimson">Rajkanwari</span>
+          {/* Logo */}
+          <Link to="/admin" className="flex items-center gap-2">
+            <BrandLogo size="sm" />
             <span className="text-[10px] tracking-widest uppercase px-1.5 py-0.5 rounded bg-brand-gold/15 text-brand-gold font-semibold border border-brand-gold/30">
               Admin
             </span>
@@ -191,15 +176,6 @@ export const AdminLayout: React.FC = () => {
             <ExternalLink size={14} />
             <span>Storefront</span>
           </Link>
-
-          {/* Theme toggle */}
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg text-text-muted hover:text-text hover:bg-surface-alt transition-colors"
-            title="Toggle theme"
-          >
-            {isDark ? <Sun size={17} className="text-brand-gold" /> : <Moon size={17} />}
-          </button>
 
           {/* Owner Identity pill */}
           <div className="flex items-center gap-2 pl-3 border-l border-border">

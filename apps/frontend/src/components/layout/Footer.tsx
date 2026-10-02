@@ -99,7 +99,7 @@ export const Footer: React.FC = () => (
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Follow Rajkanwari on Instagram"
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border border-[#E8D4A0] dark:border-border text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold transition-all hover:scale-105"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border-border text-text-muted hover:text-brand-crimson hover:border-brand-gold transition-all hover:scale-105"
           >
             <Instagram size={17} aria-hidden />
           </a>
@@ -108,7 +108,7 @@ export const Footer: React.FC = () => (
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Follow Rajkanwari on Facebook"
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border border-[#E8D4A0] dark:border-border text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold transition-all hover:scale-105"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border-border text-text-muted hover:text-brand-crimson hover:border-brand-gold transition-all hover:scale-105"
           >
             <Facebook size={17} aria-hidden />
           </a>
@@ -117,21 +117,21 @@ export const Footer: React.FC = () => (
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Chat with Rajkanwari on WhatsApp"
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border border-[#E8D4A0] dark:border-border text-text-muted hover:text-[#25D366] hover:border-[#25D366] transition-all hover:scale-105"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border-border text-text-muted hover:text-[#25D366] hover:border-[#25D366] transition-all hover:scale-105"
           >
             <MessageCircle size={17} aria-hidden />
           </a>
           <a
             href="tel:+917568572265"
             aria-label="Call Rajkanwari Flagship Boutique"
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border border-[#E8D4A0] dark:border-border text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold transition-all hover:scale-105"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border-border text-text-muted hover:text-brand-crimson hover:border-brand-gold transition-all hover:scale-105"
           >
             <Phone size={16} aria-hidden />
           </a>
           <a
             href="mailto:hello@rajkanwari.com"
             aria-label="Email Rajkanwari"
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border border-[#E8D4A0] dark:border-border text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold transition-all hover:scale-105"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border-border text-text-muted hover:text-brand-crimson hover:border-brand-gold transition-all hover:scale-105"
           >
             <Mail size={16} aria-hidden />
           </a>

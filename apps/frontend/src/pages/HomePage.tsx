@@ -11,7 +11,7 @@ import {
   Sparkles,
   Twitter,
 } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { ProductCard } from '@/components/catalog/ProductCard';
@@ -36,6 +36,9 @@ export const HomePage: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const prefersReducedMotion = useReducedMotion();
   const carouselRef = useRef<HTMLDivElement>(null);
+
+  // Offer Strip Carousel State
+  const [offerIndex, setOfferIndex] = useState(0);
 
   // Quick View modal state
   const [quickViewProduct, setQuickViewProduct] = useState<ProductItem | null>(null);
@@ -199,8 +202,52 @@ export const HomePage: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextSlide, prevSlide]);
 
+  // Announcements / Offers Carousel List
+  const announcementItems = useMemo(() => {
+    if (activeOffers && activeOffers.length > 0) {
+      return activeOffers.map((o) => ({
+        badge: 'EXCLUSIVE FESTIVE OFFER',
+        text: `${o.name} — Enjoy ${o.value}% off on curated handloom & bridal designs!`,
+        code: o.code ? `Use Code: ${o.code}` : undefined,
+        link: '/catalog',
+        linkText: 'Shop Collection',
+      }));
+    }
+    return [
+      {
+        badge: 'EXCLUSIVE FESTIVE OFFER',
+        text: 'Curated Heritage Edit — Enjoy 10% off on handloom Anarkalis, Suits & Rajputi Poshaks!',
+        code: 'Use Code: FESTIVE10',
+        link: '/catalog?occasion=Festive',
+        linkText: 'Shop Collection',
+      },
+      {
+        badge: 'FREE EXPRESS SHIPPING',
+        text: 'Complimentary Pan-India shipping on all orders over ₹4,999. Fast 3-5 day delivery!',
+        code: undefined,
+        link: '/policies/shipping',
+        linkText: 'Learn More',
+      },
+      {
+        badge: 'BENGALURU FLAGSHIP BOUTIQUE',
+        text: 'Visit us live at 100 Feet Rd, Indiranagar. Custom bridal tailoring & styling available!',
+        code: undefined,
+        link: '/policies/contact',
+        linkText: 'Find Boutique',
+      },
+    ];
+  }, [activeOffers]);
+
+  // Auto-slide offer ticker every 4 seconds
+  useEffect(() => {
+    if (announcementItems.length <= 1) return;
+    const timer = setInterval(() => {
+      setOfferIndex((prev) => (prev + 1) % announcementItems.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [announcementItems.length]);
+
   const currentBanner = banners[currentSlide];
-  const primaryOffer = activeOffers[0];
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -208,7 +255,7 @@ export const HomePage: React.FC = () => {
       <section
         ref={carouselRef}
         aria-label="Promotional Highlights"
-        className="relative w-full overflow-hidden bg-[#FEFBF8] dark:bg-bg aspect-[16/9] sm:aspect-[21/9] min-h-[480px] max-h-[680px] border-b border-border"
+        className="relative w-full overflow-hidden bg-brand-crimson aspect-[16/9] sm:aspect-[21/9] min-h-[480px] max-h-[680px] m-0 p-0 border-0"
       >
         {banners.length > 0 ? (
           <AnimatePresence mode="wait">
@@ -245,15 +292,6 @@ export const HomePage: React.FC = () => {
 
                 return (
                   <>
-                    {/* Dark gradient backdrop overlay for high contrast white text readability on every banner image */}
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-r ${
-                        isRightAligned
-                          ? 'from-black/20 via-black/55 to-black/85'
-                          : 'from-black/85 via-black/55 to-black/20'
-                      } pointer-events-none`}
-                    />
-
                     <div className="absolute inset-0 flex items-center z-10">
                       <div className="mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-16">
                         <div
@@ -267,14 +305,14 @@ export const HomePage: React.FC = () => {
                             transition={{ duration: 0.5, delay: 0.15 }}
                             className={isRightAligned ? 'text-right' : 'text-left'}
                           >
-                            <span className="text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-brand-gold block drop-shadow-sm">
+                            <span className="text-xs sm:text-sm font-extrabold uppercase tracking-[0.25em] text-brand-primary block drop-shadow-xs">
                               RAJKANWARI • CURATED STYLE
                             </span>
                             <motion.h1
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.6, delay: 0.25 }}
-                              className="font-serif text-4xl sm:text-5xl lg:text-6xl font-normal text-white leading-[1.1] tracking-tight mt-2 mb-3 drop-shadow-md"
+                              className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-text leading-[1.1] tracking-tight mt-2 mb-3 drop-shadow-xs"
                             >
                               {currentBanner?.title || 'Timeless Elegance'}
                             </motion.h1>
@@ -285,7 +323,7 @@ export const HomePage: React.FC = () => {
                               initial={{ opacity: 0, y: 15 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.5, delay: 0.4 }}
-                              className={`text-sm sm:text-base text-white/90 font-sans leading-relaxed font-light max-w-lg drop-shadow-sm ${
+                              className={`text-sm sm:text-base text-text-muted font-sans leading-relaxed font-semibold max-w-lg drop-shadow-xs ${
                                 isRightAligned ? 'ml-auto text-right' : 'mr-auto text-left'
                               }`}
                             >
@@ -301,7 +339,7 @@ export const HomePage: React.FC = () => {
                           >
                             <Link
                               to={currentBanner?.cta_link || '/catalog'}
-                              className="inline-flex items-center gap-2 rounded-full bg-brand-crimson hover:bg-[#7A1525] text-white px-7 py-3 text-xs sm:text-sm font-semibold tracking-wide transition-all shadow-lg hover:shadow-xl active:scale-95 border border-white/10"
+                              className="inline-flex items-center gap-2 rounded-full bg-brand-crimson hover:opacity-90 text-white px-7 py-3 text-xs sm:text-sm font-semibold tracking-wide transition-all shadow-xl hover:shadow-2xl active:scale-95 border border-white/20"
                             >
                               <span>{currentBanner?.cta_text || 'Explore Collection'}</span>
                               <ArrowRight size={16} />
@@ -328,7 +366,7 @@ export const HomePage: React.FC = () => {
               type="button"
               onClick={prevSlide}
               aria-label="Previous slide"
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 dark:bg-surface/80 hover:bg-white dark:hover:bg-surface text-[#2C1810] dark:text-text border border-[#E5DBCE] dark:border-border backdrop-blur-sm transition-all shadow-sm"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-surface/80 hover:bg-surface text-text border border-border backdrop-blur-sm transition-all shadow-sm"
             >
               <ChevronLeft size={20} />
             </button>
@@ -336,7 +374,7 @@ export const HomePage: React.FC = () => {
               type="button"
               onClick={nextSlide}
               aria-label="Next slide"
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 dark:bg-surface/80 hover:bg-white dark:hover:bg-surface text-[#2C1810] dark:text-text border border-[#E5DBCE] dark:border-border backdrop-blur-sm transition-all shadow-sm"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-surface/80 hover:bg-surface text-text border border-border backdrop-blur-sm transition-all shadow-sm"
             >
               <ChevronRight size={20} />
             </button>
@@ -350,7 +388,7 @@ export const HomePage: React.FC = () => {
                   onClick={() => setCurrentSlide(idx)}
                   aria-label={`Go to slide ${idx + 1}`}
                   className={`h-2 rounded-full transition-all duration-300 ${
-                    currentSlide === idx ? 'w-8 bg-[#3D4733] dark:bg-brand-gold' : 'w-2 bg-[#2C1810]/30 dark:bg-white/40'
+                    currentSlide === idx ? 'w-8 bg-brand-primary' : 'w-2 bg-text/30'
                   }`}
                 />
               ))}
@@ -359,26 +397,61 @@ export const HomePage: React.FC = () => {
         )}
       </section>
 
-      {/* ── 2. Active Offer Banner with Gold Shimmer Sweep ──────────────────── */}
-      {primaryOffer && (
-        <section
-          aria-label="Special Offer"
-          className="gold-shimmer-sweep relative w-full bg-brand-crimson text-white py-3 px-4 border-y border-brand-gold/40 shadow-inner"
-        >
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-2 text-center text-xs sm:text-sm font-medium">
-            <span className="font-semibold text-brand-gold">EXCLUSIVE FESTIVE OFFER:</span>
-            <span>
-              {primaryOffer.name} — Enjoy {primaryOffer.value}% off on curated handloom & bridal designs!
-            </span>
-            <Link
-              to="/catalog"
-              className="ml-2 font-bold underline underline-offset-4 hover:text-brand-gold transition-colors"
-            >
-              Shop Collection &rarr;
-            </Link>
+      {/* ── 2. Active Offer & Announcement Carousel Strip with Gold Shimmer Sweep ── */}
+      <section
+        aria-label="Special Offers & Announcements Carousel"
+        className="gold-shimmer-sweep relative w-full bg-brand-crimson text-white py-3 px-4 border-b border-brand-gold/40 shadow-inner select-none m-0 overflow-hidden"
+      >
+        <div className="mx-auto max-w-7xl flex items-center justify-between gap-2 px-1 sm:px-4">
+          <button
+            type="button"
+            onClick={() => setOfferIndex((prev) => (prev - 1 + announcementItems.length) % announcementItems.length)}
+            aria-label="Previous announcement"
+            className="p-1 rounded-full text-brand-gold/80 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          <div className="flex-1 overflow-hidden px-2">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={offerIndex}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="flex flex-wrap items-center justify-center gap-2 text-center text-xs sm:text-sm font-medium"
+              >
+                <span className="font-bold text-brand-gold uppercase tracking-wider">
+                  {announcementItems[offerIndex].badge}:
+                </span>
+                <span>{announcementItems[offerIndex].text}</span>
+                {announcementItems[offerIndex].code && (
+                  <span className="bg-brand-gold/20 border border-brand-gold/40 px-2 py-0.5 rounded text-[11px] font-bold text-brand-gold uppercase">
+                    {announcementItems[offerIndex].code}
+                  </span>
+                )}
+                <Link
+                  to={announcementItems[offerIndex].link}
+                  className="ml-1 font-bold underline underline-offset-4 hover:text-brand-gold transition-colors inline-flex items-center gap-1"
+                >
+                  <span>{announcementItems[offerIndex].linkText}</span>
+                  <ArrowRight size={13} />
+                </Link>
+              </motion.div>
+            </AnimatePresence>
           </div>
-        </section>
-      )}
+
+          <button
+            type="button"
+            onClick={() => setOfferIndex((prev) => (prev + 1) % announcementItems.length)}
+            aria-label="Next announcement"
+            className="p-1 rounded-full text-brand-gold/80 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </section>
 
       {/* ── 3. Shop by Category Strip (Auto-scrolls every 3s) ───────────────── */}
       <section aria-labelledby="shop-by-category-title" className="py-16 px-4 md:px-8 max-w-7xl mx-auto w-full overflow-hidden">
@@ -486,7 +559,7 @@ export const HomePage: React.FC = () => {
       {/* ── 5. Subscribe Newsletter Section (Matching Reference Design) ────── */}
       <section
         aria-label="Subscribe Newsletter"
-        className="w-full bg-[#F4F7F9] dark:bg-surface-alt border-y border-border py-12 lg:py-16 overflow-hidden relative my-8"
+        className="w-full bg-surface-alt border-y border-border py-12 lg:py-16 overflow-hidden relative my-8"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
           {/* Left Decorative Floating Flat-lay Image */}
@@ -503,7 +576,7 @@ export const HomePage: React.FC = () => {
                   repeat: Infinity,
                   ease: 'easeInOut',
                 }}
-                className="absolute -inset-2 rounded-2xl bg-gradient-to-tr from-brand-gold/30 via-[#5FB7B4]/25 to-brand-crimson/30 blur-xl z-0"
+                className="absolute -inset-2 rounded-2xl bg-gradient-to-tr from-brand-gold/30 via-brand-crimson/20 to-brand-gold/30 blur-xl z-0"
               />
             )}
 
@@ -573,7 +646,7 @@ export const HomePage: React.FC = () => {
                 ease: 'easeInOut',
                 delay: 1,
               }}
-              className="absolute -bottom-3 -right-3 z-20 rounded-full bg-white/95 dark:bg-surface/95 border border-[#5FB7B4]/60 px-3 py-1 text-[10px] font-bold text-[#5FB7B4] shadow-lg backdrop-blur-md flex items-center gap-1.5"
+              className="absolute -bottom-3 -right-3 z-20 rounded-full bg-white/95 dark:bg-surface/95 border border-brand-crimson/40 px-3 py-1 text-[10px] font-bold text-brand-crimson dark:text-brand-gold shadow-lg backdrop-blur-md flex items-center gap-1.5"
             >
               <Sparkles size={12} />
               <span>Royal Accessories</span>
@@ -583,7 +656,7 @@ export const HomePage: React.FC = () => {
           {/* Center Newsletter Form & Information */}
           <div className="w-full lg:w-2/4 text-center max-w-xl mx-auto space-y-5 relative z-10">
             {/* Envelope Badge */}
-            <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-white dark:bg-surface border border-[#5FB7B4]/40 text-[#5FB7B4] shadow-sm mx-auto">
+            <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-white dark:bg-surface border border-brand-crimson/30 text-brand-crimson dark:text-brand-gold shadow-sm mx-auto">
               <Mail size={26} strokeWidth={1.5} />
             </div>
 
@@ -609,7 +682,7 @@ export const HomePage: React.FC = () => {
               </motion.div>
             ) : (
               <form onSubmit={handleNewsletterSubmit} className="space-y-2 max-w-md mx-auto">
-                <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-0 rounded-md overflow-hidden border border-border bg-white dark:bg-surface shadow-sm focus-within:ring-2 focus-within:ring-[#5FB7B4]">
+                <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-0 rounded-md overflow-hidden border border-border bg-white dark:bg-surface shadow-sm focus-within:ring-2 focus-within:ring-brand-crimson">
                   <input
                     type="email"
                     value={newsletterEmail}
@@ -622,7 +695,7 @@ export const HomePage: React.FC = () => {
                   />
                   <button
                     type="submit"
-                    className="w-full sm:w-auto flex-shrink-0 px-6 py-3 bg-[#5FB7B4] hover:bg-[#4EA5A2] text-white text-xs sm:text-sm font-semibold tracking-wider transition-colors uppercase whitespace-nowrap cursor-pointer"
+                    className="w-full sm:w-auto flex-shrink-0 px-6 py-3 bg-brand-crimson hover:opacity-90 text-white text-xs sm:text-sm font-semibold tracking-wider transition-colors uppercase whitespace-nowrap cursor-pointer"
                   >
                     Subscribe Now
                   </button>
@@ -640,7 +713,7 @@ export const HomePage: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
-                className="h-9 w-9 rounded-full bg-white dark:bg-surface text-text-muted hover:text-[#5FB7B4] border border-border flex items-center justify-center transition-colors shadow-sm"
+                className="h-9 w-9 rounded-full bg-white dark:bg-surface text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold border border-border flex items-center justify-center transition-colors shadow-sm"
               >
                 <Facebook size={16} />
               </a>
@@ -649,7 +722,7 @@ export const HomePage: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Twitter"
-                className="h-9 w-9 rounded-full bg-white dark:bg-surface text-text-muted hover:text-[#5FB7B4] border border-border flex items-center justify-center transition-colors shadow-sm"
+                className="h-9 w-9 rounded-full bg-white dark:bg-surface text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold border border-border flex items-center justify-center transition-colors shadow-sm"
               >
                 <Twitter size={16} />
               </a>
@@ -658,7 +731,7 @@ export const HomePage: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="h-9 w-9 rounded-full bg-white dark:bg-surface text-text-muted hover:text-[#5FB7B4] border border-border flex items-center justify-center transition-colors shadow-sm"
+                className="h-9 w-9 rounded-full bg-white dark:bg-surface text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold border border-border flex items-center justify-center transition-colors shadow-sm"
               >
                 <Instagram size={16} />
               </a>
@@ -667,7 +740,7 @@ export const HomePage: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp"
-                className="h-9 w-9 rounded-full bg-white dark:bg-surface text-text-muted hover:text-[#5FB7B4] border border-border flex items-center justify-center transition-colors shadow-sm"
+                className="h-9 w-9 rounded-full bg-white dark:bg-surface text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold border border-border flex items-center justify-center transition-colors shadow-sm"
               >
                 <MessageCircle size={16} />
               </a>
@@ -688,7 +761,7 @@ export const HomePage: React.FC = () => {
                   repeat: Infinity,
                   ease: 'easeInOut',
                 }}
-                className="absolute -inset-2 rounded-2xl bg-gradient-to-bl from-brand-crimson/25 via-brand-gold/25 to-[#5FB7B4]/25 blur-xl z-0"
+                className="absolute -inset-2 rounded-2xl bg-gradient-to-bl from-brand-crimson/25 via-brand-gold/25 to-brand-crimson/20 blur-xl z-0"
               />
             )}
 

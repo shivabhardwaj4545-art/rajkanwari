@@ -15,26 +15,15 @@
 
     <!--
       BLOCKING THEME SCRIPT
-      Must run synchronously BEFORE any paint to prevent flash of wrong theme.
-      Reads localStorage key 'rajkanwari-theme' (values: 'light' | 'dark' | 'system').
-      Falls back to OS preference, then light.
-      Sets data-theme on <html> so CSS custom properties load with the correct values.
+      Forces 'light' theme on <html> BEFORE first paint.
     -->
     <script>
       (function () {
         try {
-          var saved = localStorage.getItem('rajkanwari-theme') || localStorage.getItem('shikkis-theme') || 'system';
-          var resolved = saved;
-          if (saved === 'system') {
-            resolved = window.matchMedia('(prefers-color-scheme: dark)').matches
-              ? 'dark'
-              : 'light';
-          }
-          document.documentElement.setAttribute('data-theme', resolved);
-        } catch (_) {
-          // localStorage may be blocked in some privacy modes — default to light
-          document.documentElement.setAttribute('data-theme', 'light');
-        }
+          localStorage.removeItem('rajkanwari-theme');
+          localStorage.removeItem('shikkis-theme');
+        } catch (_) {}
+        document.documentElement.setAttribute('data-theme', 'light');
       })();
     </script>
   </head>

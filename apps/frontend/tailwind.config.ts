@@ -7,9 +7,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Brand (same in both themes)
+        // Brand
+        'brand-primary': 'var(--brand-primary)',
         'brand-crimson': 'var(--brand-crimson)',
         'brand-gold': 'var(--brand-gold)',
+        'brand-sale': 'var(--brand-sale)',
 
         // Semantic
         success: 'var(--success)',

@@ -19,17 +19,8 @@ interface ThemeState {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getSystemTheme(): ResolvedTheme {
-  if (typeof window === 'undefined') return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
-function resolve(pref: ThemePreference): ResolvedTheme {
-  return pref === 'system' ? getSystemTheme() : pref;
-}
-
-function applyTheme(theme: ResolvedTheme): void {
-  document.documentElement.setAttribute('data-theme', theme);
+function applyTheme(_theme?: ResolvedTheme): void {
+  document.documentElement.setAttribute('data-theme', 'light');
 }
 
 // ─── Store ────────────────────────────────────────────────────────────────────
@@ -37,35 +28,28 @@ function applyTheme(theme: ResolvedTheme): void {
 export const useThemeStore = create<ThemeState>()(
   subscribeWithSelector(
     persist(
-      (set, get) => ({
-        preference: 'system',
-        resolved: resolve('system'),
+      (set) => ({
+        preference: 'light',
+        resolved: 'light',
 
-        setPreference(pref) {
-          const resolved = resolve(pref);
-          applyTheme(resolved);
-          set({ preference: pref, resolved });
+        setPreference() {
+          applyTheme('light');
+          set({ preference: 'light', resolved: 'light' });
         },
 
         _resolveFromSystem() {
-          const { preference } = get();
-          if (preference === 'system') {
-            const resolved = getSystemTheme();
-            applyTheme(resolved);
-            set({ resolved });
-          }
+          applyTheme('light');
+          set({ preference: 'light', resolved: 'light' });
         },
       }),
       {
-        name: 'rajkanwari-theme', // localStorage key for Rajkanwari theme preference
-        // Only persist the user's preference, not the resolved value
-        partialize: (state) => ({ preference: state.preference }),
+        name: 'rajkanwari-theme',
+        partialize: () => ({ preference: 'light' }),
         onRehydrateStorage: () => (state) => {
-          // After hydration, resolve and apply the correct theme
           if (state) {
-            const resolved = resolve(state.preference);
-            applyTheme(resolved);
-            state.resolved = resolved;
+            applyTheme('light');
+            state.preference = 'light';
+            state.resolved = 'light';
           }
         },
       },
@@ -73,12 +57,7 @@ export const useThemeStore = create<ThemeState>()(
   ),
 );
 
-// ─── System preference listener ───────────────────────────────────────────────
-// Wire up outside the store so it's a singleton effect
-
+// Enforce light theme on load
 if (typeof window !== 'undefined') {
-  const mq = window.matchMedia('(prefers-color-scheme: dark)');
-  mq.addEventListener('change', () => {
-    useThemeStore.getState()._resolveFromSystem();
-  });
+  applyTheme('light');
 }

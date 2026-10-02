@@ -6,7 +6,6 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { slideInRight, useMotionSafe } from '@/lib/motion';
 import { api } from '@/lib/api';
 import { BrandLogo } from '@/components/ui/BrandLogo';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useFocusTrap } from '@/lib/useFocusTrap';
 import { useAuthStore } from '@/stores/auth.store';
 import { useCartStore } from '@/stores/cart.store';
@@ -231,8 +230,6 @@ export const Header: React.FC = () => {
                 <span className="hidden sm:inline">Admin</span>
               </Link>
             )}
-
-            <ThemeToggle />
 
             {/* Customer Account / Sign In Link */}
             <Link
