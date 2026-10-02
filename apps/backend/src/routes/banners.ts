@@ -13,7 +13,7 @@ bannersRouter.get('/active', async (_req, res, next) => {
     const rows = await db
       .prepare(`
         SELECT
-          id, title, subtitle, image_url, cta_text, cta_link, display_order,
+          id, title, subtitle, image_url, cta_text, cta_link, text_alignment, display_order,
           starts_at, ends_at
         FROM banners
         WHERE is_active = 1

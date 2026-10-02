@@ -1023,7 +1023,7 @@ export const CheckoutPage: React.FC = () => {
                     <img
                       src={item.image_url || '/placeholder.png'}
                       alt={item.product_name}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover object-top"
                     />
                   </div>
                   <div className="flex-1 min-w-0">

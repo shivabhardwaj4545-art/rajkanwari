@@ -63,12 +63,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  login: async (email: string, password: string = 'rajkanwari_dev_cust_2026!') => {
+  login: async (email: string, password: string = '123456') => {
     try {
       set({ loading: true });
       const res = await api.login(email, password);
       setAuthTokens(res.accessToken, res.refreshToken);
-      set({ user: res.user });
+      set({ user: res.user, initialized: true });
       return true;
     } catch (err) {
       console.error('Login error:', err);
@@ -90,7 +90,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   switchUser: async (email: string) => {
-    await get().login(email, 'rajkanwari_dev_cust_2026!');
+    await get().login(email, '123456');
     window.location.reload();
   },
 }));

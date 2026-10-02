@@ -1,4 +1,4 @@
-﻿import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertCircle,
   Layers,
@@ -33,6 +33,7 @@ export const AdminBannersPage: React.FC = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [ctaText, setCtaText] = useState('Explore Collection');
   const [ctaLink, setCtaLink] = useState('/catalog');
+  const [textAlignment, setTextAlignment] = useState<'left' | 'right'>('left');
   const [startsAt, setStartsAt] = useState('');
   const [endsAt, setEndsAt] = useState('');
   const [isActive, setIsActive] = useState(true);
@@ -59,6 +60,7 @@ export const AdminBannersPage: React.FC = () => {
     setImageUrl('');
     setCtaText('Explore Collection');
     setCtaLink('/catalog');
+    setTextAlignment('left');
     setStartsAt('');
     setEndsAt('');
     setIsActive(true);
@@ -78,6 +80,7 @@ export const AdminBannersPage: React.FC = () => {
     setImageUrl(banner.image_url);
     setCtaText(banner.cta_text || 'Explore Collection');
     setCtaLink(banner.cta_link || '/catalog');
+    setTextAlignment(banner.text_alignment || 'left');
     setStartsAt(banner.starts_at ? banner.starts_at.slice(0, 16) : '');
     setEndsAt(banner.ends_at ? banner.ends_at.slice(0, 16) : '');
     setIsActive(banner.is_active);
@@ -148,8 +151,9 @@ export const AdminBannersPage: React.FC = () => {
       title: title.trim(),
       subtitle: subtitle.trim() || null,
       image_url: imageUrl.trim(),
-      cta_text: ctaText.trim() || 'Shop Collection',
+      cta_text: ctaText.trim() || 'Explore Collection',
       cta_link: ctaLink.trim() || '/catalog',
+      text_alignment: textAlignment,
       starts_at: startsAt ? new Date(startsAt).toISOString() : null,
       ends_at: endsAt ? new Date(endsAt).toISOString() : null,
       is_active: isActive,
@@ -174,6 +178,7 @@ export const AdminBannersPage: React.FC = () => {
   };
 
   const activeBanner = banners[previewIndex] || banners[0];
+  const isPreviewRight = activeBanner?.text_alignment === 'right';
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
@@ -181,7 +186,7 @@ export const AdminBannersPage: React.FC = () => {
         <div>
           <h1 className="font-serif text-3xl font-bold text-text">Hero Carousel Banners</h1>
           <p className="text-xs text-text-muted mt-1">
-            Configure full-bleed hero slides, schedule festival announcements, and reorder slide sequence.
+            Configure full-bleed hero slides, choose Left / Right text alignment, schedule festival announcements, and reorder sequence.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -207,7 +212,7 @@ export const AdminBannersPage: React.FC = () => {
           <div className="p-4 border-b border-border flex items-center justify-between bg-surface-alt/40">
             <span className="text-xs font-semibold text-brand-gold uppercase tracking-wider flex items-center gap-2">
               <Sparkles size={14} />
-              <span>Live Customer Storefront Carousel Preview</span>
+              <span>Live Storefront Preview (Align: {activeBanner.text_alignment === 'right' ? 'Right ➡️' : 'Left ⬅️'})</span>
             </span>
             <div className="flex items-center gap-1.5">
               {banners.map((b, idx) => (
@@ -228,10 +233,10 @@ export const AdminBannersPage: React.FC = () => {
               alt={activeBanner.title}
               className="absolute inset-0 w-full h-full object-cover object-center brightness-75"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-            <div className="relative z-10 max-w-xl px-8 sm:px-12 text-white space-y-3">
+            <div className={`absolute inset-0 bg-gradient-to-r ${isPreviewRight ? 'from-black/20 via-black/50 to-black/85' : 'from-black/85 via-black/50 to-black/20'}`} />
+            <div className={`relative z-10 max-w-xl px-8 sm:px-12 text-white space-y-3 flex flex-col ${isPreviewRight ? 'ml-auto text-right items-end' : 'mr-auto text-left items-start'}`}>
               <span className="inline-block font-serif tracking-widest text-[11px] uppercase text-brand-gold">
-                Shikkis &bull; Curated Style
+                RAJKANWARI &bull; CURATED STYLE
               </span>
               <h2 className="font-serif text-2xl sm:text-4xl font-bold leading-tight drop-shadow-md">
                 {activeBanner.title}
@@ -242,8 +247,8 @@ export const AdminBannersPage: React.FC = () => {
                 </p>
               )}
               <div className="pt-2">
-                <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-crimson text-white text-xs font-semibold shadow-lg">
-                  {activeBanner.cta_text || 'Shop Collection'} &rarr;
+                <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-brand-crimson text-white text-xs font-semibold shadow-lg">
+                  {activeBanner.cta_text || 'Explore Collection'} &rarr;
                 </span>
               </div>
             </div>
@@ -299,13 +304,18 @@ export const AdminBannersPage: React.FC = () => {
                     <img
                       src={banner.image_url}
                       alt={banner.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover object-top"
                     />
                   </div>
 
                   <div>
-                    <h3 className="font-serif text-base font-bold text-text line-clamp-1">{banner.title}</h3>
-                    <div className="flex items-center gap-2 text-[11px] text-text-muted">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-serif text-base font-bold text-text line-clamp-1">{banner.title}</h3>
+                      <span className="px-2 py-0.5 rounded-full bg-surface-alt border border-border text-[10px] font-semibold text-text-muted uppercase">
+                        {banner.text_alignment === 'right' ? 'Right ➡️' : 'Left ⬅️'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[11px] text-text-muted mt-0.5">
                       <span>CTA: {banner.cta_text}</span>
                       <span>&bull;</span>
                       <span className="font-mono">{banner.cta_link}</span>
@@ -417,9 +427,38 @@ export const AdminBannersPage: React.FC = () => {
                   </div>
                   {imageUrl && (
                     <div className="mt-2 rounded-lg overflow-hidden border border-border h-20 bg-surface-alt">
-                      <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                      <img src={imageUrl} alt="Preview" className="w-full h-full object-cover object-top" />
                     </div>
                   )}
+                </div>
+
+                {/* Text Alignment Selection (Left vs Right) */}
+                <div>
+                  <label className="block font-semibold text-text mb-1">Text Alignment on Hero Slide</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setTextAlignment('left')}
+                      className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-xs font-semibold transition-all ${
+                        textAlignment === 'left'
+                          ? 'border-brand-crimson bg-brand-crimson/10 text-brand-crimson dark:text-brand-gold dark:border-brand-gold ring-1 ring-brand-crimson/30'
+                          : 'border-border bg-bg text-text-muted hover:text-text'
+                      }`}
+                    >
+                      <span>⬅️ Left Aligned</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTextAlignment('right')}
+                      className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-xs font-semibold transition-all ${
+                        textAlignment === 'right'
+                          ? 'border-brand-crimson bg-brand-crimson/10 text-brand-crimson dark:text-brand-gold dark:border-brand-gold ring-1 ring-brand-crimson/30'
+                          : 'border-border bg-bg text-text-muted hover:text-text'
+                      }`}
+                    >
+                      <span>Right Aligned ➡️</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">

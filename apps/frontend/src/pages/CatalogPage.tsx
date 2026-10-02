@@ -171,19 +171,33 @@ export const CatalogPage: React.FC = () => {
     setSearchParams(params);
   };
 
-  // Category page title heading
+  // Category & Gender page title heading
   const currentCategoryName = useMemo(() => {
-    if (!filters.category) return 'All Creations';
-    const found = categories.find((c) => c.slug === filters.category);
-    return found ? found.name : 'Curated Styles';
-  }, [categories, filters.category]);
+    let title = '';
+    if (filters.category) {
+      const found = categories.find((c) => c.slug === filters.category);
+      if (found) {
+        title = found.name;
+      } else {
+        title = filters.category.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+      }
+    }
+
+    if (filters.gender === 'men') {
+      title = title ? `${title} (Men's)` : "Men's Ethnic Collection";
+    } else if (filters.gender === 'women') {
+      title = title ? `${title} (Women's)` : "Women's Ethnic Collection";
+    }
+
+    return title || 'All Creations';
+  }, [categories, filters.category, filters.gender]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 md:px-8">
       {/* ── Page Header ──────────────────────────────────────────────────── */}
       <div className="mb-8 pb-6 border-b border-border">
         <span className="text-xs font-semibold uppercase tracking-widest text-brand-gold">
-          Shikkis Collection
+          Rajkanwari Collection
         </span>
         <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-text mt-1">
           {currentCategoryName}
@@ -300,7 +314,7 @@ export const CatalogPage: React.FC = () => {
               className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6"
             >
               {products.map((product) => (
-                <motion.div key={product.id} variants={staggerItem}>
+                <motion.div key={product.id} variants={staggerItem} className="h-full">
                   <ProductCard
                     product={product}
                     onQuickView={(p) => setQuickViewProduct(p)}

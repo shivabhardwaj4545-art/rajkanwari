@@ -11,7 +11,11 @@ export default {
         brand: {
           crimson: "var(--brand-crimson)",
           gold: "var(--brand-gold)",
+          primary: "var(--brand-primary)",
+          accent: "var(--brand-accent)",
         },
+        primary: "var(--brand-primary)",
+        accent: "var(--brand-accent)",
         bg: "var(--bg)",
         surface: {
           DEFAULT: "var(--surface)",

@@ -1,5 +1,16 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import {
+  ArrowRight,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Facebook,
+  Instagram,
+  Mail,
+  MessageCircle,
+  Sparkles,
+  Twitter,
+} from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -13,7 +24,6 @@ import {
   type OfferItem,
   type ProductItem,
 } from '@/lib/api';
-import { staggerContainer, staggerItem } from '@/lib/motion';
 
 export const HomePage: React.FC = () => {
   const [banners, setBanners] = useState<BannerItem[]>([]);
@@ -24,12 +34,27 @@ export const HomePage: React.FC = () => {
 
   // Hero carousel state
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const carouselRef = useRef<HTMLDivElement>(null);
 
   // Quick View modal state
   const [quickViewProduct, setQuickViewProduct] = useState<ProductItem | null>(null);
+
+  // Newsletter subscription state
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
+  const [newsletterError, setNewsletterError] = useState('');
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail || !newsletterEmail.includes('@')) {
+      setNewsletterError('Please enter a valid email address.');
+      return;
+    }
+    setNewsletterError('');
+    setNewsletterSubscribed(true);
+    setNewsletterEmail('');
+  };
 
   // Fetch home page data
   useEffect(() => {
@@ -53,21 +78,30 @@ export const HomePage: React.FC = () => {
           const fallbackBanners: BannerItem[] = [
             {
               id: 'fallback_01',
-              title: 'The Royal Weaves of Varanasi',
-              subtitle: 'Handcrafted Silk Sarees & Heritage Zari Craftsmanship',
-              image_url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1600&auto=format&fit=crop',
-              cta_text: 'Explore Sarees',
-              cta_link: '/catalog?category=sarees',
+              title: 'Timeless Elegance',
+              subtitle: 'Graceful silhouettes. Rich fabrics. For every chapter of you.',
+              image_url: '/images/banner_festive_trio.jpg',
+              cta_text: 'EXPLORE COLLECTION',
+              cta_link: '/catalog?occasion=Festive',
               display_order: 1,
             },
             {
               id: 'fallback_02',
-              title: 'Bespoke Festive Elegance',
-              subtitle: 'Scarlet Bridal Lehengas & Hand-Embroidered Anarkalis',
-              image_url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=1600&auto=format&fit=crop',
-              cta_text: 'Shop Festive Edit',
-              cta_link: '/catalog?occasion=Festive',
+              title: "Make Room For What's New",
+              subtitle: 'Too Rajkunwari To Blend In. Discover our newest handcrafted arrivals & festive edits.',
+              image_url: '/images/banner_whats_new.jpg',
+              cta_text: 'SHOP NEW ARRIVALS',
+              cta_link: '/catalog?sort=newest',
               display_order: 2,
+            },
+            {
+              id: 'fallback_03',
+              title: 'The Royal Anarkali & Suit Edit',
+              subtitle: 'Scarlet red silk flared Anarkalis & hand-embroidered heritage couture crafted for royalty.',
+              image_url: '/images/banner_scarlet_anarkali.jpg',
+              cta_text: 'SHOP ANARKALIS & SUITS',
+              cta_link: '/catalog?category=anarkalis',
+              display_order: 3,
             },
           ];
 
@@ -103,21 +137,54 @@ export const HomePage: React.FC = () => {
     }
   }, [totalSlides]);
 
-  // 5s auto-advance: pauses on hover, on focus, and under reduced motion
+  // 3s auto-advance hero carousel
   useEffect(() => {
-    if (prefersReducedMotion || isPaused || totalSlides <= 1) return;
+    if (prefersReducedMotion || totalSlides <= 1) return;
 
     const timer = setInterval(() => {
-      nextSlide();
-    }, 5000);
+      setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    }, 3000);
 
     return () => clearInterval(timer);
-  }, [isPaused, nextSlide, prefersReducedMotion, totalSlides]);
+  }, [prefersReducedMotion, totalSlides]);
+
+  // Auto-scroll Category slider every 3 seconds
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (prefersReducedMotion || categories.length <= 1) return;
+    const interval = setInterval(() => {
+      if (categoryScrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = categoryScrollRef.current;
+        if (scrollLeft + clientWidth >= scrollWidth - 15) {
+          categoryScrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          categoryScrollRef.current.scrollBy({ left: 240, behavior: 'smooth' });
+        }
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [categories, prefersReducedMotion]);
+
+  // Auto-scroll Featured Products slider every 3 seconds
+  const productScrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (prefersReducedMotion || featuredProducts.length <= 1) return;
+    const interval = setInterval(() => {
+      if (productScrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = productScrollRef.current;
+        if (scrollLeft + clientWidth >= scrollWidth - 15) {
+          productScrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          productScrollRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+        }
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [featuredProducts, prefersReducedMotion]);
 
   // Keyboard navigation for carousel
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only react if active element is inside carousel or on body
       if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
         return;
       }
@@ -134,73 +201,115 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* ── 1. Hero Carousel (Full-bleed) ──────────────────────────────────── */}
+      {/* ── 1. Full-Bleed Hero Banner Section ─────────────────────────────────── */}
       <section
         ref={carouselRef}
         aria-label="Promotional Highlights"
-        className="relative w-full overflow-hidden bg-black aspect-[16/9] sm:aspect-[21/9] min-h-[460px] max-h-[680px]"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-        onFocus={() => setIsPaused(true)}
-        onBlur={() => setIsPaused(false)}
+        className="relative w-full overflow-hidden bg-[#FEFBF8] dark:bg-bg aspect-[16/9] sm:aspect-[21/9] min-h-[480px] max-h-[680px] border-b border-border"
       >
         {banners.length > 0 ? (
           <AnimatePresence mode="wait">
             <motion.div
               key={currentBanner?.id || currentSlide}
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.02 }}
-              transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: 'easeInOut' }}
+              initial={{ opacity: 0, scale: 1.04 }}
+              animate={{ opacity: 1, scale: 1.0 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.6, ease: 'easeInOut' }}
               className="absolute inset-0"
             >
-              {/* Background Slide Image */}
-              <img
-                src={currentBanner?.image_url}
+              {/* Full-bleed Animated Background Image (Ken Burns 3s Smooth Zoom & Pan) */}
+              <motion.img
+                key={`img-${currentBanner?.id || currentSlide}`}
+                initial={{ scale: prefersReducedMotion ? 1 : 1.12, opacity: 0.85 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: prefersReducedMotion ? 0 : 3, ease: 'easeOut' }}
+                src={currentBanner?.image_url || '/images/banner_festive_trio.jpg'}
                 alt={currentBanner?.title || 'Rajkanwari House of Ethnic Wear'}
-                className="h-full w-full object-cover object-center"
+                className={`h-full w-full object-cover ${
+                  currentBanner?.image_url?.includes('scarlet_anarkali')
+                    ? 'object-left-top'
+                    : 'object-center'
+                }`}
               />
 
-              {/* Crimson to transparent gradient overlay */}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background:
-                    'linear-gradient(90deg, rgba(155,27,48,0.88) 0%, rgba(155,27,48,0.55) 45%, rgba(0,0,0,0.2) 80%, transparent 100%)',
-                }}
-              />
+              {/* Content Overlay with Gradient Backdrop & Animated Entrances */}
+              {(() => {
+                const isRightAligned = currentBanner?.text_alignment
+                  ? currentBanner.text_alignment === 'right'
+                  : (currentSlide % 2 === 1 ||
+                     currentBanner?.image_url?.includes('scarlet_anarkali') ||
+                     currentBanner?.image_url?.includes('whats_new'));
 
-              {/* Slide Content */}
-              <div className="absolute inset-0 flex items-center">
-                <div className="mx-auto w-full max-w-7xl px-6 md:px-12">
-                  <div className="max-w-xl text-white space-y-4 drop-shadow-md">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-gold/30 px-3 py-1 text-xs font-semibold tracking-wider text-white uppercase backdrop-blur-md border border-brand-gold/50">
-                      <Sparkles size={12} className="text-brand-gold" />
-                      House of Ethnic Wear
-                    </span>
+                return (
+                  <>
+                    {/* Dark gradient backdrop overlay for high contrast white text readability on every banner image */}
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-r ${
+                        isRightAligned
+                          ? 'from-black/20 via-black/55 to-black/85'
+                          : 'from-black/85 via-black/55 to-black/20'
+                      } pointer-events-none`}
+                    />
 
-                    <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal leading-[1.1] tracking-tight">
-                      {currentBanner?.title}
-                    </h1>
+                    <div className="absolute inset-0 flex items-center z-10">
+                      <div className="mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-16">
+                        <div
+                          className={`max-w-xl space-y-3 sm:space-y-4 flex flex-col ${
+                            isRightAligned ? 'ml-auto text-right items-end' : 'mr-auto text-left items-start'
+                          }`}
+                        >
+                          <motion.div
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.15 }}
+                            className={isRightAligned ? 'text-right' : 'text-left'}
+                          >
+                            <span className="text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-brand-gold block drop-shadow-sm">
+                              RAJKANWARI • CURATED STYLE
+                            </span>
+                            <motion.h1
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.6, delay: 0.25 }}
+                              className="font-serif text-4xl sm:text-5xl lg:text-6xl font-normal text-white leading-[1.1] tracking-tight mt-2 mb-3 drop-shadow-md"
+                            >
+                              {currentBanner?.title || 'Timeless Elegance'}
+                            </motion.h1>
+                          </motion.div>
 
-                    {currentBanner?.subtitle && (
-                      <p className="text-sm sm:text-base text-white/90 font-sans max-w-md leading-relaxed font-light">
-                        {currentBanner.subtitle}
-                      </p>
-                    )}
+                          {currentBanner?.subtitle && (
+                            <motion.p
+                              initial={{ opacity: 0, y: 15 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.5, delay: 0.4 }}
+                              className={`text-sm sm:text-base text-white/90 font-sans leading-relaxed font-light max-w-lg drop-shadow-sm ${
+                                isRightAligned ? 'ml-auto text-right' : 'mr-auto text-left'
+                              }`}
+                            >
+                              {currentBanner.subtitle}
+                            </motion.p>
+                          )}
 
-                    <div className="pt-2">
-                      <Link
-                        to={currentBanner?.cta_link || '/catalog'}
-                        className="inline-flex items-center gap-2 rounded-md bg-white px-6 py-3 text-sm font-semibold text-brand-crimson hover:bg-brand-gold hover:text-white transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
-                      >
-                        <span>{currentBanner?.cta_text || 'Shop Now'}</span>
-                        <ArrowRight size={16} />
-                      </Link>
+                          <motion.div
+                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{ duration: 0.5, delay: 0.55 }}
+                            className={`pt-3 w-full flex ${isRightAligned ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <Link
+                              to={currentBanner?.cta_link || '/catalog'}
+                              className="inline-flex items-center gap-2 rounded-full bg-brand-crimson hover:bg-[#7A1525] text-white px-7 py-3 text-xs sm:text-sm font-semibold tracking-wide transition-all shadow-lg hover:shadow-xl active:scale-95 border border-white/10"
+                            >
+                              <span>{currentBanner?.cta_text || 'Explore Collection'}</span>
+                              <ArrowRight size={16} />
+                            </Link>
+                          </motion.div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
+                  </>
+                );
+              })()}
             </motion.div>
           </AnimatePresence>
         ) : (
@@ -209,14 +318,14 @@ export const HomePage: React.FC = () => {
           </div>
         )}
 
-        {/* Arrow Controls */}
+        {/* Carousel Navigation (Arrows & Indicators) */}
         {totalSlides > 1 && (
           <>
             <button
               type="button"
               onClick={prevSlide}
               aria-label="Previous slide"
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 hover:bg-black/70 text-white border border-white/20 backdrop-blur-sm transition-all"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 dark:bg-surface/80 hover:bg-white dark:hover:bg-surface text-[#2C1810] dark:text-text border border-[#E5DBCE] dark:border-border backdrop-blur-sm transition-all shadow-sm"
             >
               <ChevronLeft size={20} />
             </button>
@@ -224,13 +333,13 @@ export const HomePage: React.FC = () => {
               type="button"
               onClick={nextSlide}
               aria-label="Next slide"
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 hover:bg-black/70 text-white border border-white/20 backdrop-blur-sm transition-all"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 dark:bg-surface/80 hover:bg-white dark:hover:bg-surface text-[#2C1810] dark:text-text border border-[#E5DBCE] dark:border-border backdrop-blur-sm transition-all shadow-sm"
             >
               <ChevronRight size={20} />
             </button>
 
             {/* Dot Indicators */}
-            <div className="absolute bottom-5 inset-x-0 z-20 flex justify-center gap-2">
+            <div className="absolute bottom-6 inset-x-0 z-20 flex justify-center gap-2">
               {banners.map((_, idx) => (
                 <button
                   key={idx}
@@ -238,7 +347,7 @@ export const HomePage: React.FC = () => {
                   onClick={() => setCurrentSlide(idx)}
                   aria-label={`Go to slide ${idx + 1}`}
                   className={`h-2 rounded-full transition-all duration-300 ${
-                    currentSlide === idx ? 'w-8 bg-brand-gold' : 'w-2 bg-white/50 hover:bg-white/80'
+                    currentSlide === idx ? 'w-8 bg-[#3D4733] dark:bg-brand-gold' : 'w-2 bg-[#2C1810]/30 dark:bg-white/40'
                   }`}
                 />
               ))}
@@ -268,8 +377,8 @@ export const HomePage: React.FC = () => {
         </section>
       )}
 
-      {/* ── 3. Shop by Category Strip (Gold border reveal on hover) ─────────── */}
-      <section aria-labelledby="shop-by-category-title" className="py-16 px-4 md:px-8 max-w-7xl mx-auto w-full">
+      {/* ── 3. Shop by Category Strip (Auto-scrolls every 3s) ───────────────── */}
+      <section aria-labelledby="shop-by-category-title" className="py-16 px-4 md:px-8 max-w-7xl mx-auto w-full overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 pb-4 border-b border-border">
           <div>
             <span className="text-xs font-semibold uppercase tracking-widest text-brand-gold">
@@ -288,13 +397,16 @@ export const HomePage: React.FC = () => {
           </Link>
         </div>
 
-        {/* Category Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+        {/* Auto-scrolling Category Carousel */}
+        <div
+          ref={categoryScrollRef}
+          className="flex gap-4 overflow-x-auto pb-4 scroll-smooth scrollbar-none snap-x"
+        >
           {categories.map((category) => (
             <Link
               key={category.id}
               to={`/catalog?category=${category.slug}`}
-              className="group relative flex flex-col rounded-xl overflow-hidden bg-surface border border-border transition-all duration-300 hover:-translate-y-1 hover:border-brand-gold hover:shadow-lg"
+              className="group relative flex flex-col justify-between flex-shrink-0 w-[180px] sm:w-[220px] rounded-xl overflow-hidden bg-surface border border-border transition-all duration-300 hover:-translate-y-1 hover:border-brand-gold hover:shadow-lg snap-start"
             >
               {/* Category Image */}
               <div className="aspect-[4/5] w-full overflow-hidden bg-surface-alt">
@@ -307,7 +419,7 @@ export const HomePage: React.FC = () => {
               </div>
 
               {/* Category Card Footer */}
-              <div className="p-3 text-center">
+              <div className="p-3 text-center flex-1 flex flex-col justify-center">
                 <h3 className="text-sm font-semibold text-text group-hover:text-brand-crimson dark:group-hover:text-brand-gold transition-colors">
                   {category.name}
                 </h3>
@@ -320,8 +432,8 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── 4. Featured Products Grid (Staggered Entrance) ─────────────────── */}
-      <section aria-labelledby="featured-products-title" className="py-12 px-4 md:px-8 max-w-7xl mx-auto w-full">
+      {/* ── 4. Featured Products Carousel (Auto-scrolls every 3s) ─────────────── */}
+      <section aria-labelledby="featured-products-title" className="py-12 px-4 md:px-8 max-w-7xl mx-auto w-full overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 pb-4 border-b border-border">
           <div>
             <span className="text-xs font-semibold uppercase tracking-widest text-brand-gold">
@@ -340,37 +452,295 @@ export const HomePage: React.FC = () => {
           </Link>
         </div>
 
-        {/* Responsive Grid with 2 / 3 / 4 columns */}
+        {/* Auto-scrolling Featured Products Carousel */}
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="space-y-3">
-                <Skeleton className="aspect-[3/4] w-full rounded-lg" />
+          <div className="flex gap-4 overflow-hidden">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-3 w-[260px] flex-shrink-0">
+                <Skeleton className="aspect-[4/5] w-full rounded-lg" />
                 <Skeleton className="h-4 w-3/4 rounded" />
                 <Skeleton className="h-4 w-1/3 rounded" />
               </div>
             ))}
           </div>
         ) : (
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
+          <div
+            ref={productScrollRef}
+            className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scroll-smooth scrollbar-none snap-x"
           >
             {featuredProducts.map((product) => (
-              <motion.div key={product.id} variants={staggerItem}>
+              <div key={product.id} className="w-[240px] sm:w-[280px] flex-shrink-0 snap-start">
                 <ProductCard
                   product={product}
                   onQuickView={(p) => setQuickViewProduct(p)}
                 />
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         )}
       </section>
 
-      {/* ── 5. Quick View Modal ────────────────────────────────────────────── */}
+      {/* ── 5. Subscribe Newsletter Section (Matching Reference Design) ────── */}
+      <section
+        aria-label="Subscribe Newsletter"
+        className="w-full bg-[#F4F7F9] dark:bg-surface-alt border-y border-border py-12 lg:py-16 overflow-hidden relative my-8"
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
+          {/* Left Decorative Floating Flat-lay Image */}
+          <div className="hidden lg:block lg:w-1/4 flex-shrink-0 relative">
+            {/* Animated Ambient Aura */}
+            {!prefersReducedMotion && (
+              <motion.div
+                animate={{
+                  scale: [1, 1.08, 1],
+                  opacity: [0.25, 0.5, 0.25],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+                className="absolute -inset-2 rounded-2xl bg-gradient-to-tr from-brand-gold/30 via-[#5FB7B4]/25 to-brand-crimson/30 blur-xl z-0"
+              />
+            )}
+
+            {/* Main Floating Image Container */}
+            <motion.div
+              animate={
+                prefersReducedMotion
+                  ? {}
+                  : {
+                      y: [0, -12, 0],
+                      rotate: [0, 1.5, 0, -1.5, 0],
+                    }
+              }
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+              className="relative z-10 aspect-square w-full max-w-[260px] mx-auto overflow-hidden rounded-2xl shadow-xl border border-border/80 bg-surface group"
+            >
+              <img
+                src="/images/newsletter_ethnic_flatlay.jpg"
+                alt="Rajkanwari Luxury Accessories"
+                className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
+                loading="lazy"
+              />
+
+              {/* Shimmer Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/20 pointer-events-none" />
+            </motion.div>
+
+            {/* Floating Accessory Badge #1 */}
+            <motion.div
+              animate={
+                prefersReducedMotion
+                  ? {}
+                  : {
+                      y: [0, -8, 0],
+                      x: [0, 4, 0],
+                    }
+              }
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: 'easeInOut',
+                delay: 0.4,
+              }}
+              className="absolute -top-3 -left-3 z-20 rounded-full bg-white/95 dark:bg-surface/95 border border-brand-gold/60 px-3 py-1 text-[10px] font-bold text-brand-crimson dark:text-brand-gold shadow-lg backdrop-blur-md flex items-center gap-1.5"
+            >
+              <span className="h-2 w-2 rounded-full bg-brand-gold animate-ping" />
+              <span>Pure Tissue Silk</span>
+            </motion.div>
+
+            {/* Floating Accessory Badge #2 */}
+            <motion.div
+              animate={
+                prefersReducedMotion
+                  ? {}
+                  : {
+                      y: [0, 8, 0],
+                      x: [0, -4, 0],
+                    }
+              }
+              transition={{
+                duration: 4.5,
+                repeat: Infinity,
+                ease: 'easeInOut',
+                delay: 1,
+              }}
+              className="absolute -bottom-3 -right-3 z-20 rounded-full bg-white/95 dark:bg-surface/95 border border-[#5FB7B4]/60 px-3 py-1 text-[10px] font-bold text-[#5FB7B4] shadow-lg backdrop-blur-md flex items-center gap-1.5"
+            >
+              <Sparkles size={12} />
+              <span>Royal Accessories</span>
+            </motion.div>
+          </div>
+
+          {/* Center Newsletter Form & Information */}
+          <div className="w-full lg:w-2/4 text-center max-w-xl mx-auto space-y-5 relative z-10">
+            {/* Envelope Badge */}
+            <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-white dark:bg-surface border border-[#5FB7B4]/40 text-[#5FB7B4] shadow-sm mx-auto">
+              <Mail size={26} strokeWidth={1.5} />
+            </div>
+
+            {/* Title & Subtitle */}
+            <div className="space-y-2">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold uppercase tracking-wider text-text font-sans">
+                SUBSCRIBE NEWSLETTER
+              </h2>
+              <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-sans max-w-md mx-auto">
+                Join our private community of Rajkanwari. We'll send you curated product updates once a month.
+              </p>
+            </div>
+
+            {/* Subscription Form */}
+            {newsletterSubscribed ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-medium flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                <span>Thank you for subscribing! Welcome to the Rajkanwari community.</span>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleNewsletterSubmit} className="space-y-2 max-w-md mx-auto">
+                <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-0 rounded-md overflow-hidden border border-border bg-white dark:bg-surface shadow-sm focus-within:ring-2 focus-within:ring-[#5FB7B4]">
+                  <input
+                    type="email"
+                    value={newsletterEmail}
+                    onChange={(e) => {
+                      setNewsletterEmail(e.target.value);
+                      if (newsletterError) setNewsletterError('');
+                    }}
+                    placeholder="Enter Your Email Here..."
+                    className="w-full px-4 py-3 text-xs sm:text-sm text-text bg-transparent border-0 focus:outline-none focus:ring-0 placeholder:text-text-muted/60"
+                  />
+                  <button
+                    type="submit"
+                    className="w-full sm:w-auto flex-shrink-0 px-6 py-3 bg-[#5FB7B4] hover:bg-[#4EA5A2] text-white text-xs sm:text-sm font-semibold tracking-wider transition-colors uppercase whitespace-nowrap cursor-pointer"
+                  >
+                    Subscribe Now
+                  </button>
+                </div>
+                {newsletterError && (
+                  <p className="text-[11px] text-brand-crimson text-left px-1 font-medium">{newsletterError}</p>
+                )}
+              </form>
+            )}
+
+            {/* Social Media Links */}
+            <div className="pt-2 flex items-center justify-center gap-3">
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="h-9 w-9 rounded-full bg-white dark:bg-surface text-text-muted hover:text-[#5FB7B4] border border-border flex items-center justify-center transition-colors shadow-sm"
+              >
+                <Facebook size={16} />
+              </a>
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Twitter"
+                className="h-9 w-9 rounded-full bg-white dark:bg-surface text-text-muted hover:text-[#5FB7B4] border border-border flex items-center justify-center transition-colors shadow-sm"
+              >
+                <Twitter size={16} />
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="h-9 w-9 rounded-full bg-white dark:bg-surface text-text-muted hover:text-[#5FB7B4] border border-border flex items-center justify-center transition-colors shadow-sm"
+              >
+                <Instagram size={16} />
+              </a>
+              <a
+                href="https://whatsapp.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                className="h-9 w-9 rounded-full bg-white dark:bg-surface text-text-muted hover:text-[#5FB7B4] border border-border flex items-center justify-center transition-colors shadow-sm"
+              >
+                <MessageCircle size={16} />
+              </a>
+            </div>
+          </div>
+
+          {/* Right Decorative Floating Model Image */}
+          <div className="hidden lg:block lg:w-1/4 flex-shrink-0 relative">
+            {/* Animated Ambient Aura */}
+            {!prefersReducedMotion && (
+              <motion.div
+                animate={{
+                  scale: [1.05, 1, 1.05],
+                  opacity: [0.3, 0.5, 0.3],
+                }}
+                transition={{
+                  duration: 5.5,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+                className="absolute -inset-2 rounded-2xl bg-gradient-to-bl from-brand-crimson/25 via-brand-gold/25 to-[#5FB7B4]/25 blur-xl z-0"
+              />
+            )}
+
+            <motion.div
+              animate={
+                prefersReducedMotion
+                  ? {}
+                  : {
+                      y: [-8, 8, -8],
+                      rotate: [0, -1.5, 0, 1.5, 0],
+                    }
+              }
+              transition={{
+                duration: 5.5,
+                repeat: Infinity,
+                ease: 'easeInOut',
+                delay: 0.5,
+              }}
+              className="relative z-10 aspect-[3/4] w-full max-w-[240px] mx-auto overflow-hidden rounded-2xl shadow-xl border border-border/80 bg-surface group"
+            >
+              <img
+                src="/images/newsletter_model_portrait.jpg"
+                alt="Rajkanwari Brand Ambassador"
+                className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
+                loading="lazy"
+              />
+
+              {/* Shimmer Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-bl from-black/20 via-transparent to-white/20 pointer-events-none" />
+            </motion.div>
+
+            {/* Floating Model Badge */}
+            <motion.div
+              animate={
+                prefersReducedMotion
+                  ? {}
+                  : {
+                      y: [0, -6, 0],
+                    }
+              }
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: 'easeInOut',
+                delay: 0.8,
+              }}
+              className="absolute -top-3 -right-2 z-20 rounded-full bg-white/95 dark:bg-surface/95 border border-brand-crimson/50 px-3 py-1 text-[10px] font-bold text-brand-crimson dark:text-brand-gold shadow-lg backdrop-blur-md"
+            >
+              <span>Bridal Couture</span>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 6. Quick View Modal ────────────────────────────────────────────── */}
       <QuickViewModal
         product={quickViewProduct}
         onClose={() => setQuickViewProduct(null)}

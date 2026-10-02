@@ -58,6 +58,7 @@ export interface CategoryItem {
   image_url: string;
   display_order: number;
   product_count: number;
+  is_active?: boolean;
 }
 
 export interface BannerItem {
@@ -67,6 +68,7 @@ export interface BannerItem {
   image_url: string;
   cta_text: string;
   cta_link: string;
+  text_alignment?: 'left' | 'right';
   display_order: number;
 }
 
@@ -1021,6 +1023,7 @@ export interface AdminBannerItem {
   image_url: string;
   cta_text: string;
   cta_link: string;
+  text_alignment?: 'left' | 'right';
   display_order: number;
   starts_at?: string | null;
   ends_at?: string | null;

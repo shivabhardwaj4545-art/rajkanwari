@@ -34,12 +34,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
 
   return (
     <article
-      className="group relative flex flex-col rounded-lg border border-border bg-surface overflow-hidden transition-all duration-300 hover:shadow-md hover:border-brand-gold/50"
+      className="group relative flex flex-col h-full rounded-lg border border-border bg-surface overflow-hidden transition-all duration-300 hover:shadow-md hover:border-brand-gold/50"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* ── Image Container ──────────────────────────────────────────────── */}
-      <div className="relative aspect-[3/4] w-full overflow-hidden bg-surface-alt">
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-surface-alt flex-shrink-0">
         <Link to={`/products/${product.slug}`} className="block h-full w-full">
           {/* Primary image */}
           <ImageWithFallback
@@ -113,39 +113,45 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
       </div>
 
       {/* ── Details ──────────────────────────────────────────────────────── */}
-      <div className="flex flex-1 flex-col p-3.5 sm:p-4">
-        {/* Category & Fabric badge */}
-        <div className="mb-1 flex items-center justify-between text-[11px] text-text-muted">
-          <span className="uppercase tracking-wider font-medium">{product.category_name}</span>
-          <span className="truncate max-w-[110px]">{product.fabric}</span>
+      <div className="flex flex-1 flex-col justify-between p-3.5 sm:p-4">
+        <div>
+          {/* Category & Fabric badge */}
+          <div className="mb-1.5 flex items-center justify-between text-[11px] text-text-muted">
+            <span className="uppercase tracking-wider font-medium">{product.category_name}</span>
+            <span className="truncate max-w-[110px]">{product.fabric}</span>
+          </div>
+
+          {/* Product Name */}
+          <h3 className="line-clamp-2 text-sm font-medium leading-snug text-text transition-colors group-hover:text-brand-crimson dark:group-hover:text-brand-gold min-h-[2.5rem]">
+            <Link to={`/products/${product.slug}`}>{product.name}</Link>
+          </h3>
         </div>
 
-        {/* Product Name */}
-        <h3 className="line-clamp-2 text-sm font-medium text-text transition-colors group-hover:text-brand-crimson dark:group-hover:text-brand-gold">
-          <Link to={`/products/${product.slug}`}>{product.name}</Link>
-        </h3>
-
-        {/* Price block */}
-        <div className="mt-auto pt-3 flex items-baseline gap-2">
-          {/* Final price in crimson (gold on dark) */}
-          <span className="font-serif text-base font-semibold text-brand-crimson dark:text-brand-gold">
-            {formatPrice(product.price.final_price_paise)}
-          </span>
-
-          {/* Struck-through MRP */}
-          {hasDiscount && (
-            <span className="text-xs text-text-muted line-through">
-              {formatPrice(product.price.mrp_paise)}
+        {/* Price block & offer banner */}
+        <div className="mt-3 pt-2 border-t border-border/40 flex flex-col justify-end">
+          <div className="flex items-baseline gap-2 min-h-[1.5rem]">
+            {/* Final price in crimson (gold on dark) */}
+            <span className="font-sans text-base font-bold text-brand-crimson dark:text-brand-gold tracking-tight">
+              {formatPrice(product.price.final_price_paise)}
             </span>
-          )}
-        </div>
 
-        {/* Applied active promotional offer notice */}
-        {product.price.applied_offer && (
-          <p className="mt-1 text-[10px] font-medium text-brand-gold truncate">
-            ✨ {product.price.applied_offer.name}
-          </p>
-        )}
+            {/* Struck-through MRP */}
+            {hasDiscount && (
+              <span className="font-sans text-xs text-text-muted line-through font-medium">
+                {formatPrice(product.price.mrp_paise)}
+              </span>
+            )}
+          </div>
+
+          {/* Applied active promotional offer notice */}
+          <div className="min-h-[1.25rem] mt-0.5">
+            {product.price.applied_offer ? (
+              <p className="text-[10px] font-medium text-brand-gold truncate">
+                ✨ {product.price.applied_offer.name}
+              </p>
+            ) : null}
+          </div>
+        </div>
       </div>
     </article>
   );

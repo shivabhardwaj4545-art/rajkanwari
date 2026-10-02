@@ -196,19 +196,20 @@ CREATE TABLE IF NOT EXISTS offer_redemptions (
 );
 
 CREATE TABLE IF NOT EXISTS banners (
-  id            TEXT PRIMARY KEY,
-  title         TEXT NOT NULL,
-  subtitle      TEXT,
-  image_url     TEXT NOT NULL,
-  cta_text      TEXT NOT NULL DEFAULT 'Shop Now',
-  cta_link      TEXT NOT NULL DEFAULT '/catalog',
-  display_order INTEGER NOT NULL DEFAULT 0,
-  starts_at     TIMESTAMPTZ,
-  ends_at       TIMESTAMPTZ,
-  is_active     INTEGER NOT NULL DEFAULT 1,
-  created_by    TEXT REFERENCES users(id) ON DELETE SET NULL,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+  id             TEXT PRIMARY KEY,
+  title          TEXT NOT NULL,
+  subtitle       TEXT,
+  image_url      TEXT NOT NULL,
+  cta_text       TEXT NOT NULL DEFAULT 'Shop Now',
+  cta_link       TEXT NOT NULL DEFAULT '/catalog',
+  text_alignment TEXT DEFAULT 'left',
+  display_order  INTEGER NOT NULL DEFAULT 0,
+  starts_at      TIMESTAMPTZ,
+  ends_at        TIMESTAMPTZ,
+  is_active      INTEGER NOT NULL DEFAULT 1,
+  created_by     TEXT REFERENCES users(id) ON DELETE SET NULL,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS carts (
@@ -592,3 +593,16 @@ export const db: DbClient = {
 
 export const getDb = (): DbClient => db;
 export default db;
+
+// Auto-migrate banners table for text_alignment column on PostgreSQL and SQLite
+(async () => {
+  try {
+    if (isUsingSqlite) {
+      const sDb = getSqliteInstance();
+      sDb.exec("ALTER TABLE banners ADD COLUMN text_alignment TEXT DEFAULT 'left'");
+    } else {
+      await pool.query("ALTER TABLE banners ADD COLUMN IF NOT EXISTS text_alignment TEXT DEFAULT 'left'");
+    }
+    console.log('✅ Banners table column text_alignment verified.');
+  } catch (_e) {}
+})();

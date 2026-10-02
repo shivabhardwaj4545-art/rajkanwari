@@ -7,23 +7,6 @@ interface BrandLogoProps {
   showSubText?: boolean;
 }
 
-/**
- * Floral Accent SVG Icon for letters
- */
-const FlowerAccent: React.FC<{ className?: string }> = ({ className = 'w-2 h-2' }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={`inline-block ${className}`} aria-hidden="true">
-    <circle cx="12" cy="12" r="3" />
-    <circle cx="12" cy="5" r="2.5" />
-    <circle cx="19" cy="12" r="2.5" />
-    <circle cx="12" cy="19" r="2.5" />
-    <circle cx="5" cy="12" r="2.5" />
-    <circle cx="17" cy="7" r="2" />
-    <circle cx="17" cy="17" r="2" />
-    <circle cx="7" cy="17" r="2" />
-    <circle cx="7" cy="7" r="2" />
-  </svg>
-);
-
 export const BrandLogo: React.FC<BrandLogoProps> = ({
   variant = 'full',
   size = 'md',
@@ -52,12 +35,6 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     sm: 'text-[6px] sm:text-[8px] tracking-wider',
     md: 'text-[7px] sm:text-[9px] tracking-widest',
     lg: 'text-[9px] sm:text-[11px] tracking-widest',
-  };
-
-  const flowerSizes = {
-    sm: 'w-1.5 h-1.5 -mt-1',
-    md: 'w-2 h-2 -mt-1.5',
-    lg: 'w-3 h-3 -mt-2.5',
   };
 
   return (
@@ -94,70 +71,21 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
         </svg>
       </div>
 
-      {/* ── Center Boxed Title with Flower Accents ────────────────────────── */}
-      <div className="flex flex-col items-center">
-        <div className="relative border-2 border-current rounded-xl px-2.5 py-0.5 sm:px-3.5 sm:py-1 flex flex-col items-center justify-center bg-transparent">
-          {/* Brand Title with Ornate Floral Accents */}
-          <div className="flex items-center font-serif font-bold tracking-wide leading-none text-current">
-            <span className={titleSizes[size]} style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-              R
-            </span>
-            <span className="relative inline-flex items-center">
-              <span className={titleSizes[size]} style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-                a
-              </span>
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-current opacity-80">
-                <FlowerAccent className={flowerSizes[size]} />
-              </span>
-            </span>
-            <span className={titleSizes[size]} style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-              j
-            </span>
-            <span className={titleSizes[size]} style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-              k
-            </span>
-            <span className="relative inline-flex items-center">
-              <span className={titleSizes[size]} style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-                a
-              </span>
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-current opacity-80">
-                <FlowerAccent className={flowerSizes[size]} />
-              </span>
-            </span>
-            <span className={titleSizes[size]} style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-              n
-            </span>
-            <span className={titleSizes[size]} style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-              w
-            </span>
-            <span className="relative inline-flex items-center">
-              <span className={titleSizes[size]} style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-                a
-              </span>
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-current opacity-80">
-                <FlowerAccent className={flowerSizes[size]} />
-              </span>
-            </span>
-            <span className={titleSizes[size]} style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-              r
-            </span>
-            <span className="relative inline-flex items-center">
-              <span className={titleSizes[size]} style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-                i
-              </span>
-              <span className="absolute -top-1 left-1/2 -translate-x-1/2 text-current">
-                <FlowerAccent className={flowerSizes[size]} />
-              </span>
-            </span>
-          </div>
-
-          {/* Sub-tagline */}
+      {/* ── Center Brand Title & Sub-tagline ────────────────────────── */}
+      <div className="flex flex-col items-start justify-center">
+        <span
+          className={`font-serif font-bold tracking-wide leading-none text-current ${titleSizes[size]}`}
+          style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+        >
+          Rajkanwari
+        </span>
+        {showSubText && (
           <span
-            className={`font-semibold uppercase text-current border-t border-current/80 pt-0.5 mt-0.5 w-full text-center leading-tight ${taglineSizes[size]}`}
+            className={`font-semibold uppercase tracking-[0.2em] text-brand-gold dark:text-brand-gold mt-0.5 leading-tight ${taglineSizes[size]}`}
           >
             House of Ethnic Wear
           </span>
-        </div>
+        )}
       </div>
 
       {/* ── Right Sub-brand Tag (A BRAND OF DHANANYA ATTIRE) ──────────────── */}

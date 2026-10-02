@@ -342,7 +342,7 @@ export const AdminOrdersPage: React.FC = () => {
                               key={idx}
                               src={img}
                               alt="thumb"
-                              className="inline-block h-6 w-6 rounded-full ring-2 ring-[var(--surface)] object-cover bg-surface-alt"
+                              className="inline-block h-6 w-6 rounded-full ring-2 ring-[var(--surface)] object-cover object-top bg-surface-alt"
                             />
                           ))}
                         </div>
@@ -456,7 +456,7 @@ export const AdminOrdersPage: React.FC = () => {
                           key={idx}
                           src={img}
                           alt="thumb"
-                          className="inline-block h-6 w-6 rounded-full ring-1 ring-[var(--surface)] object-cover bg-surface-alt"
+                          className="inline-block h-6 w-6 rounded-full ring-1 ring-[var(--surface)] object-cover object-top bg-surface-alt"
                         />
                       ))}
                     </div>

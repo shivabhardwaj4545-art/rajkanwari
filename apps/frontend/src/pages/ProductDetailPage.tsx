@@ -208,14 +208,14 @@ export const ProductDetailPage: React.FC = () => {
             <div className="mt-4 pb-5 border-b border-border">
               <div className="flex items-baseline gap-3">
                 {/* Final price in crimson (gold on dark) */}
-                <span className="font-serif text-3xl font-bold text-brand-crimson dark:text-brand-gold">
+                <span className="font-sans text-3xl font-bold text-brand-crimson dark:text-brand-gold tracking-tight">
                   {formatPrice(product.price.final_price_paise)}
                 </span>
 
                 {/* Struck-through MRP */}
                 {product.price.effective_discount_percent > 0 && (
                   <>
-                    <span className="text-base text-text-muted line-through font-normal">
+                    <span className="font-sans text-base text-text-muted line-through font-normal">
                       {formatPrice(product.price.mrp_paise)}
                     </span>
                     <span className="inline-flex items-center rounded-sm bg-brand-crimson/15 px-2 py-0.5 text-xs font-bold text-brand-crimson dark:text-brand-gold">
@@ -580,9 +580,9 @@ export const ProductDetailPage: React.FC = () => {
                 <Link
                   key={rp.id}
                   to={`/products/${rp.slug}`}
-                  className="group flex flex-col rounded-lg border border-border bg-surface overflow-hidden hover:border-brand-gold transition-all duration-300 hover:shadow-md"
+                  className="group flex flex-col h-full rounded-lg border border-border bg-surface overflow-hidden hover:border-brand-gold transition-all duration-300 hover:shadow-md"
                 >
-                  <div className="aspect-[3/4] w-full overflow-hidden bg-surface-alt">
+                  <div className="aspect-[3/4] w-full overflow-hidden bg-surface-alt flex-shrink-0">
                     <img
                       src={rp.images[0] || '/placeholder.jpg'}
                       alt={rp.name}
@@ -590,19 +590,21 @@ export const ProductDetailPage: React.FC = () => {
                       className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
-                  <div className="p-3">
-                    <span className="text-[11px] font-medium text-brand-gold uppercase tracking-wider">
-                      {rp.category_name}
-                    </span>
-                    <h3 className="line-clamp-1 text-sm font-medium text-text mt-0.5 group-hover:text-brand-crimson dark:group-hover:text-brand-gold transition-colors">
-                      {rp.name}
-                    </h3>
-                    <div className="mt-2 flex items-baseline gap-2">
-                      <span className="font-serif text-sm font-semibold text-brand-crimson dark:text-brand-gold">
+                  <div className="p-3.5 flex flex-1 flex-col justify-between">
+                    <div>
+                      <span className="text-[11px] font-medium text-brand-gold uppercase tracking-wider">
+                        {rp.category_name}
+                      </span>
+                      <h3 className="line-clamp-2 text-sm font-medium leading-snug text-text mt-0.5 group-hover:text-brand-crimson dark:group-hover:text-brand-gold transition-colors min-h-[2.5rem]">
+                        {rp.name}
+                      </h3>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-border/40 flex items-baseline gap-2 min-h-[1.5rem]">
+                      <span className="font-sans text-sm font-bold text-brand-crimson dark:text-brand-gold tracking-tight">
                         {formatPrice(rp.price.final_price_paise)}
                       </span>
                       {rp.price.effective_discount_percent > 0 && (
-                        <span className="text-[11px] text-text-muted line-through">
+                        <span className="font-sans text-[11px] text-text-muted line-through font-medium">
                           {formatPrice(rp.price.mrp_paise)}
                         </span>
                       )}
@@ -621,7 +623,7 @@ export const ProductDetailPage: React.FC = () => {
           <div className="flex-1 min-w-0">
             <h4 className="text-xs font-semibold text-text truncate">{product.name}</h4>
             <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="font-serif text-sm font-bold text-brand-crimson dark:text-brand-gold">
+              <span className="font-sans text-sm font-bold text-brand-crimson dark:text-brand-gold tracking-tight">
                 {formatPrice(product.price.final_price_paise)}
               </span>
               {product.price.effective_discount_percent > 0 && (

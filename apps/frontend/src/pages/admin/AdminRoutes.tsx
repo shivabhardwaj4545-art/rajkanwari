@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { AdminBannersPage } from './AdminBannersPage';
+import { AdminCategoriesPage } from './AdminCategoriesPage';
 import { AdminCustomerDetailPage } from './AdminCustomerDetailPage';
 import { AdminCustomersPage } from './AdminCustomersPage';
 import { AdminDashboardPage } from './AdminDashboardPage';
@@ -26,6 +27,7 @@ export const AdminRoutes: React.FC = () => {
         <Route path="products" element={<AdminProductsPage />} />
         <Route path="products/new" element={<ProductEditorPage />} />
         <Route path="products/:id" element={<ProductEditorPage />} />
+        <Route path="categories" element={<AdminCategoriesPage />} />
         <Route path="inventory" element={<AdminInventoryPage />} />
         <Route path="offers" element={<AdminOffersPage />} />
         <Route path="banners" element={<AdminBannersPage />} />

@@ -1,4 +1,4 @@
-import { Instagram, Mail, MapPin, Phone } from 'lucide-react';
+import { Facebook, Instagram, Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { BrandLogo } from '@/components/ui/BrandLogo';
@@ -35,29 +35,31 @@ export const Footer: React.FC = () => (
             <BrandLogo variant="full" size="lg" />
           </Link>
           <p className="text-sm text-text-muted max-w-md leading-relaxed">
-            Rajkanwari — House of Ethnic Wear. A Brand of Dhananya Attire. Curated Indian &amp;
-            fusion wear for men and women. Handcrafted with love, shipped with care.
+            Rajkanwari — House of Ethnic Wear. A Brand of Dhananya Attire based in Jodhpur, Rajasthan. Premier destination for designer bridal lehengas, traditional Rajputi poshaks, Anarkalis, Crop top-skirts, Indo-Western fusion wear &amp; pre-draped sarees. Featuring our exclusive Buy Back concept.
           </p>
 
           {/* ── Contact ─────────────────────────────────────────────────────── */}
           <address className="not-italic flex flex-col gap-2 text-sm text-text-muted">
+            <span className="flex items-start gap-2">
+              <MapPin size={15} className="text-brand-gold shrink-0 mt-0.5" aria-hidden />
+              <span>269, 2nd C Road, Near Nikky Tiles, Sardarpura, Jodhpur, Rajasthan - 342001</span>
+            </span>
             <span className="flex items-center gap-2">
-              <MapPin size={13} className="text-brand-gold shrink-0" aria-hidden />
-              123 Textile Lane, Jaipur, Rajasthan 302001
+              <Phone size={14} className="text-brand-gold shrink-0" aria-hidden />
+              <a href="tel:+917568572265" className="hover:text-text transition-colors">
+                +91 75685 72265
+              </a>
+              <span>/</span>
+              <a href="tel:+918619474459" className="hover:text-text transition-colors">
+                +91 86194 74459
+              </a>
             </span>
             <a
-              href="tel:+919876543210"
+              href="mailto:hello@rajkanwari.com"
               className="flex items-center gap-2 hover:text-text transition-colors"
             >
-              <Phone size={13} className="text-brand-gold shrink-0" aria-hidden />
-              +91 98765 43210
-            </a>
-            <a
-              href="mailto:hello@rajkanwari.in"
-              className="flex items-center gap-2 hover:text-text transition-colors"
-            >
-              <Mail size={13} className="text-brand-gold shrink-0" aria-hidden />
-              hello@rajkanwari.in
+              <Mail size={14} className="text-brand-gold shrink-0" aria-hidden />
+              hello@rajkanwari.com
             </a>
           </address>
         </div>
@@ -87,19 +89,51 @@ export const Footer: React.FC = () => (
       {/* ── Bottom row ─────────────────────────────────────────────────────── */}
       <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-border pt-6">
         <p className="text-xs text-text-muted">
-          © {new Date().getFullYear()} Rajkanwari — House of Ethnic Wear. A Brand of Dhananya Attire. All rights reserved. All prices in INR.
+          © {new Date().getFullYear()} Rajkanwari — House of Ethnic Wear. Flagship Boutique: Jodhpur, Rajasthan. All rights reserved.
         </p>
 
-        {/* Social */}
-        <div className="flex items-center gap-3" role="group" aria-label="Social links">
+        {/* Social Links */}
+        <div className="flex items-center gap-2.5" role="group" aria-label="Social media links">
           <a
-            href="https://instagram.com/rajkanwari"
+            href="https://www.instagram.com/rajkanwari_ethnic_wear/?hl=en"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Follow Rajkanwari on Instagram"
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border-border text-text-muted hover:text-text hover:border-brand-gold transition-colors"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border border-[#E8D4A0] dark:border-border text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold transition-all hover:scale-105"
           >
-            <Instagram size={16} aria-hidden />
+            <Instagram size={17} aria-hidden />
+          </a>
+          <a
+            href="https://www.facebook.com/p/Rajkanwari-House-of-Ethnic-Wear-100077052254113/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Follow Rajkanwari on Facebook"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border border-[#E8D4A0] dark:border-border text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold transition-all hover:scale-105"
+          >
+            <Facebook size={17} aria-hidden />
+          </a>
+          <a
+            href="https://wa.me/917568572265?text=Hello%20Rajkanwari,%20I%20would%20like%20to%20inquire%20about%20your%20collection"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Chat with Rajkanwari on WhatsApp"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border border-[#E8D4A0] dark:border-border text-text-muted hover:text-[#25D366] hover:border-[#25D366] transition-all hover:scale-105"
+          >
+            <MessageCircle size={17} aria-hidden />
+          </a>
+          <a
+            href="tel:+917568572265"
+            aria-label="Call Rajkanwari Flagship Boutique"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border border-[#E8D4A0] dark:border-border text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold transition-all hover:scale-105"
+          >
+            <Phone size={16} aria-hidden />
+          </a>
+          <a
+            href="mailto:hello@rajkanwari.com"
+            aria-label="Email Rajkanwari"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border border-[#E8D4A0] dark:border-border text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold transition-all hover:scale-105"
+          >
+            <Mail size={16} aria-hidden />
           </a>
         </div>
       </div>

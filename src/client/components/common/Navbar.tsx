@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, User as UserIcon, Menu, X, Sun, Moon, Monitor, Shield } from 'lucide-react';
+import { ShoppingBag, User as UserIcon, Heart, Search, Menu, X, Sun, Moon, Shield } from 'lucide-react';
 import { useAuthStore } from '../../hooks/useAuthStore.ts';
 import { useCartStore } from '../../hooks/useCartStore.ts';
 import { useTheme } from '../../hooks/useTheme.ts';
@@ -16,9 +16,9 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 w-full bg-surface/95 backdrop-blur-md border-b border-border transition-colors duration-200">
-      {/* Slow Gold Shimmer Sweep Festival Header Banner */}
-      <div className="animate-gold-shimmer text-white text-xs py-8 px-16 text-center font-medium tracking-wide uppercase shadow-sm">
-        ✨ Heritage Festive Collection '26 — Free Express Shipping Across India ✨
+      {/* Gold Shimmer Festival Banner */}
+      <div className="bg-primary text-white text-[11px] py-6 px-16 text-center font-medium tracking-widest uppercase shadow-sm">
+        ✨ HERITAGE FESTIVE COLLECTION — FREE SHIPPING ON ORDERS ABOVE ₹2500 ✨
       </div>
 
       <div className="max-w-7xl mx-auto px-16 sm:px-24 flex items-center justify-between h-72">
@@ -31,86 +31,70 @@ export const Navbar: React.FC = () => {
           {mobileMenuOpen ? <X className="w-24 h-24" /> : <Menu className="w-24 h-24" />}
         </button>
 
-        {/* Brand Logo */}
-        <Link to="/" className="flex flex-col items-center md:items-start group">
-          <span className="font-serif text-24 sm:text-28 font-bold tracking-wider text-brand-crimson dark:text-brand-gold uppercase transition-colors">
-            SHIKKIS
-          </span>
-          <span className="text-[10px] tracking-[0.25em] text-text-muted uppercase font-sans -mt-4">
-            Curated Style
+        {/* Brand Logo with Lotus Flourish matching Screenshot 1 */}
+        <Link to="/" className="flex items-center gap-8 group">
+          <svg className="w-28 h-28 text-brand-primary dark:text-brand-gold fill-current" viewBox="0 0 24 24">
+            <path d="M12 2C10.5 5 8 8 4 9c0 0 4 2 6 7 2-5 6-7 6-7-4-1-6.5-4-4-7zm0 20c-3 0-6-1.5-8-4 4 0 6.5-2 8-5 1.5 3 4 5 8 5-2 2.5-5 4-8 4z" />
+          </svg>
+          <span className="font-serif text-22 sm:text-26 font-bold tracking-widest text-text uppercase">
+            RAJKUNWARI
           </span>
         </Link>
 
-        {/* Desktop Horizontal Navigation (>= 768px) */}
-        <nav className="hidden md:flex items-center gap-32 font-sans text-sm font-medium text-text">
-          <Link to="/catalog" className="hover:text-brand-gold transition-colors">
-            All Collections
-          </Link>
-          <Link to="/catalog?gender=women" className="hover:text-brand-gold transition-colors">
-            Women Couture
-          </Link>
-          <Link to="/catalog?gender=men" className="hover:text-brand-gold transition-colors">
-            Men Heritage
-          </Link>
+        {/* Desktop Horizontal Navigation (>= 768px) matching Screenshot 1 */}
+        <nav className="hidden lg:flex items-center gap-24 font-sans text-xs font-semibold text-text uppercase tracking-wider">
           <Link to="/catalog?sort=newest" className="hover:text-brand-gold transition-colors">
-            New Arrivals
+            NEW ARRIVALS
+          </Link>
+          <Link to="/catalog?category=kurtas" className="hover:text-brand-gold transition-colors">
+            KURTAS & TOPS
+          </Link>
+          <Link to="/catalog?category=dresses" className="hover:text-brand-gold transition-colors">
+            DRESSES
+          </Link>
+          <Link to="/catalog?category=bottoms" className="hover:text-brand-gold transition-colors">
+            BOTTOMS
+          </Link>
+          <Link to="/catalog?category=jewellery" className="hover:text-brand-gold transition-colors">
+            JEWELLERY
+          </Link>
+          <Link to="/catalog?category=handbags" className="hover:text-brand-gold transition-colors">
+            HANDBAGS
+          </Link>
+          <Link to="/catalog" className="hover:text-brand-gold transition-colors">
+            COLLECTIONS
           </Link>
           {user?.role === 'owner' && (
-            <Link to="/admin" className="flex items-center gap-4 text-brand-crimson dark:text-brand-gold font-semibold hover:underline">
-              <Shield className="w-16 h-16" /> Owner Portal
+            <Link to="/admin" className="flex items-center gap-4 text-brand-crimson dark:text-brand-gold font-bold hover:underline">
+              <Shield className="w-14 h-14" /> OWNER
             </Link>
           )}
         </nav>
 
-        {/* Right Actions: Theme Toggle, User Profile, Shopping Bag */}
-        <div className="flex items-center gap-12 sm:gap-16">
-          {/* Theme Dropdown / Toggle */}
-          <div className="relative group">
-            <button
-              className="p-8 text-text hover:text-brand-gold rounded-sm min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
-              aria-label="Select Theme"
-            >
-              {theme === 'light' ? <Sun className="w-20 h-20" /> : theme === 'dark' ? <Moon className="w-20 h-20" /> : <Monitor className="w-20 h-20" />}
-            </button>
-            <div className="absolute right-0 top-full mt-4 hidden group-hover:block bg-surface border border-border rounded-md shadow-lg py-4 w-36 z-50">
-              <button
-                onClick={() => setTheme('light')}
-                className={`w-full px-12 py-8 text-left text-xs font-medium flex items-center gap-8 min-h-[44px] hover:bg-surface-alt ${theme === 'light' ? 'text-brand-gold' : 'text-text'}`}
-              >
-                <Sun className="w-14 h-14" /> Light
-              </button>
-              <button
-                onClick={() => setTheme('dark')}
-                className={`w-full px-12 py-8 text-left text-xs font-medium flex items-center gap-8 min-h-[44px] hover:bg-surface-alt ${theme === 'dark' ? 'text-brand-gold' : 'text-text'}`}
-              >
-                <Moon className="w-14 h-14" /> Dark
-              </button>
-              <button
-                onClick={() => setTheme('system')}
-                className={`w-full px-12 py-8 text-left text-xs font-medium flex items-center gap-8 min-h-[44px] hover:bg-surface-alt ${theme === 'system' ? 'text-brand-gold' : 'text-text'}`}
-              >
-                <Monitor className="w-14 h-14" /> System
-              </button>
-            </div>
-          </div>
+        {/* Right Action Icons matching Screenshot 1 */}
+        <div className="flex items-center gap-8 sm:gap-12 text-text">
+          {/* Search Icon */}
+          <Link
+            to="/catalog"
+            className="p-8 hover:text-brand-gold rounded-sm min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+            aria-label="Search Catalog"
+          >
+            <Search className="w-20 h-20" />
+          </Link>
 
           {/* User Account / Auth */}
           {user ? (
             <div className="relative group">
               <button
-                className="flex items-center gap-8 p-8 text-text hover:text-brand-gold rounded-sm min-h-[44px] text-xs font-medium"
+                className="flex items-center gap-6 p-8 hover:text-brand-gold rounded-sm min-h-[44px] text-xs font-medium"
                 aria-label="User profile menu"
               >
                 <UserIcon className="w-20 h-20" />
-                <span className="hidden sm:inline font-semibold">{user.fullName.split(' ')[0]}</span>
               </button>
               <div className="absolute right-0 top-full mt-4 hidden group-hover:block bg-surface border border-border rounded-md shadow-lg py-8 w-48 z-50">
                 <div className="px-16 py-8 border-b border-border text-xs">
                   <p className="font-semibold text-text">{user.fullName}</p>
                   <p className="text-text-muted truncate">{user.email}</p>
-                  <span className="inline-block mt-4 text-[10px] uppercase font-bold text-brand-gold bg-brand-gold/10 px-6 py-2 rounded-sm">
-                    Role: {user.role}
-                  </span>
                 </div>
                 {user.role === 'owner' && (
                   <Link to="/admin" className="block px-16 py-10 text-xs font-semibold text-brand-crimson dark:text-brand-gold hover:bg-surface-alt min-h-[44px]">
@@ -134,22 +118,32 @@ export const Navbar: React.FC = () => {
           ) : (
             <Link
               to="/auth"
-              className="p-8 text-text hover:text-brand-gold min-h-[44px] min-w-[44px] flex items-center justify-center text-xs font-semibold"
+              className="p-8 hover:text-brand-gold min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Sign In"
             >
-              Sign In
+              <UserIcon className="w-20 h-20" />
             </Link>
           )}
 
-          {/* Shopping Bag Drawer Button with Bouncing Scale Animation */}
+          {/* Wishlist Heart Icon */}
+          <Link
+            to="/catalog"
+            className="p-8 hover:text-brand-gold rounded-sm min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+            aria-label="Wishlist"
+          >
+            <Heart className="w-20 h-20" />
+          </Link>
+
+          {/* Shopping Bag Drawer Button */}
           <button
             onClick={() => setDrawerOpen(true)}
-            className="relative p-8 text-text hover:text-brand-gold min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="relative p-8 hover:text-brand-gold min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Open shopping bag"
           >
-            <ShoppingBag className="w-24 h-24" />
+            <ShoppingBag className="w-20 h-20" />
             {cartCount > 0 && (
               <span
-                className={`absolute top-4 right-4 bg-brand-crimson text-white text-[10px] font-bold w-20 h-20 rounded-full flex items-center justify-center transition-transform duration-300 ${
+                className={`absolute top-4 right-4 bg-brand-crimson text-white text-[10px] font-bold w-18 h-18 rounded-full flex items-center justify-center transition-transform duration-300 ${
                   isBouncing ? 'scale-125' : 'scale-100'
                 }`}
               >
@@ -157,42 +151,42 @@ export const Navbar: React.FC = () => {
               </span>
             )}
           </button>
+
+          {/* Theme Selector Icon */}
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="p-8 hover:text-brand-gold rounded-sm min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+            aria-label="Toggle Theme"
+          >
+            {theme === 'dark' ? <Sun className="w-18 h-18" /> : <Moon className="w-18 h-18" />}
+          </button>
         </div>
       </div>
 
-      {/* Mobile Slide-down Menu (< 768px) */}
+      {/* Mobile Slide-down Menu (< 1024px) */}
       {mobileMenuOpen && (
-        <nav className="md:hidden border-t border-border bg-surface px-16 py-16 flex flex-col gap-12 text-sm font-medium">
-          <Link
-            to="/catalog"
-            onClick={() => setMobileMenuOpen(false)}
-            className="py-10 text-text hover:text-brand-gold min-h-[44px] flex items-center"
-          >
-            All Collections
+        <nav className="lg:hidden border-t border-border bg-surface px-16 py-16 flex flex-col gap-8 text-xs font-semibold uppercase tracking-wider">
+          <Link to="/catalog?sort=newest" onClick={() => setMobileMenuOpen(false)} className="py-8 text-text hover:text-brand-gold flex items-center min-h-[44px]">
+            NEW ARRIVALS
           </Link>
-          <Link
-            to="/catalog?gender=women"
-            onClick={() => setMobileMenuOpen(false)}
-            className="py-10 text-text hover:text-brand-gold min-h-[44px] flex items-center"
-          >
-            Women Couture
+          <Link to="/catalog?category=kurtas" onClick={() => setMobileMenuOpen(false)} className="py-8 text-text hover:text-brand-gold flex items-center min-h-[44px]">
+            KURTAS & TOPS
           </Link>
-          <Link
-            to="/catalog?gender=men"
-            onClick={() => setMobileMenuOpen(false)}
-            className="py-10 text-text hover:text-brand-gold min-h-[44px] flex items-center"
-          >
-            Men Heritage
+          <Link to="/catalog?category=dresses" onClick={() => setMobileMenuOpen(false)} className="py-8 text-text hover:text-brand-gold flex items-center min-h-[44px]">
+            DRESSES
           </Link>
-          {user?.role === 'owner' && (
-            <Link
-              to="/admin"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-10 text-brand-crimson dark:text-brand-gold font-bold min-h-[44px] flex items-center gap-8"
-            >
-              <Shield className="w-18 h-18" /> Owner Dashboard
-            </Link>
-          )}
+          <Link to="/catalog?category=bottoms" onClick={() => setMobileMenuOpen(false)} className="py-8 text-text hover:text-brand-gold flex items-center min-h-[44px]">
+            BOTTOMS
+          </Link>
+          <Link to="/catalog?category=jewellery" onClick={() => setMobileMenuOpen(false)} className="py-8 text-text hover:text-brand-gold flex items-center min-h-[44px]">
+            JEWELLERY
+          </Link>
+          <Link to="/catalog?category=handbags" onClick={() => setMobileMenuOpen(false)} className="py-8 text-text hover:text-brand-gold flex items-center min-h-[44px]">
+            HANDBAGS
+          </Link>
+          <Link to="/catalog" onClick={() => setMobileMenuOpen(false)} className="py-8 text-text hover:text-brand-gold flex items-center min-h-[44px]">
+            COLLECTIONS
+          </Link>
         </nav>
       )}
     </header>

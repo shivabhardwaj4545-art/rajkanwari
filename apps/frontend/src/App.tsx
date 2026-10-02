@@ -3,7 +3,7 @@ import React from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { AppLayout } from '@/components/layout/AppLayout';
-import { fadeIn, useMotionSafe } from '@/lib/motion';
+import { pageTransition, useMotionSafe } from '@/lib/motion';
 import {
   AuthPage,
   CatalogPage,
@@ -20,9 +20,9 @@ import {
 const AdminRoutes = React.lazy(() => import('@/pages/admin/AdminRoutes'));
 
 const PageTransition: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const variants = useMotionSafe(fadeIn);
+  const variants = useMotionSafe(pageTransition);
   return (
-    <motion.div variants={variants} initial="hidden" animate="visible" exit="exit">
+    <motion.div variants={variants} initial="hidden" animate="visible" exit="exit" className="w-full flex-1 flex flex-col">
       {children}
     </motion.div>
   );

@@ -9,6 +9,12 @@ export const fadeIn: Variants = {
   exit: { opacity: 0, transition: { duration: 0.15, ease: 'easeIn' } },
 };
 
+export const pageTransition: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] } },
+  exit: { opacity: 0, y: -4, transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] } },
+};
+
 export const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 16 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } },

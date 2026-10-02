@@ -1,28 +1,35 @@
 :root {
-  /* Brand (Identical in both themes) */
-  --brand-crimson: #9B1B30;
-  --brand-gold: #D4AF37;
+  /* Brand Tokens */
+  --brand-crimson: #8E2731;
+  --brand-gold: #B89A5A;
+  --brand-primary: #4F5437;
+  --brand-accent: #B89A5A;
 
   /* Semantic */
   --success: #2D6A4F;
   --warning: #F4A261;
-  --danger: #E76F51;
+  --danger: #8E2731;
 
   /* Default Light Theme */
-  --bg: #FEFBF8;
-  --surface: #FFFFFF;
-  --surface-alt: #F5E6D3;
-  --text: #2C1810;
-  --text-muted: #7A6A5F;
-  --border: #E8D4A0;
+  --bg: #F7F2E8;
+  --surface: #FBF8F0;
+  --surface-alt: #EFE8D8;
+  --text: #2D2A24;
+  --text-muted: #756D60;
+  --border: #D8C9A9;
 }
 
 [data-theme="dark"] {
   /* Dark Theme */
-  --bg: #1A0F0A;
-  --surface: #241611;
-  --surface-alt: #2C1810;
-  --text: #F5E6D3;
-  --text-muted: #A8998C;
-  --border: #4A2F25;
+  --bg: #1A1813;
+  --surface: #24211B;
+  --surface-alt: #2D2A24;
+  --text: #F7F2E8;
+  --text-muted: #D8C9A9;
+  --border: #4A4436;
+  --brand-crimson: #E76F51;
+  --brand-gold: #D4AF37;
+  --brand-primary: #6B724D;
+  --brand-accent: #D4AF37;
 }
+

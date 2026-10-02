@@ -108,7 +108,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
                         activeImgIndex === idx ? 'border-brand-gold' : 'border-transparent opacity-70'
                       }`}
                     >
-                      <img src={img} alt="thumbnail" className="h-full w-full object-cover" />
+                      <img src={img} alt="thumbnail" className="h-full w-full object-cover object-top" />
                     </button>
                   ))}
                 </div>
@@ -128,12 +128,12 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
 
                 {/* Price block */}
                 <div className="mt-3 flex items-baseline gap-3">
-                  <span className="font-serif text-2xl font-bold text-brand-crimson dark:text-brand-gold">
+                  <span className="font-sans text-2xl font-bold text-brand-crimson dark:text-brand-gold tracking-tight">
                     {formatPrice(product.price.final_price_paise)}
                   </span>
                   {product.price.effective_discount_percent > 0 && (
                     <>
-                      <span className="text-sm text-text-muted line-through">
+                      <span className="font-sans text-sm text-text-muted line-through font-medium">
                         {formatPrice(product.price.mrp_paise)}
                       </span>
                       <span className="rounded bg-brand-crimson/15 text-brand-crimson dark:text-brand-gold text-xs font-semibold px-2 py-0.5">

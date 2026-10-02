@@ -5,6 +5,7 @@ import { CartLiveRegion } from '@/components/cart/CartLiveRegion';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { PageHeaderSkeleton } from '@/components/ui/Skeleton';
 import { ToastContainer } from '@/components/ui/Toast';
+import { WhatsAppWidget } from '@/components/ui/WhatsAppWidget';
 import { useAuthStore } from '@/stores/auth.store';
 import { useCartStore } from '@/stores/cart.store';
 import { Footer } from './Footer';
@@ -45,6 +46,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <CartLiveRegion />
       <ToastContainer />
       <CartDrawer />
+      <WhatsAppWidget />
       <Header />
 
       <main id="main-content" className="flex-1" tabIndex={-1}>

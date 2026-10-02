@@ -1149,6 +1149,7 @@ adminRouter.post('/banners', async (req, res, next) => {
       image_url,
       cta_text = 'Shop Collection',
       cta_link = '/catalog',
+      text_alignment = 'left',
       starts_at,
       ends_at,
       is_active = true,
@@ -1165,9 +1166,9 @@ adminRouter.post('/banners', async (req, res, next) => {
 
     await db.prepare(`
       INSERT INTO banners (
-        id, title, subtitle, image_url, cta_text, cta_link,
+        id, title, subtitle, image_url, cta_text, cta_link, text_alignment,
         display_order, starts_at, ends_at, is_active, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       bannerId,
       title,
@@ -1175,6 +1176,7 @@ adminRouter.post('/banners', async (req, res, next) => {
       image_url,
       cta_text,
       cta_link,
+      text_alignment || 'left',
       nextOrder,
       starts_at || null,
       ends_at || null,
@@ -1229,6 +1231,7 @@ adminRouter.patch('/banners/:id', async (req, res, next) => {
       image_url,
       cta_text = 'Shop Collection',
       cta_link = '/catalog',
+      text_alignment = 'left',
       starts_at,
       ends_at,
       is_active = true,
@@ -1241,7 +1244,7 @@ adminRouter.patch('/banners/:id', async (req, res, next) => {
 
     const result = await db.prepare(`
       UPDATE banners
-      SET title = ?, subtitle = ?, image_url = ?, cta_text = ?, cta_link = ?,
+      SET title = ?, subtitle = ?, image_url = ?, cta_text = ?, cta_link = ?, text_alignment = ?,
           starts_at = ?, ends_at = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `).run(
@@ -1250,6 +1253,7 @@ adminRouter.patch('/banners/:id', async (req, res, next) => {
       image_url,
       cta_text,
       cta_link,
+      text_alignment || 'left',
       starts_at || null,
       ends_at || null,
       is_active ? 1 : 0,

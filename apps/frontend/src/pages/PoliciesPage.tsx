@@ -1,11 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, HelpCircle, Lock, LucideIcon, RefreshCw, ShieldCheck, Truck } from 'lucide-react';
+import { Clock, ChevronDown, HelpCircle, Lock, LucideIcon, MapPin, RefreshCw, ShieldCheck, Truck } from 'lucide-react';
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { fadeIn, useMotionSafe } from '@/lib/motion';
 
-export type PolicyTab = 'shipping' | 'returns' | 'faq' | 'privacy' | 'terms';
+export type PolicyTab = 'shipping' | 'returns' | 'faq' | 'contact' | 'privacy' | 'terms';
 
 interface TabItem {
   id: PolicyTab;
@@ -17,6 +17,7 @@ const TABS: TabItem[] = [
   { id: 'shipping', label: 'Shipping & Delivery', icon: Truck },
   { id: 'returns', label: 'Returns & Exchanges', icon: RefreshCw },
   { id: 'faq', label: 'FAQ', icon: HelpCircle },
+  { id: 'contact', label: 'Contact Us & Store Location', icon: MapPin },
   { id: 'privacy', label: 'Privacy Policy', icon: Lock },
   { id: 'terms', label: 'Terms & Conditions', icon: ShieldCheck },
 ];
@@ -158,7 +159,7 @@ export const PoliciesPage: React.FC = () => {
                     Shipping &amp; Delivery Policy
                   </h2>
                   <p className="text-xs text-text-muted mt-1">
-                    Handcrafted in Jaipur, shipped across all pincodes in India with care.
+                    Handcrafted in Jodhpur, shipped across all pincodes in India with care.
                   </p>
                 </div>
 
@@ -167,8 +168,8 @@ export const PoliciesPage: React.FC = () => {
                     1. Order Processing Time
                   </h3>
                   <p>
-                    Each piece at Shikkis is curated and thoroughly quality-checked before dispatch.
-                    Standard orders are packed and dispatched from our Jaipur atelier within{' '}
+                    Each piece at Rajkanwari is curated and thoroughly quality-checked before dispatch.
+                    Standard orders are packed and dispatched from our Jodhpur flagship boutique within{' '}
                     <strong className="text-text font-semibold">24 to 48 hours</strong> (excluding Sundays and national holidays).
                   </p>
 
@@ -307,12 +308,12 @@ export const PoliciesPage: React.FC = () => {
 
                   <FAQAccordionItem
                     id="4"
-                    question="Can I visit your physical flagship store in Jaipur?"
+                    question="Can I visit your physical flagship store in Jodhpur?"
                     isOpen={openFaqIndex === 3}
                     onToggle={() => setOpenFaqIndex(openFaqIndex === 3 ? null : 3)}
                     answer={
                       <p>
-                        Yes! We welcome you to experience our full bridal and festive couture collection at our Jaipur physical store: <strong className="text-text">123 Textile Lane, Jaipur, Rajasthan 302001</strong> (Mon–Sat 10:30 AM – 8:00 PM).
+                        Yes! We welcome you to experience our full bridal, poshak, and festive couture collection at our flagship boutique in Jodhpur: <strong className="text-text">269, 2nd C Road, Near Nikky Tiles, Sardarpura, Jodhpur, Rajasthan - 342001</strong> (Open Daily 11:00 AM – 9:00 PM).
                       </p>
                     }
                   />
@@ -324,10 +325,65 @@ export const PoliciesPage: React.FC = () => {
                     onToggle={() => setOpenFaqIndex(openFaqIndex === 4 ? null : 4)}
                     answer={
                       <p>
-                        Orders can be cancelled or modified within 2 hours of placement before dispatch. Please reach out to our team immediately at <strong className="text-text">hello@shikkis.in</strong> or call <strong className="text-text">+91 98765 43210</strong>.
+                        Orders can be cancelled or modified within 2 hours of placement before dispatch. Please reach out to our team immediately at <strong className="text-text">hello@rajkanwari.com</strong> or call <strong className="text-text">+91 75685 72265 / +91 86194 74459</strong>.
                       </p>
                     }
                   />
+                </div>
+              </div>
+            )}
+
+            {/* ── 3.5. CONTACT & STORE LOCATION ────────────────────────────── */}
+            {activeTab === 'contact' && (
+              <div className="space-y-6">
+                <div className="border-b border-border/80 pb-4">
+                  <h2 className="font-serif text-2xl font-semibold text-text flex items-center gap-3">
+                    <MapPin className="text-brand-gold shrink-0" size={24} />
+                    Flagship Boutique &amp; Contact Details
+                  </h2>
+                  <p className="text-xs text-text-muted mt-1">
+                    Visit our flagship store in Sardarpura, Jodhpur or get in touch with our bridal team.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                  <div className="p-6 rounded-2xl border border-border bg-surface-alt/40 space-y-4">
+                    <div className="flex items-center gap-3 text-brand-gold">
+                      <MapPin size={22} />
+                      <h3 className="font-serif text-lg font-semibold text-text">Boutique Address</h3>
+                    </div>
+                    <p className="text-sm text-text-muted leading-relaxed">
+                      <strong className="text-text font-medium block">Rajkanwari — House of Ethnic Wear</strong>
+                      269, 2nd C Road, Near Nikky Tiles,<br />
+                      Sardarpura (Near 11th B Road / Jaljog Circle),<br />
+                      Jodhpur, Rajasthan - 342001
+                    </p>
+                  </div>
+
+                  <div className="p-6 rounded-2xl border border-border bg-surface-alt/40 space-y-4">
+                    <div className="flex items-center gap-3 text-brand-gold">
+                      <Clock size={22} />
+                      <h3 className="font-serif text-lg font-semibold text-text">Store Hours &amp; Phone</h3>
+                    </div>
+                    <div className="text-sm text-text-muted space-y-2">
+                      <p>
+                        <strong className="text-text font-medium">Boutique Timings:</strong><br />
+                        11:00 AM to 9:00 PM (Open Daily)
+                      </p>
+                      <p>
+                        <strong className="text-text font-medium">Phone Support:</strong><br />
+                        <a href="tel:+917568572265" className="hover:text-brand-crimson dark:hover:text-brand-gold font-mono">+91 75685 72265</a> /{' '}
+                        <a href="tel:+918619474459" className="hover:text-brand-crimson dark:hover:text-brand-gold font-mono">+91 86194 74459</a>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-2xl border border-border bg-surface-alt/20 space-y-3">
+                  <h3 className="font-serif text-lg font-medium text-text">Signature Specialty: Buy Back Concept</h3>
+                  <p className="text-sm text-text-muted leading-relaxed">
+                    Rajkanwari is renowned in Rajasthan for introducing a unique <strong className="text-text font-semibold">Buy Back concept</strong> for designer wear. Whether you are looking for heavy bridal lehengas, authentic Rajputi poshaks, Anarkalis, Gowns, or Indo-Western fusion wear, our Jodhpur atelier offers tailored customization and consultation.
+                  </p>
                 </div>
               </div>
             )}

@@ -303,7 +303,7 @@ export const CustomerOrdersPage: React.FC = () => {
                             <img
                               src={thumb || '/placeholder.png'}
                               alt="Item preview"
-                              className="h-full w-full object-cover"
+                              className="h-full w-full object-cover object-top"
                             />
                           </div>
                         ))}

@@ -327,7 +327,7 @@ export const AdminOrderDetailPage: React.FC = () => {
                         <ImageWithFallback
                           src={item.thumbnail || undefined}
                           alt={item.product_name}
-                          className="w-9 h-11 object-cover rounded border border-[var(--border)] bg-[var(--surface-alt)]"
+                          className="w-9 h-11 object-cover object-top rounded border border-[var(--border)] bg-[var(--surface-alt)]"
                         />
                         <div>
                           <p className="font-semibold text-[var(--text)]">{item.product_name}</p>

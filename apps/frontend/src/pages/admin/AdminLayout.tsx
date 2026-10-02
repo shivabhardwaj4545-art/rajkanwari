@@ -4,6 +4,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  FolderTree,
   Layers,
   LayoutDashboard,
   LogOut,
@@ -22,6 +23,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
+import { pageTransition, useMotionSafe } from '@/lib/motion';
 import { useAuthStore } from '@/stores/auth.store';
 
 interface NavItem {
@@ -36,6 +38,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Orders', path: '/admin/orders', icon: ShoppingBag },
   { label: 'Customers', path: '/admin/customers', icon: Users },
   { label: 'Products', path: '/admin/products', icon: Package },
+  { label: 'Categories', path: '/admin/categories', icon: FolderTree },
   { label: 'Inventory', path: '/admin/inventory', icon: Warehouse },
   { label: 'Offers & Promo', path: '/admin/offers', icon: Tag },
   { label: 'Banners', path: '/admin/banners', icon: Layers },
@@ -46,6 +49,7 @@ export const AdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, initialized, initAuth, logout, login } = useAuthStore();
+  const pageVariants = useMotionSafe(pageTransition);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -102,10 +106,14 @@ export const AdminLayout: React.FC = () => {
           <div className="space-y-3">
             <button
               onClick={async () => {
-                await login('owner@rajkanwari.in', '123456');
-                window.location.reload();
+                const ok = await login('owner@rajkanwari.in', '123456');
+                if (ok) {
+                  window.location.reload();
+                } else {
+                  alert('Unable to sign in as Store Owner. Please verify network connection or server status.');
+                }
               }}
-              className="w-full py-2.5 rounded-lg bg-brand-crimson text-white font-medium text-xs shadow hover:bg-brand-crimson/90 transition-colors"
+              className="w-full py-2.5 rounded-lg bg-brand-crimson text-white font-medium text-xs shadow hover:bg-brand-crimson/90 transition-colors cursor-pointer"
             >
               Sign In as Store Owner (Vikram Singhania)
             </button>
@@ -352,7 +360,18 @@ export const AdminLayout: React.FC = () => {
 
         {/* Dynamic Page Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-bg transition-colors">
-          <Outlet />
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={location.pathname}
+              variants={pageVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="w-full flex-1"
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>
