@@ -196,7 +196,7 @@ export const PackingSlipModal: React.FC<PackingSlipModalProps> = ({ data, onClos
               </div>
               <p className="font-bold text-sm text-gray-900">RAJKANWARI LUXURY WAREHOUSE</p>
               <p className="text-xs text-gray-700 leading-relaxed">
-                House of Ethnic Wear (Dhananya Attire)
+                House of Ethnic Wear
                 <br />
                 100 Feet Rd, Indiranagar, Stage 2
                 <br />

@@ -74,7 +74,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
             <tr>
               <td style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #D4AF37;">
                 <h1 style="color: #9B1B30; margin: 0; font-size: 28px; font-weight: bold; font-family: serif;">RAJKANWARI</h1>
-                <p style="color: #7A6A5F; margin: 5px 0 0 0; font-size: 12px; font-family: sans-serif; letter-spacing: 2px; text-transform: uppercase;">House of Ethnic Wear • A Brand of Dhananya Attire</p>
+                <p style="color: #7A6A5F; margin: 5px 0 0 0; font-size: 12px; font-family: sans-serif; letter-spacing: 2px; text-transform: uppercase;">House of Ethnic Wear</p>
               </td>
             </tr>
 
@@ -113,7 +113,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
               <td style="text-align: center; padding-top: 25px; border-top: 1px solid #E8D4A0; color: #7A6A5F; font-size: 12px; font-family: sans-serif;">
                 <p style="margin: 0;">If you have any questions, feel free to reply to this email or call us at +91 98765 43210.</p>
                 <p style="margin: 8px 0 0 0;">📍 123 Textile Lane, Jaipur, Rajasthan 302001</p>
-                <p style="margin: 15px 0 0 0; color: #9B1B30; font-weight: bold;">© Rajkanwari — House of Ethnic Wear. A Brand of Dhananya Attire.</p>
+                <p style="margin: 15px 0 0 0; color: #9B1B30; font-weight: bold;">© Rajkanwari — House of Ethnic Wear.</p>
               </td>
             </tr>
           </table>

@@ -55,7 +55,7 @@ export async function generateInvoicePDF(order: InvoiceOrderData): Promise<Buffe
 
       doc.moveDown(1.5);
       doc.fillColor(crimson).fontSize(24).font('Helvetica-Bold').text('RAJKANWARI', 40, 55);
-      doc.fillColor(gold).fontSize(7.5).font('Helvetica').text('HOUSE OF ETHNIC WEAR • A BRAND OF DHANANYA ATTIRE', 42, 85);
+      doc.fillColor(gold).fontSize(7.5).font('Helvetica').text('HOUSE OF ETHNIC WEAR', 42, 85);
 
       // Store Details (Right Aligned)
       doc
@@ -185,7 +185,7 @@ export async function generateInvoicePDF(order: InvoiceOrderData): Promise<Buffe
       doc.strokeColor(borderColor).lineWidth(0.5).moveTo(40, footerY).lineTo(555, footerY).stroke();
       doc.fillColor(mutedText).fontSize(7.5).font('Helvetica');
       doc.text(
-        'Thank you for shopping at Rajkanwari — House of Ethnic Wear. A Brand of Dhananya Attire.',
+        'Thank you for shopping at Rajkanwari — House of Ethnic Wear.',
         40,
         footerY + 10,
         { align: 'center', width: 515 }

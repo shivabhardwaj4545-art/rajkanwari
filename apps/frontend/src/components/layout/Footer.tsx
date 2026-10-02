@@ -35,7 +35,7 @@ export const Footer: React.FC = () => (
             <BrandLogo variant="full" size="lg" />
           </Link>
           <p className="text-sm text-text-muted max-w-md leading-relaxed">
-            Rajkanwari — House of Ethnic Wear. A Brand of Dhananya Attire based in Jodhpur, Rajasthan. Premier destination for designer bridal lehengas, traditional Rajputi poshaks, Anarkalis, Crop top-skirts, Indo-Western fusion wear &amp; pre-draped sarees. Featuring our exclusive Buy Back concept.
+            Rajkanwari — House of Ethnic Wear, Jodhpur. Curated designer bridal lehengas, Rajputi poshaks &amp; festive couture.
           </p>
 
           {/* ── Contact ─────────────────────────────────────────────────────── */}
