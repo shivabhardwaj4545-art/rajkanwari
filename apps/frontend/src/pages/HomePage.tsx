@@ -78,11 +78,12 @@ export const HomePage: React.FC = () => {
           const fallbackBanners: BannerItem[] = [
             {
               id: 'fallback_01',
-              title: 'Timeless Elegance',
-              subtitle: 'Graceful silhouettes. Rich fabrics. For every chapter of you.',
+              title: 'Heritage Handloom Festive Edit',
+              subtitle: 'Graceful emerald green suits, woven zari brocades & artisan dupattas for timeless celebrations.',
               image_url: '/images/banner_festive_trio.jpg',
-              cta_text: 'EXPLORE COLLECTION',
+              cta_text: 'Explore Collection',
               cta_link: '/catalog?occasion=Festive',
+              text_alignment: 'left',
               display_order: 1,
             },
             {
@@ -90,8 +91,9 @@ export const HomePage: React.FC = () => {
               title: "Make Room For What's New",
               subtitle: 'Too Rajkunwari To Blend In. Discover our newest handcrafted arrivals & festive edits.',
               image_url: '/images/banner_whats_new.jpg',
-              cta_text: 'SHOP NEW ARRIVALS',
+              cta_text: 'Shop New Arrivals',
               cta_link: '/catalog?sort=newest',
+              text_alignment: 'right',
               display_order: 2,
             },
             {
@@ -99,8 +101,9 @@ export const HomePage: React.FC = () => {
               title: 'The Royal Anarkali & Suit Edit',
               subtitle: 'Scarlet red silk flared Anarkalis & hand-embroidered heritage couture crafted for royalty.',
               image_url: '/images/banner_scarlet_anarkali.jpg',
-              cta_text: 'SHOP ANARKALIS & SUITS',
+              cta_text: 'Shop Anarkalis & Suits',
               cta_link: '/catalog?category=anarkalis',
+              text_alignment: 'right',
               display_order: 3,
             },
           ];
