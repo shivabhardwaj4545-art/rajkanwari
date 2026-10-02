@@ -602,11 +602,27 @@ export default db;
       try {
         sDb.exec("ALTER TABLE banners ADD COLUMN text_alignment TEXT DEFAULT 'left'");
       } catch (_e) {}
+      try {
+        sDb.exec("ALTER TABLE banners ADD COLUMN text_color TEXT DEFAULT 'white'");
+      } catch (_e) {}
+      try {
+        sDb.exec("ALTER TABLE banners ADD COLUMN offer_category TEXT DEFAULT 'None'");
+      } catch (_e) {}
+      try {
+        sDb.exec("ALTER TABLE banners ADD COLUMN gradient_style TEXT DEFAULT 'dark_vignette'");
+      } catch (_e) {}
+      try {
+        sDb.exec("ALTER TABLE offers ADD COLUMN offer_category TEXT DEFAULT 'Festive Offer'");
+      } catch (_e) {}
       sDb.exec("UPDATE banners SET image_url = '/images/hero-timeless-elegance.jpg', text_alignment = 'right' WHERE image_url LIKE '%banner_whats_new%' OR id = 'bnr_02'");
     } else {
       await pool.query("ALTER TABLE banners ADD COLUMN IF NOT EXISTS text_alignment TEXT DEFAULT 'left'");
+      await pool.query("ALTER TABLE banners ADD COLUMN IF NOT EXISTS text_color TEXT DEFAULT 'white'");
+      await pool.query("ALTER TABLE banners ADD COLUMN IF NOT EXISTS offer_category TEXT DEFAULT 'None'");
+      await pool.query("ALTER TABLE banners ADD COLUMN IF NOT EXISTS gradient_style TEXT DEFAULT 'dark_vignette'");
+      await pool.query("ALTER TABLE offers ADD COLUMN IF NOT EXISTS offer_category TEXT DEFAULT 'Festive Offer'");
       await pool.query("UPDATE banners SET image_url = '/images/hero-timeless-elegance.jpg', text_alignment = 'right' WHERE image_url LIKE '%banner_whats_new%' OR id = 'bnr_02'");
     }
-    console.log('✅ Banners table schema and clean image URLs synchronized.');
+    console.log('✅ Banners and Offers table schema synchronized.');
   } catch (_e) {}
 })();

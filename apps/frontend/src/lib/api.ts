@@ -69,6 +69,9 @@ export interface BannerItem {
   cta_text: string;
   cta_link: string;
   text_alignment?: 'left' | 'right';
+  text_color?: string;
+  offer_category?: string;
+  gradient_style?: string;
   display_order: number;
 }
 
@@ -76,6 +79,7 @@ export interface OfferItem {
   id: string;
   name: string;
   code: string | null;
+  offer_category?: string;
   type: string;
   value: number;
   max_discount: number | null;
@@ -996,6 +1000,7 @@ export interface AdminOfferItem {
   id: string;
   name: string;
   code: string | null;
+  offer_category?: string;
   type: 'percent' | 'flat' | 'bxgy' | 'free_shipping';
   value: number;
   max_discount: number | null;
@@ -1024,6 +1029,9 @@ export interface AdminBannerItem {
   cta_text: string;
   cta_link: string;
   text_alignment?: 'left' | 'right';
+  text_color?: string;
+  offer_category?: string;
+  gradient_style?: string;
   display_order: number;
   starts_at?: string | null;
   ends_at?: string | null;

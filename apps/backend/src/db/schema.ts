@@ -110,6 +110,7 @@ CREATE TABLE IF NOT EXISTS offers (
   id               TEXT PRIMARY KEY,
   name             TEXT NOT NULL,
   code             TEXT UNIQUE,
+  offer_category   TEXT DEFAULT 'Festive Offer',
   type             TEXT NOT NULL CHECK(type IN ('percent', 'flat', 'bxgy', 'free_shipping')),
   value            BIGINT NOT NULL,
   max_discount     BIGINT,
@@ -147,6 +148,9 @@ CREATE TABLE IF NOT EXISTS banners (
   cta_text       TEXT NOT NULL DEFAULT 'Shop Now',
   cta_link       TEXT NOT NULL DEFAULT '/catalog',
   text_alignment TEXT DEFAULT 'left',
+  text_color     TEXT DEFAULT 'white',
+  offer_category TEXT DEFAULT 'None',
+  gradient_style TEXT DEFAULT 'dark_vignette',
   display_order  INTEGER NOT NULL DEFAULT 0,
   starts_at      TIMESTAMPTZ,
   ends_at        TIMESTAMPTZ,
@@ -303,6 +307,13 @@ export async function initSchema(): Promise<void> {
   } catch (err: any) {
     console.warn('⚠️ Schema DDL execution note (tables already initialized):', err?.message || err);
   }
+
+  try {
+    await db.query(`ALTER TABLE banners ADD COLUMN text_alignment TEXT DEFAULT 'left'`);
+  } catch (_) {}
+  try {
+    await db.query(`ALTER TABLE banners ADD COLUMN text_color TEXT DEFAULT 'white'`);
+  } catch (_) {}
 
   await seedIfEmpty();
 }

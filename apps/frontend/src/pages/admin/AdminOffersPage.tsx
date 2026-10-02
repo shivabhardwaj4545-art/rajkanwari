@@ -37,6 +37,9 @@ export const AdminOffersPage: React.FC = () => {
   // Form Fields
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
+  const [offerCategory, setOfferCategory] = useState<string>('Festive Offer');
+  const [customOfferCategory, setCustomOfferCategory] = useState<string>('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [type, setType] = useState<'percent' | 'flat' | 'free_shipping'>('percent');
   const [value, setValue] = useState<number>(15);
   const [maxDiscountInr, setMaxDiscountInr] = useState<number>(1500);
@@ -73,10 +76,41 @@ export const AdminOffersPage: React.FC = () => {
     api.getProducts({ limit: 50 }).then((r) => setProducts(r.data)).catch(console.error);
   }, []);
 
-  // Filter offers by derived_status
+  // Filter offers by derived_status and offer_category
   const filteredOffers = useMemo(() => {
-    return offers.filter((o) => o.derived_status === activeTab);
-  }, [offers, activeTab]);
+    return offers.filter((o) => {
+      const matchesStatus = o.derived_status === activeTab;
+      const matchesCat =
+        categoryFilter === 'all' || (o.offer_category || 'Festive Offer') === categoryFilter;
+      return matchesStatus && matchesCat;
+    });
+  }, [offers, activeTab, categoryFilter]);
+
+  // Dynamically compute category filter pills (presets + custom ones found in offers)
+  const categoryOptions = useMemo(() => {
+    const defaultCats = [
+      { id: 'all', label: 'All Offers' },
+      { id: 'Festive Offer', label: '🪔 Festive' },
+      { id: 'Clearance Sale', label: '⚡ Clearance' },
+      { id: 'Flash Deal', label: '🔥 Flash Deal' },
+      { id: 'Exclusive Offer', label: '💎 VIP Exclusive' },
+      { id: 'Free Shipping', label: '🚚 Free Shipping' },
+      { id: 'First Order', label: '🎁 First Order' },
+      { id: 'Combo Deal', label: '📦 Combo Deal' },
+    ];
+
+    const knownIds = new Set(defaultCats.map((c) => c.id));
+    const customCats: { id: string; label: string }[] = [];
+
+    offers.forEach((o) => {
+      const cat = o.offer_category;
+      if (cat && !knownIds.has(cat) && !customCats.some((c) => c.id === cat)) {
+        customCats.push({ id: cat, label: `✨ ${cat}` });
+      }
+    });
+
+    return [...defaultCats, ...customCats];
+  }, [offers]);
 
   const handleToggleOffer = async (id: string) => {
     try {
@@ -148,9 +182,15 @@ export const AdminOffersPage: React.FC = () => {
 
     setSaving(true);
     try {
+      const effectiveOfferCategory =
+        offerCategory === 'custom'
+          ? customOfferCategory.trim() || 'Festive Offer'
+          : offerCategory;
+
       const payload = {
         name: name.trim(),
         code: code.trim() ? code.trim().toUpperCase() : null,
+        offer_category: effectiveOfferCategory,
         type,
         value: type === 'percent' ? value : value * 100, // flat value stored in paise
         max_discount: type === 'percent' && maxDiscountInr > 0 ? maxDiscountInr * 100 : null,
@@ -172,6 +212,7 @@ export const AdminOffersPage: React.FC = () => {
       // Reset form
       setName('');
       setCode('');
+      setCustomOfferCategory('');
       await fetchOffers();
     } catch (err: any) {
       console.error('Failed to create offer:', err);
@@ -213,43 +254,65 @@ export const AdminOffersPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── 3 Tabs with Animated Underline ─────────────────────────────────── */}
-      <div className="border-b border-border">
-        <div className="flex items-center gap-8">
-          {(['running', 'scheduled', 'expired'] as TabStatus[]).map((tab) => {
-            const count = offers.filter((o) => o.derived_status === tab).length;
-            const isActive = activeTab === tab;
+      {/* ── 3 Tabs with Animated Underline & Category Filter Strip ───────────────── */}
+      <div className="space-y-4">
+        <div className="border-b border-border flex items-center justify-between gap-4 overflow-x-auto pb-1">
+          <div className="flex items-center gap-8">
+            {(['running', 'scheduled', 'expired'] as TabStatus[]).map((tab) => {
+              const count = offers.filter((o) => o.derived_status === tab).length;
+              const isActive = activeTab === tab;
 
-            return (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`relative pb-3 text-xs font-semibold transition-colors flex items-center gap-2 capitalize ${
-                  isActive ? 'text-brand-crimson dark:text-brand-gold' : 'text-text-muted hover:text-text'
-                }`}
-              >
-                <span>{tab}</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                    isActive
-                      ? 'bg-brand-crimson/15 text-brand-crimson dark:text-brand-gold font-bold'
-                      : 'bg-surface-alt text-text-muted'
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`relative pb-3 text-xs font-semibold transition-colors flex items-center gap-2 capitalize shrink-0 ${
+                    isActive ? 'text-brand-crimson dark:text-brand-gold' : 'text-text-muted hover:text-text'
                   }`}
                 >
-                  {count}
-                </span>
+                  <span>{tab}</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                      isActive
+                        ? 'bg-brand-crimson/15 text-brand-crimson dark:text-brand-gold font-bold'
+                        : 'bg-surface-alt text-text-muted'
+                    }`}
+                  >
+                    {count}
+                  </span>
 
-                {/* Animated sliding underline */}
-                {isActive && (
-                  <motion.div
-                    layoutId="offers-active-tab-underline"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-crimson dark:bg-brand-gold"
-                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                  />
-                )}
-              </button>
-            );
-          })}
+                  {/* Animated sliding underline */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="offers-active-tab-underline"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-crimson dark:bg-brand-gold"
+                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Filter by Special Offer Category */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+          <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider shrink-0 mr-1">
+            Category Filter:
+          </span>
+          {categoryOptions.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setCategoryFilter(cat.id)}
+              className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all shrink-0 ${
+                categoryFilter === cat.id
+                  ? 'bg-brand-crimson text-white border-brand-crimson dark:bg-brand-gold dark:text-black dark:border-brand-gold shadow-xs'
+                  : 'bg-surface border-border text-text-muted hover:text-text hover:bg-surface-alt'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -257,7 +320,9 @@ export const AdminOffersPage: React.FC = () => {
       {filteredOffers.length === 0 ? (
         <div className="p-12 rounded-xl bg-surface border border-border text-center space-y-3">
           <Tag size={32} className="mx-auto text-brand-gold opacity-50" />
-          <h3 className="font-serif text-lg font-semibold text-text capitalize">No {activeTab} Promotions</h3>
+          <h3 className="font-serif text-lg font-semibold text-text capitalize">
+            No {activeTab} {categoryFilter !== 'all' ? `"${categoryFilter}"` : ''} Promotions
+          </h3>
           <p className="text-xs text-text-muted max-w-sm mx-auto">
             {activeTab === 'running'
               ? 'No promotions are currently active within their scheduled date window.'
@@ -268,18 +333,55 @@ export const AdminOffersPage: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredOffers.map((offer) => (
-            <div
-              key={offer.id}
-              className="rounded-xl bg-surface border border-border p-5 flex flex-col justify-between shadow-xs hover:border-brand-gold/40 transition-colors"
-            >
-              <div className="space-y-3">
-                {/* Header */}
-                <div className="flex items-start justify-between gap-2">
+          {filteredOffers.map((offer) => {
+            const catName = offer.offer_category || 'Festive Offer';
+            return (
+              <div
+                key={offer.id}
+                className="rounded-xl bg-surface border border-border p-5 flex flex-col justify-between shadow-xs hover:border-brand-gold/40 transition-colors"
+              >
+                <div className="space-y-3">
+                  {/* Category Pill Tag */}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-brand-gold/15 text-brand-gold border border-brand-gold/30 uppercase tracking-wider">
+                      {catName === 'Clearance Sale' ? '⚡ CLEARANCE' :
+                       catName === 'Flash Deal' ? '🔥 FLASH DEAL' :
+                       catName === 'Exclusive Offer' ? '💎 VIP EXCLUSIVE' :
+                       catName === 'Free Shipping' ? '🚚 FREE SHIPPING' :
+                       catName === 'First Order' ? '🎁 WELCOME SPECIAL' :
+                       catName === 'Combo Deal' ? '📦 COMBO SAVINGS' :
+                       catName === 'Festive Offer' ? '🪔 FESTIVE OFFER' :
+                       `✨ ${catName.toUpperCase()}`}
+                    </span>
+
+                    <div className="flex items-center gap-1.5">
+                      {/* Active toggle */}
+                      <button
+                        onClick={() => handleToggleOffer(offer.id)}
+                        className={`p-1.5 rounded-lg border transition-colors ${
+                          offer.is_active
+                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                            : 'bg-surface-alt border-border text-text-muted'
+                        }`}
+                        title={offer.is_active ? 'Active — click to pause' : 'Paused — click to activate'}
+                      >
+                        <Power size={13} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteOffer(offer.id)}
+                        className="p-1.5 rounded-lg border border-border text-text-muted hover:text-danger hover:bg-danger/10"
+                        title="Delete offer"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Header */}
                   <div>
                     <h3 className="font-serif text-lg font-bold text-text line-clamp-1">{offer.name}</h3>
                     {offer.code ? (
-                      <span className="inline-block mt-1 font-mono text-xs font-bold px-2 py-0.5 rounded bg-brand-gold/15 text-brand-gold border border-brand-gold/30">
+                      <span className="inline-block mt-1 font-mono text-xs font-bold px-2 py-0.5 rounded bg-surface-alt text-brand-gold border border-border">
                         {offer.code}
                       </span>
                     ) : (
@@ -289,44 +391,21 @@ export const AdminOffersPage: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1.5">
-                    {/* Active toggle */}
-                    <button
-                      onClick={() => handleToggleOffer(offer.id)}
-                      className={`p-1.5 rounded-lg border transition-colors ${
-                        offer.is_active
-                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-surface-alt border-border text-text-muted'
-                      }`}
-                      title={offer.is_active ? 'Active — click to pause' : 'Paused — click to activate'}
-                    >
-                      <Power size={13} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteOffer(offer.id)}
-                      className="p-1.5 rounded-lg border border-border text-text-muted hover:text-danger hover:bg-danger/10"
-                      title="Delete offer"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Offer Formula Description */}
-                <div className="text-xs text-text font-medium flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded bg-surface-alt text-brand-crimson font-bold">
-                    {offer.type === 'percent'
-                      ? `${offer.value}% OFF`
-                      : offer.type === 'flat'
-                      ? `${formatPrice(offer.value)} OFF`
-                      : 'FREE SHIPPING'}
-                  </span>
-                  {offer.min_cart_value > 0 && (
-                    <span className="text-[11px] text-text-muted">
-                      Min: {formatPrice(offer.min_cart_value)}
+                  {/* Offer Formula Description */}
+                  <div className="text-xs text-text font-medium flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded bg-surface-alt text-brand-crimson font-bold">
+                      {offer.type === 'percent'
+                        ? `${offer.value}% OFF`
+                        : offer.type === 'flat'
+                        ? `${formatPrice(offer.value)} OFF`
+                        : 'FREE SHIPPING'}
                     </span>
-                  )}
-                </div>
+                    {offer.min_cart_value > 0 && (
+                      <span className="text-[11px] text-text-muted">
+                        Min: {formatPrice(offer.min_cart_value)}
+                      </span>
+                    )}
+                  </div>
 
                 {/* Dates */}
                 <div className="text-[11px] text-text-muted space-y-0.5">
@@ -363,40 +442,43 @@ export const AdminOffersPage: React.FC = () => {
                 </div>
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
       )}
 
       {/* ── Offer Builder Modal ─────────────────────────────────────────────── */}
       <AnimatePresence>
         {modalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:py-8 bg-black/60 backdrop-blur-xs overflow-y-auto">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="max-w-2xl w-full bg-surface border border-border rounded-xl shadow-2xl overflow-hidden my-8"
+              className="max-w-2xl w-full max-h-[80vh] bg-surface border border-border rounded-xl shadow-2xl flex flex-col m-auto overflow-hidden"
             >
               {/* Modal Header */}
-              <div className="p-5 border-b border-border flex items-center justify-between bg-surface-alt/40">
+              <div className="p-5 border-b border-border flex items-center justify-between bg-surface-alt/40 shrink-0">
                 <div className="flex items-center gap-2 text-brand-crimson">
                   <Sparkles size={20} />
                   <h3 className="font-serif text-xl font-bold text-text">Promotional Offer Builder</h3>
                 </div>
-                <button onClick={() => setModalOpen(false)} className="p-1 rounded text-text-muted hover:text-text">
+                <button onClick={() => setModalOpen(false)} className="p-1 rounded text-text-muted hover:text-text hover:bg-surface-alt transition-colors">
                   <X size={18} />
                 </button>
               </div>
 
-              {/* Error Alert */}
-              {error && (
-                <div className="p-3 mx-5 mt-4 rounded-lg bg-danger/10 border border-danger/30 text-danger text-xs flex items-center gap-2">
-                  <AlertCircle size={15} className="shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
+              {/* Scrollable Form Body */}
+              <div className="p-5 overflow-y-auto flex-1 space-y-4 text-xs">
+                {/* Error Alert */}
+                {error && (
+                  <div className="p-3 rounded-lg bg-danger/10 border border-danger/30 text-danger text-xs flex items-center gap-2">
+                    <AlertCircle size={15} className="shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
 
-              <form onSubmit={handleCreateOffer} className="p-5 space-y-4 text-xs">
+                <form onSubmit={handleCreateOffer} className="space-y-4">
                 {/* 1. Name & Code */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -425,6 +507,54 @@ export const AdminOffersPage: React.FC = () => {
                       className="w-full px-3 py-2 rounded-lg bg-bg border border-border font-mono text-text focus:outline-hidden focus:border-brand-gold"
                     />
                   </div>
+                </div>
+
+                {/* Offer Category Selector */}
+                <div>
+                  <label className="block font-semibold text-text mb-1">
+                    Special Offer Category <span className="text-brand-crimson">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                      { id: 'Festive Offer', label: '🪔 Festive Offer' },
+                      { id: 'Clearance Sale', label: '⚡ Clearance' },
+                      { id: 'Flash Deal', label: '🔥 Flash Deal' },
+                      { id: 'Exclusive Offer', label: '💎 VIP Exclusive' },
+                      { id: 'Free Shipping', label: '🚚 Free Shipping' },
+                      { id: 'First Order', label: '🎁 First Order' },
+                      { id: 'Combo Deal', label: '📦 Combo Savings' },
+                      { id: 'custom', label: '✨ Custom Category' },
+                    ].map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setOfferCategory(cat.id)}
+                        className={`py-2 px-2 rounded-lg border text-xs font-semibold transition-all text-center ${
+                          offerCategory === cat.id
+                            ? 'border-brand-crimson bg-brand-crimson/10 text-brand-crimson dark:text-brand-gold dark:border-brand-gold ring-1 ring-brand-crimson/30'
+                            : 'border-border bg-bg text-text-muted hover:text-text'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {offerCategory === 'custom' && (
+                    <div className="mt-2.5">
+                      <label className="block text-[11px] font-semibold text-text-muted mb-1 uppercase tracking-wider">
+                        Custom Special Category Name
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. 🎉 Karwa Chauth Special, 🪔 Navratri Edit, 👑 Rajputi Poshaks"
+                        value={customOfferCategory}
+                        onChange={(e) => setCustomOfferCategory(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg bg-bg border border-border text-text font-medium focus:outline-hidden focus:border-brand-gold"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* 2. Type & Value */}
@@ -678,9 +808,10 @@ export const AdminOffersPage: React.FC = () => {
                   </button>
                 </div>
               </form>
-            </motion.div>
-          </div>
-        )}
+            </div>
+          </motion.div>
+        </div>
+      )}
       </AnimatePresence>
     </div>
   );

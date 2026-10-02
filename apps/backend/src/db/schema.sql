@@ -113,6 +113,7 @@ CREATE TABLE IF NOT EXISTS offers (
   id               TEXT PRIMARY KEY,
   name             TEXT NOT NULL,
   code             TEXT UNIQUE, -- NULL allowed for auto-applied promotions
+  offer_category   TEXT DEFAULT 'Festive Offer',
   type             TEXT NOT NULL CHECK(type IN ('percent', 'flat', 'bxgy', 'free_shipping')),
   value            BIGINT NOT NULL, -- percentage or paise
   max_discount     BIGINT, -- in paise, for percent discounts
@@ -145,19 +146,23 @@ CREATE TABLE IF NOT EXISTS offer_redemptions (
 
 -- 10. Banners
 CREATE TABLE IF NOT EXISTS banners (
-  id            TEXT PRIMARY KEY,
-  title         TEXT NOT NULL,
-  subtitle      TEXT,
-  image_url     TEXT NOT NULL,
-  cta_text      TEXT NOT NULL DEFAULT 'Shop Now',
-  cta_link      TEXT NOT NULL DEFAULT '/catalog',
-  display_order INTEGER NOT NULL DEFAULT 0,
-  starts_at     TIMESTAMPTZ,
-  ends_at       TIMESTAMPTZ,
-  is_active     INTEGER NOT NULL DEFAULT 1,
-  created_by    TEXT REFERENCES users(id) ON DELETE SET NULL,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+  id             TEXT PRIMARY KEY,
+  title          TEXT NOT NULL,
+  subtitle       TEXT,
+  image_url      TEXT NOT NULL,
+  cta_text       TEXT NOT NULL DEFAULT 'Shop Now',
+  cta_link       TEXT NOT NULL DEFAULT '/catalog',
+  text_alignment TEXT DEFAULT 'left',
+  text_color     TEXT DEFAULT 'white',
+  offer_category TEXT DEFAULT 'None',
+  gradient_style TEXT DEFAULT 'dark_vignette',
+  display_order  INTEGER NOT NULL DEFAULT 0,
+  starts_at      TIMESTAMPTZ,
+  ends_at        TIMESTAMPTZ,
+  is_active      INTEGER NOT NULL DEFAULT 1,
+  created_by     TEXT REFERENCES users(id) ON DELETE SET NULL,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 11. Carts

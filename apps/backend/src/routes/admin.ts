@@ -888,6 +888,7 @@ adminRouter.get('/inventory/audit-log', async (_req, res, next) => {
 const offerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   code: z.string().optional().nullable(),
+  offer_category: z.string().default('Festive Offer'),
   type: z.enum(['percent', 'flat', 'bxgy', 'free_shipping']),
   value: z.number().int().positive('Value must be a positive integer'),
   max_discount: z.number().int().positive().optional().nullable(),
@@ -1021,11 +1022,11 @@ adminRouter.post('/offers', async (req, res, next) => {
 
     await db.prepare(`
       INSERT INTO offers (
-        id, name, code, type, value, max_discount, min_cart_value,
+        id, name, code, offer_category, type, value, max_discount, min_cart_value,
         starts_at, ends_at, is_active, stackable, usage_limit,
         per_user_limit, scope, scope_ids, banner_image_url, priority, created_by
       ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?, ?
       )
@@ -1033,6 +1034,7 @@ adminRouter.post('/offers', async (req, res, next) => {
       offerId,
       data.name,
       cleanCode,
+      data.offer_category || 'Festive Offer',
       data.type,
       data.value,
       data.max_discount || null,
@@ -1150,6 +1152,9 @@ adminRouter.post('/banners', async (req, res, next) => {
       cta_text = 'Shop Collection',
       cta_link = '/catalog',
       text_alignment = 'left',
+      text_color = 'white',
+      offer_category = 'None',
+      gradient_style = 'dark_vignette',
       starts_at,
       ends_at,
       is_active = true,
@@ -1166,9 +1171,9 @@ adminRouter.post('/banners', async (req, res, next) => {
 
     await db.prepare(`
       INSERT INTO banners (
-        id, title, subtitle, image_url, cta_text, cta_link, text_alignment,
-        display_order, starts_at, ends_at, is_active, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, title, subtitle, image_url, cta_text, cta_link, text_alignment, text_color,
+        offer_category, gradient_style, display_order, starts_at, ends_at, is_active, created_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       bannerId,
       title,
@@ -1177,6 +1182,9 @@ adminRouter.post('/banners', async (req, res, next) => {
       cta_text,
       cta_link,
       text_alignment || 'left',
+      text_color || 'white',
+      offer_category || 'None',
+      gradient_style || 'dark_vignette',
       nextOrder,
       starts_at || null,
       ends_at || null,
@@ -1232,6 +1240,9 @@ adminRouter.patch('/banners/:id', async (req, res, next) => {
       cta_text = 'Shop Collection',
       cta_link = '/catalog',
       text_alignment = 'left',
+      text_color = 'white',
+      offer_category = 'None',
+      gradient_style = 'dark_vignette',
       starts_at,
       ends_at,
       is_active = true,
@@ -1244,8 +1255,8 @@ adminRouter.patch('/banners/:id', async (req, res, next) => {
 
     const result = await db.prepare(`
       UPDATE banners
-      SET title = ?, subtitle = ?, image_url = ?, cta_text = ?, cta_link = ?, text_alignment = ?,
-          starts_at = ?, ends_at = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
+      SET title = ?, subtitle = ?, image_url = ?, cta_text = ?, cta_link = ?, text_alignment = ?, text_color = ?,
+          offer_category = ?, gradient_style = ?, starts_at = ?, ends_at = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `).run(
       title,
@@ -1254,6 +1265,9 @@ adminRouter.patch('/banners/:id', async (req, res, next) => {
       cta_text,
       cta_link,
       text_alignment || 'left',
+      text_color || 'white',
+      offer_category || 'None',
+      gradient_style || 'dark_vignette',
       starts_at || null,
       ends_at || null,
       is_active ? 1 : 0,

@@ -205,31 +205,56 @@ export const HomePage: React.FC = () => {
   // Announcements / Offers Carousel List
   const announcementItems = useMemo(() => {
     if (activeOffers && activeOffers.length > 0) {
-      return activeOffers.map((o) => ({
-        badge: 'EXCLUSIVE FESTIVE OFFER',
-        text: `${o.name} — Enjoy ${o.value}% off on curated handloom & bridal designs!`,
-        code: o.code ? `Use Code: ${o.code}` : undefined,
-        link: '/catalog',
-        linkText: 'Shop Collection',
-      }));
+      return activeOffers.map((o) => {
+        const cat = o.offer_category || 'Festive Offer';
+        let badge = '🪔 SPECIAL OFFER';
+        if (cat === 'Clearance Sale') badge = '⚡ CLEARANCE SALE';
+        else if (cat === 'Flash Deal') badge = '🔥 FLASH DEAL';
+        else if (cat === 'Exclusive Offer') badge = '💎 VIP EXCLUSIVE';
+        else if (cat === 'Free Shipping') badge = '🚚 FREE SHIPPING';
+        else if (cat === 'First Order') badge = '🎁 WELCOME SPECIAL';
+        else if (cat === 'Combo Deal') badge = '📦 COMBO SAVINGS';
+        else badge = '🪔 FESTIVE OFFER';
+
+        let discountText = '';
+        if (o.type === 'percent') {
+          discountText = `Enjoy ${o.value}% off`;
+        } else if (o.type === 'flat') {
+          discountText = `Flat ₹${o.value / 100} discount`;
+        } else if (o.type === 'free_shipping') {
+          discountText = `Free express doorstep shipping`;
+        } else {
+          discountText = `Special promotional pricing`;
+        }
+
+        const minCartText = o.min_cart_value > 0 ? ` on orders above ₹${(o.min_cart_value / 100).toLocaleString('en-IN')}` : '';
+
+        return {
+          badge,
+          text: `${o.name} — ${discountText}${minCartText}!`,
+          code: o.code ? `Use Code: ${o.code}` : undefined,
+          link: '/catalog',
+          linkText: 'Shop Special Offers',
+        };
+      });
     }
     return [
       {
-        badge: 'EXCLUSIVE FESTIVE OFFER',
+        badge: '🪔 FESTIVE OFFER',
         text: 'Curated Heritage Edit — Enjoy 10% off on handloom Anarkalis, Suits & Rajputi Poshaks!',
         code: 'Use Code: FESTIVE10',
         link: '/catalog?occasion=Festive',
         linkText: 'Shop Collection',
       },
       {
-        badge: 'FREE EXPRESS SHIPPING',
+        badge: '🚚 FREE EXPRESS SHIPPING',
         text: 'Complimentary Pan-India shipping on all orders over ₹4,999. Fast 3-5 day delivery!',
         code: undefined,
         link: '/policies/shipping',
         linkText: 'Learn More',
       },
       {
-        badge: 'BENGALURU FLAGSHIP BOUTIQUE',
+        badge: '💎 BENGALURU FLAGSHIP BOUTIQUE',
         text: 'Visit us live at 100 Feet Rd, Indiranagar. Custom bridal tailoring & styling available!',
         code: undefined,
         link: '/policies/contact',
@@ -290,8 +315,45 @@ export const HomePage: React.FC = () => {
                      currentBanner?.image_url?.includes('scarlet_anarkali') ||
                      currentBanner?.image_url?.includes('whats_new'));
 
+                const textColorVal = currentBanner?.text_color || 'white';
+                const gradStyle = currentBanner?.gradient_style || 'dark_vignette';
+                const bannerCat = currentBanner?.offer_category || 'None';
+
+                let gradientClass = 'from-black/45 via-black/20 to-transparent';
+                if (gradStyle === 'light_pearl') {
+                  gradientClass = isRightAligned ? 'from-transparent via-white/30 to-white/75' : 'from-white/75 via-white/30 to-transparent';
+                } else if (gradStyle === 'crimson_gold') {
+                  gradientClass = isRightAligned ? 'from-transparent via-[#8E2731]/40 to-[#4A0D14]/80' : 'from-[#4A0D14]/80 via-[#8E2731]/40 to-transparent';
+                } else if (gradStyle === 'emerald_velvet') {
+                  gradientClass = isRightAligned ? 'from-transparent via-[#1B4332]/40 to-[#081C15]/80' : 'from-[#081C15]/80 via-[#1B4332]/40 to-transparent';
+                } else if (gradStyle === 'festive_shimmer') {
+                  gradientClass = isRightAligned ? 'from-transparent via-[#705510]/40 to-[#2A1F02]/80' : 'from-[#2A1F02]/80 via-[#705510]/40 to-transparent';
+                } else if (gradStyle === 'sunset_amber') {
+                  gradientClass = isRightAligned ? 'from-transparent via-[#7F381B]/40 to-[#381508]/80' : 'from-[#381508]/80 via-[#7F381B]/40 to-transparent';
+                } else if (gradStyle === 'none' || gradStyle === 'no_overlay') {
+                  gradientClass = 'hidden bg-transparent';
+                } else {
+                  gradientClass = isRightAligned ? 'from-transparent via-black/20 to-black/45' : 'from-black/45 via-black/20 to-transparent';
+                }
+
+                let textStyle: React.CSSProperties = { color: '#FFFFFF', textShadow: '0 2px 14px rgba(0,0,0,0.95)' };
+                if (textColorVal.startsWith('#')) {
+                  textStyle = { color: textColorVal, textShadow: '0 2px 12px rgba(0,0,0,0.9)' };
+                } else if (textColorVal === 'dark') {
+                  textStyle = { color: '#2D2A24', textShadow: '0 1px 6px rgba(255,255,255,0.85)' };
+                } else if (textColorVal === 'gold') {
+                  textStyle = { color: '#D4AF37', textShadow: '0 2px 12px rgba(0,0,0,0.9)' };
+                }
+
                 return (
                   <>
+                    {/* Soft ambient vignette customized for text legibility */}
+                    {gradStyle !== 'none' && gradStyle !== 'no_overlay' && (
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-r ${gradientClass} pointer-events-none`}
+                      />
+                    )}
+
                     <div className="absolute inset-0 flex items-center z-10">
                       <div className="mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-16">
                         <div
@@ -305,14 +367,26 @@ export const HomePage: React.FC = () => {
                             transition={{ duration: 0.5, delay: 0.15 }}
                             className={isRightAligned ? 'text-right' : 'text-left'}
                           >
-                            <span className="text-xs sm:text-sm font-extrabold uppercase tracking-[0.25em] text-brand-primary block drop-shadow-xs">
+                            {bannerCat !== 'None' && (
+                              <span className="inline-block px-3 py-1 mb-2 rounded-full bg-brand-gold/20 text-brand-gold border border-brand-gold/40 text-xs font-extrabold uppercase tracking-widest shadow-sm">
+                                {bannerCat === 'Clearance Sale' ? '⚡ CLEARANCE SALE' :
+                                 bannerCat === 'Flash Deal' ? '🔥 FLASH DEAL' :
+                                 bannerCat === 'Exclusive Offer' ? '💎 VIP EXCLUSIVE' :
+                                 bannerCat === 'Free Shipping' ? '🚚 FREE SHIPPING' :
+                                 bannerCat === 'First Order' ? '🎁 WELCOME SPECIAL' :
+                                 bannerCat === 'Combo Deal' ? '📦 COMBO SAVINGS' :
+                                 '🪔 FESTIVE OFFER'}
+                              </span>
+                            )}
+                            <span className="text-xs sm:text-sm font-extrabold uppercase tracking-[0.25em] text-brand-gold block [text-shadow:_0_1px_8px_rgba(0,0,0,0.9)]">
                               RAJKANWARI • CURATED STYLE
                             </span>
                             <motion.h1
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.6, delay: 0.25 }}
-                              className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-text leading-[1.1] tracking-tight mt-2 mb-3 drop-shadow-xs"
+                              className="font-serif text-4xl sm:text-5xl lg:text-6xl font-normal leading-[1.1] tracking-tight mt-2 mb-3"
+                              style={textStyle as any}
                             >
                               {currentBanner?.title || 'Timeless Elegance'}
                             </motion.h1>
@@ -323,7 +397,7 @@ export const HomePage: React.FC = () => {
                               initial={{ opacity: 0, y: 15 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.5, delay: 0.4 }}
-                              className={`text-sm sm:text-base text-text-muted font-sans leading-relaxed font-semibold max-w-lg drop-shadow-xs ${
+                              className={`text-sm sm:text-base font-sans leading-relaxed font-medium max-w-lg text-white/95 [text-shadow:_0_1px_10px_rgba(0,0,0,0.9)] ${
                                 isRightAligned ? 'ml-auto text-right' : 'mr-auto text-left'
                               }`}
                             >
