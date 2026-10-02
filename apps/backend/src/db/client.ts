@@ -594,15 +594,19 @@ export const db: DbClient = {
 export const getDb = (): DbClient => db;
 export default db;
 
-// Auto-migrate banners table for text_alignment column on PostgreSQL and SQLite
+// Auto-migrate banners table for text_alignment column on PostgreSQL and SQLite & sync clean banner photos
 (async () => {
   try {
     if (isUsingSqlite) {
       const sDb = getSqliteInstance();
-      sDb.exec("ALTER TABLE banners ADD COLUMN text_alignment TEXT DEFAULT 'left'");
+      try {
+        sDb.exec("ALTER TABLE banners ADD COLUMN text_alignment TEXT DEFAULT 'left'");
+      } catch (_e) {}
+      sDb.exec("UPDATE banners SET image_url = '/images/hero-timeless-elegance.jpg', text_alignment = 'right' WHERE image_url LIKE '%banner_whats_new%' OR id = 'bnr_02'");
     } else {
       await pool.query("ALTER TABLE banners ADD COLUMN IF NOT EXISTS text_alignment TEXT DEFAULT 'left'");
+      await pool.query("UPDATE banners SET image_url = '/images/hero-timeless-elegance.jpg', text_alignment = 'right' WHERE image_url LIKE '%banner_whats_new%' OR id = 'bnr_02'");
     }
-    console.log('✅ Banners table column text_alignment verified.');
+    console.log('✅ Banners table schema and clean image URLs synchronized.');
   } catch (_e) {}
 })();

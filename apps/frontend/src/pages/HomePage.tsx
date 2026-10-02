@@ -90,7 +90,7 @@ export const HomePage: React.FC = () => {
               id: 'fallback_02',
               title: "Make Room For What's New",
               subtitle: 'Too Rajkunwari To Blend In. Discover our newest handcrafted arrivals & festive edits.',
-              image_url: '/images/banner_whats_new.jpg',
+              image_url: '/images/hero-timeless-elegance.jpg',
               cta_text: 'Shop New Arrivals',
               cta_link: '/catalog?sort=newest',
               text_alignment: 'right',

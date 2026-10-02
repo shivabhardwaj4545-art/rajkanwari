@@ -376,7 +376,7 @@ const banners = [
     id: 'bnr_02',
     title: "Make Room For What's New",
     subtitle: 'Too Rajkunwari To Blend In. Discover our newest handcrafted arrivals & festive edits.',
-    image_url: '/images/banner_whats_new.jpg',
+    image_url: '/images/hero-timeless-elegance.jpg',
     cta_text: 'SHOP NEW ARRIVALS',
     cta_link: '/catalog?sort=newest',
     text_alignment: 'right',
