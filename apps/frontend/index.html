@@ -15,16 +15,16 @@
 
     <!--
       BLOCKING THEME SCRIPT
-      Sets data-theme on <html> BEFORE first paint to prevent theme flash.
+      Sets data-theme="light" on <html> BEFORE first paint.
     -->
     <script>
       (function () {
         try {
-          var theme = localStorage.getItem('shikkis-theme') || 'system';
-          if (theme === 'system') {
-            theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          var theme = localStorage.getItem('shikkis-theme');
+          if (theme !== 'dark') {
+            theme = 'light';
           }
-          document.documentElement.setAttribute('data-theme', theme);
+          document.documentElement.setAttribute('data-theme', 'light');
         } catch (_) {
           document.documentElement.setAttribute('data-theme', 'light');
         }

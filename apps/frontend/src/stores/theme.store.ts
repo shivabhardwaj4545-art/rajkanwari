@@ -15,14 +15,9 @@ interface ThemeState {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getSystemTheme(): ResolvedTheme {
-  if (typeof window === 'undefined') return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
 function resolveTheme(pref: ThemePreference): ResolvedTheme {
-  if (pref === 'system') return getSystemTheme();
-  return pref;
+  if (pref === 'dark') return 'dark';
+  return 'light';
 }
 
 function applyTheme(theme: ResolvedTheme): void {
@@ -36,8 +31,8 @@ function applyTheme(theme: ResolvedTheme): void {
 export const useThemeStore = create<ThemeState>()(
   subscribeWithSelector(
     persist(
-      (set, get) => ({
-        preference: 'system',
+      (set) => ({
+        preference: 'light',
         resolved: 'light',
 
         setPreference(pref: ThemePreference) {
@@ -47,11 +42,9 @@ export const useThemeStore = create<ThemeState>()(
         },
 
         _resolveFromSystem() {
-          if (get().preference === 'system') {
-            const resolved = getSystemTheme();
-            applyTheme(resolved);
-            set({ resolved });
-          }
+          // Keep light theme as the stable store default
+          applyTheme('light');
+          set({ preference: 'light', resolved: 'light' });
         },
       }),
       {
@@ -70,14 +63,14 @@ export const useThemeStore = create<ThemeState>()(
 
 // Synchronize theme on startup
 if (typeof window !== 'undefined') {
-  let stored: ThemePreference = 'system';
+  let stored: ThemePreference = 'light';
   try {
     const raw = localStorage.getItem('shikkis-theme');
-    if (raw === 'light' || raw === 'dark' || raw === 'system') {
-      stored = raw;
-    } else if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed?.state?.preference) stored = parsed.state.preference;
+    if (raw === 'dark') {
+      stored = 'dark';
+    } else {
+      stored = 'light';
+      localStorage.setItem('shikkis-theme', 'light');
     }
   } catch {}
 
