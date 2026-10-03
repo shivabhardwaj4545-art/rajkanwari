@@ -15,15 +15,19 @@
 
     <!--
       BLOCKING THEME SCRIPT
-      Forces 'light' theme on <html> BEFORE first paint.
+      Sets data-theme on <html> BEFORE first paint to prevent theme flash.
     -->
     <script>
       (function () {
         try {
-          localStorage.removeItem('rajkanwari-theme');
-          localStorage.removeItem('shikkis-theme');
-        } catch (_) {}
-        document.documentElement.setAttribute('data-theme', 'light');
+          var theme = localStorage.getItem('shikkis-theme') || 'system';
+          if (theme === 'system') {
+            theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (_) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
       })();
     </script>
   </head>

@@ -40,23 +40,23 @@
 
 /* ── Global Theme Settings ─────────────────────────────────────────────────── */
 [data-theme='dark'] {
-  --brand-primary: #4f5437;
-  --brand-gold: #b89a5a;
-  --brand-crimson: #8e2731;
-  --brand-sale: #8e2731;
-  --bg: #f7f2e8;
-  --surface: #fbf8f0;
-  --surface-alt: #f7f2e8;
-  --text: #2d2a24;
-  --text-muted: #756d60;
-  --border: #d8c9a9;
-  --success: #2d6a4f;
-  --warning: #b89a5a;
-  --danger: #8e2731;
+  --bg: #1A0F0A;
+  --surface: #241611;
+  --surface-alt: #2C1810;
+  --text: #F5E6D3;
+  --text-muted: #A8998C;
+  --border: #4A2F25;
+  --brand-primary: #D4AF37;
+  --brand-gold: #D4AF37;
+  --brand-crimson: #9B1B30;
+  --brand-sale: #9B1B30;
+  --success: #2D6A4F;
+  --warning: #F4A261;
+  --danger: #E76F51;
 }
 
-html {
-  color-scheme: light;
+html[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 /* ── Accessible Focus Visible Ring (WCAG 2.1 AA) ─────────────────────────── */

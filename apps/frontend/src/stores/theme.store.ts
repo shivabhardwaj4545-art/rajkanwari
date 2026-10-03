@@ -7,20 +7,28 @@ export type ThemePreference = 'light' | 'dark' | 'system';
 export type ResolvedTheme = 'light' | 'dark';
 
 interface ThemeState {
-  /** What the user chose — stored in localStorage */
   preference: ThemePreference;
-  /** The actual theme applied to the DOM right now */
   resolved: ResolvedTheme;
-  /** Update user preference and resolve it immediately */
   setPreference: (pref: ThemePreference) => void;
-  /** Called internally when the OS preference changes */
   _resolveFromSystem: () => void;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function applyTheme(_theme?: ResolvedTheme): void {
-  document.documentElement.setAttribute('data-theme', 'light');
+function getSystemTheme(): ResolvedTheme {
+  if (typeof window === 'undefined') return 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function resolveTheme(pref: ThemePreference): ResolvedTheme {
+  if (pref === 'system') return getSystemTheme();
+  return pref;
+}
+
+function applyTheme(theme: ResolvedTheme): void {
+  if (typeof document !== 'undefined') {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
 }
 
 // ─── Store ────────────────────────────────────────────────────────────────────
@@ -28,28 +36,31 @@ function applyTheme(_theme?: ResolvedTheme): void {
 export const useThemeStore = create<ThemeState>()(
   subscribeWithSelector(
     persist(
-      (set) => ({
-        preference: 'light',
+      (set, get) => ({
+        preference: 'system',
         resolved: 'light',
 
-        setPreference() {
-          applyTheme('light');
-          set({ preference: 'light', resolved: 'light' });
+        setPreference(pref: ThemePreference) {
+          const resolved = resolveTheme(pref);
+          applyTheme(resolved);
+          set({ preference: pref, resolved });
         },
 
         _resolveFromSystem() {
-          applyTheme('light');
-          set({ preference: 'light', resolved: 'light' });
+          if (get().preference === 'system') {
+            const resolved = getSystemTheme();
+            applyTheme(resolved);
+            set({ resolved });
+          }
         },
       }),
       {
-        name: 'rajkanwari-theme',
-        partialize: () => ({ preference: 'light' }),
+        name: 'shikkis-theme',
         onRehydrateStorage: () => (state) => {
           if (state) {
-            applyTheme('light');
-            state.preference = 'light';
-            state.resolved = 'light';
+            const resolved = resolveTheme(state.preference);
+            applyTheme(resolved);
+            state.resolved = resolved;
           }
         },
       },
@@ -57,7 +68,23 @@ export const useThemeStore = create<ThemeState>()(
   ),
 );
 
-// Enforce light theme on load
+// Synchronize theme on startup
 if (typeof window !== 'undefined') {
-  applyTheme('light');
+  let stored: ThemePreference = 'system';
+  try {
+    const raw = localStorage.getItem('shikkis-theme');
+    if (raw === 'light' || raw === 'dark' || raw === 'system') {
+      stored = raw;
+    } else if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.state?.preference) stored = parsed.state.preference;
+    }
+  } catch {}
+
+  const initialResolved = resolveTheme(stored);
+  applyTheme(initialResolved);
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    useThemeStore.getState()._resolveFromSystem();
+  });
 }
