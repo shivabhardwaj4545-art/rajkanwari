@@ -703,7 +703,7 @@ ordersRouter.post('/', validate(createOrderSchema, 'body'), async (req, res, nex
 
         // If COD: decrement stock immediately
         if (!isOnline) {
-          await tx.prepare('UPDATE product_variants SET stock = MAX(0, stock - ?) WHERE id = ?').run(
+          await tx.prepare('UPDATE product_variants SET stock = GREATEST(0, stock - ?) WHERE id = ?').run(
             it.quantity,
             it.variant_id
           );
