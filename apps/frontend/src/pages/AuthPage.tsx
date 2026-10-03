@@ -162,7 +162,7 @@ export const AuthPage: React.FC = () => {
         <div className="flex flex-col items-center justify-center mb-8 text-center">
           <Link
             to="/"
-            className="inline-block text-text hover:opacity-95 transition-opacity focus:outline-none"
+            className="inline-block text-text focus:outline-none"
             aria-label="Rajkanwari Home"
           >
             <BrandLogo variant="full" size="lg" />

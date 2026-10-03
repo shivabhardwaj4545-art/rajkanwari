@@ -337,6 +337,8 @@ function parseSqliteParams(sql: string, params: any[]): { text: string; values: 
   text = text.replace(/\bILIKE\b/gi, 'LIKE');
   text = text.replace(/\bTIMESTAMPTZ\b/gi, 'TEXT');
   text = text.replace(/\bBIGINT\b/gi, 'INTEGER');
+  text = text.replace(/\bGREATEST\(([^,]+),\s*([^)]+)\)/gi, 'MAX($1, $2)');
+  text = text.replace(/\bLEAST\(([^,]+),\s*([^)]+)\)/gi, 'MIN($1, $2)');
 
   text = text.replace(/TO_CHAR\(([^,]+),\s*'YYYY-MM-DD'\)/gi, "strftime('%Y-%m-%d', $1)");
   text = text.replace(/CURRENT_TIMESTAMP\s*\+\s*INTERVAL\s*'(\d+)\s*days?'/gi, "datetime('now', '+$1 days')");

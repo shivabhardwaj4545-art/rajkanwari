@@ -22,7 +22,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       <img
         src="/images/rajkanwari_logo.jpeg"
         alt="Rajkanwari — House of Ethnic Wear"
-        className={`${logoHeights[size]} w-auto object-contain mix-blend-multiply dark:invert dark:brightness-150 transition-all`}
+        className={`${logoHeights[size]} w-auto object-contain mix-blend-multiply dark:invert dark:brightness-150`}
       />
     </div>
   );

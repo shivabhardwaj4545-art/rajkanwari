@@ -199,7 +199,7 @@ export const Header: React.FC = () => {
           <Link
             to="/"
             id="site-wordmark"
-            className="flex items-center text-text hover:opacity-95 transition-opacity duration-200 focus:outline-none"
+            className="flex items-center text-text focus:outline-none"
             aria-label="Rajkanwari - House of Ethnic Wear"
           >
             <BrandLogo variant="full" size="md" />

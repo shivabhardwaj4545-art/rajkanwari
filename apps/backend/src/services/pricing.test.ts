@@ -156,7 +156,7 @@ describe('Offer & Pricing Engine (calculateCart)', () => {
 
     await testDb.prepare(`
       INSERT INTO products (id, category_id, name, slug, description, fabric, occasion, gender, mrp, discount_percent, sku, images, is_active)
-      VALUES ('prd_test_small', 'cat_sarees', 'Dupatta', 'dupatta-freeship-test', 'Silk Dupatta', 'Silk', 'Festive', 'women', 100000, 0, 'SKU-SM-FS-TEST', '[]', 1)
+      VALUES ('prd_test_small', 'cat_anarkali', 'Dupatta', 'dupatta-freeship-test', 'Silk Dupatta', 'Silk', 'Festive', 'women', 100000, 0, 'SKU-SM-FS-TEST', '[]', 1)
       ON CONFLICT (id) DO NOTHING;
     `).run();
 

@@ -29,7 +29,7 @@ export const Footer: React.FC = () => (
         <div className="md:col-span-2 flex flex-col gap-4">
           <Link
             to="/"
-            className="inline-block text-text hover:opacity-95 transition-opacity focus:outline-none"
+            className="inline-block text-text focus:outline-none"
             aria-label="Rajkanwari - House of Ethnic Wear"
           >
             <BrandLogo variant="full" size="lg" />
