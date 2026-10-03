@@ -8,10 +8,13 @@ import {
   MoveLeft,
   MoveRight,
   Package,
+  Palette,
+  Plus,
   Save,
   Star,
   Trash2,
   UploadCloud,
+  X,
 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -23,8 +26,14 @@ import {
 } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
 
+export interface ColorDef {
+  name: string;
+  hex: string;
+  code: string;
+}
+
 const SIZES_AVAILABLE = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'FREE_SIZE'];
-const PRESET_COLORS = [
+const PRESET_COLORS: ColorDef[] = [
   { name: 'Crimson Red', hex: '#9B1B30', code: 'RED' },
   { name: 'Royal Gold', hex: '#D4AF37', code: 'GLD' },
   { name: 'Midnight Navy', hex: '#1B263B', code: 'NVY' },
@@ -65,9 +74,46 @@ export const ProductEditorPage: React.FC = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [deleteImageTarget, setDeleteImageTarget] = useState<number | null>(null);
 
-  // Variants
+  // Variants & Colors
   const [selectedSizes, setSelectedSizes] = useState<string[]>(['S', 'M', 'L']);
   const [selectedColors, setSelectedColors] = useState<string[]>(['Crimson Red']);
+
+  // Custom Colors
+  const [customColors, setCustomColors] = useState<ColorDef[]>(() => {
+    try {
+      const saved = localStorage.getItem('shikkis-custom-colors');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [showCustomColorInput, setShowCustomColorInput] = useState(false);
+  const [newColorName, setNewColorName] = useState('');
+  const [newColorHex, setNewColorHex] = useState('#7C3AED');
+  const [newColorCode, setNewColorCode] = useState('');
+
+  // Combined available colors list
+  const allAvailableColors: ColorDef[] = useMemo(() => {
+    const list: ColorDef[] = [...PRESET_COLORS];
+    for (const c of customColors) {
+      if (!list.some((existing) => existing.name.toLowerCase() === c.name.toLowerCase())) {
+        list.push(c);
+      }
+    }
+    return list;
+  }, [customColors]);
+
+  const getColorDef = (colorName: string): ColorDef => {
+    const found = allAvailableColors.find((c) => c.name.toLowerCase() === colorName.toLowerCase());
+    if (found) return found;
+    return {
+      name: colorName,
+      hex: '#888888',
+      code: colorName.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase() || 'CLR',
+    };
+  };
+
   const [variants, setVariants] = useState<AdminVariantItem[]>([
     { size: 'S', color: 'Crimson Red', variant_sku: 'PRD-RED-S', stock: 10, price_override: null },
     { size: 'M', color: 'Crimson Red', variant_sku: 'PRD-RED-M', stock: 15, price_override: null },
@@ -114,6 +160,30 @@ export const ProductEditorPage: React.FC = () => {
           const distinctColors = Array.from(new Set(res.variants.map((v) => v.color)));
           setSelectedSizes(distinctSizes);
           setSelectedColors(distinctColors);
+
+          // Register any colors from product that aren't in preset
+          setCustomColors((prev) => {
+            const next = [...prev];
+            let modified = false;
+            for (const cName of distinctColors) {
+              const inPreset = PRESET_COLORS.some((p) => p.name.toLowerCase() === cName.toLowerCase());
+              const inCustom = next.some((c) => c.name.toLowerCase() === cName.toLowerCase());
+              if (!inPreset && !inCustom) {
+                next.push({
+                  name: cName,
+                  hex: '#888888',
+                  code: cName.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase() || 'CLR',
+                });
+                modified = true;
+              }
+            }
+            if (modified) {
+              try {
+                localStorage.setItem('shikkis-custom-colors', JSON.stringify(next));
+              } catch {}
+            }
+            return next;
+          });
         }
       })
       .catch((err) => {
@@ -202,8 +272,8 @@ export const ProductEditorPage: React.FC = () => {
     const generated: AdminVariantItem[] = [];
 
     for (const color of selectedColors) {
-      const colorDef = PRESET_COLORS.find((c) => c.name === color);
-      const colorCode = colorDef?.code || color.replace(/[^A-Z]/gi, '').slice(0, 3).toUpperCase() || 'CLR';
+      const colorDef = getColorDef(color);
+      const colorCode = colorDef.code || color.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase() || 'CLR';
 
       for (const size of selectedSizes) {
         const variantSku = `${baseSku}-${colorCode}-${size}`;
@@ -221,6 +291,67 @@ export const ProductEditorPage: React.FC = () => {
     }
 
     setVariants(generated);
+    markDirty();
+  };
+
+  // Custom Color Handlers
+  const handleAddCustomColor = () => {
+    const trimmed = newColorName.trim();
+    if (!trimmed) return;
+
+    const code = (newColorCode.trim() || trimmed.replace(/[^A-Za-z0-9]/g, '').slice(0, 3) || 'CLR').toUpperCase();
+    const hex = newColorHex || '#7C3AED';
+
+    const newEntry: ColorDef = {
+      name: trimmed,
+      hex,
+      code,
+    };
+
+    const nextCustom = [...customColors.filter((c) => c.name.toLowerCase() !== trimmed.toLowerCase()), newEntry];
+    setCustomColors(nextCustom);
+    try {
+      localStorage.setItem('shikkis-custom-colors', JSON.stringify(nextCustom));
+    } catch {}
+
+    setSelectedColors((prev) => (prev.includes(trimmed) ? prev : [...prev, trimmed]));
+    setNewColorName('');
+    setNewColorCode('');
+    setNewColorHex('#7C3AED');
+    setShowCustomColorInput(false);
+    markDirty();
+  };
+
+  const handleRemoveCustomColor = (colorName: string) => {
+    const nextCustom = customColors.filter((c) => c.name.toLowerCase() !== colorName.toLowerCase());
+    setCustomColors(nextCustom);
+    try {
+      localStorage.setItem('shikkis-custom-colors', JSON.stringify(nextCustom));
+    } catch {}
+    setSelectedColors((prev) => prev.filter((c) => c.toLowerCase() !== colorName.toLowerCase()));
+    markDirty();
+  };
+
+  const handleAddSingleVariant = () => {
+    const defaultSize = selectedSizes[0] || 'M';
+    const defaultColor = selectedColors[0] || (allAvailableColors[0]?.name ?? 'Crimson Red');
+    const colorDef = getColorDef(defaultColor);
+    const colorCode = colorDef.code || defaultColor.slice(0, 3).toUpperCase();
+    const baseSku = (sku.trim() || name.replace(/[^A-Z0-9]/gi, '').slice(0, 4) || 'SHK').toUpperCase();
+    const randomSuffix = Math.floor(100 + Math.random() * 900);
+    const variantSku = `${baseSku}-${colorCode}-${defaultSize}-${randomSuffix}`;
+
+    setVariants((prev) => [
+      ...prev,
+      {
+        size: defaultSize,
+        color: defaultColor,
+        variant_sku: variantSku,
+        stock: 10,
+        price_override: null,
+        is_active: true,
+      },
+    ]);
     markDirty();
   };
 
@@ -746,30 +877,144 @@ export const ProductEditorPage: React.FC = () => {
 
             {/* Color Selector */}
             <div>
-              <label className="block text-xs font-medium text-text mb-2">Colours Included:</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-medium text-text">Colours Included:</label>
+                <button
+                  type="button"
+                  onClick={() => setShowCustomColorInput((prev) => !prev)}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-brand-gold hover:text-brand-crimson transition-colors"
+                >
+                  <Palette size={13} />
+                  <span>{showCustomColorInput ? 'Close Custom Colour' : '+ Add Custom Colour'}</span>
+                </button>
+              </div>
+
+              {/* Custom Colour Creation Form */}
+              {showCustomColorInput && (
+                <div className="mb-3 p-3.5 rounded-xl border border-brand-gold/40 bg-surface-alt/50 space-y-3">
+                  <div className="text-xs font-semibold text-text flex items-center gap-1.5">
+                    <Palette size={14} className="text-brand-gold" />
+                    <span>Create Custom Product Colour</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                    <div className="sm:col-span-5">
+                      <label className="block text-[11px] font-medium text-text mb-1">
+                        Colour Name <span className="text-brand-crimson">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Rani Pink, Peacock Blue, Sage Green"
+                        value={newColorName}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setNewColorName(val);
+                          if (!newColorCode || newColorCode === newColorName.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase()) {
+                            setNewColorCode(val.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase());
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddCustomColor();
+                          }
+                        }}
+                        className="w-full px-3 py-1.5 rounded-lg bg-bg border border-border text-xs text-text focus:outline-hidden focus:border-brand-gold"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-3">
+                      <label className="block text-[11px] font-medium text-text mb-1">
+                        Colour Swatch
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={newColorHex}
+                          onChange={(e) => setNewColorHex(e.target.value)}
+                          className="w-8 h-8 rounded-md border border-border cursor-pointer p-0.5 bg-bg"
+                        />
+                        <input
+                          type="text"
+                          value={newColorHex}
+                          onChange={(e) => setNewColorHex(e.target.value)}
+                          className="w-full px-2 py-1.5 rounded-lg bg-bg border border-border text-xs font-mono uppercase text-text"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label className="block text-[11px] font-medium text-text mb-1">
+                        SKU Code
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={4}
+                        placeholder="e.g. RNP"
+                        value={newColorCode}
+                        onChange={(e) => setNewColorCode(e.target.value.toUpperCase())}
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-bg border border-border text-xs font-mono uppercase text-text"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-2 flex gap-1.5">
+                      <button
+                        type="button"
+                        onClick={handleAddCustomColor}
+                        disabled={!newColorName.trim()}
+                        className="w-full py-1.5 px-3 rounded-lg bg-brand-crimson text-white text-xs font-semibold hover:bg-brand-crimson/90 disabled:opacity-50 transition-colors shadow-xs"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-wrap gap-2">
-                {PRESET_COLORS.map((c) => {
+                {allAvailableColors.map((c) => {
                   const isSelected = selectedColors.includes(c.name);
+                  const isCustom = !PRESET_COLORS.some((p) => p.name.toLowerCase() === c.name.toLowerCase());
                   return (
-                    <button
+                    <div
                       key={c.name}
-                      type="button"
-                      onClick={() => {
-                        setSelectedColors((prev) =>
-                          isSelected ? prev.filter((clr) => clr !== c.name) : [...prev, c.name]
-                        );
-                        markDirty();
-                      }}
                       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                         isSelected
                           ? 'bg-surface-alt border-brand-gold text-text shadow-xs'
-                          : 'bg-bg border-border text-text-muted'
+                          : 'bg-bg border-border text-text-muted hover:border-brand-gold/50'
                       }`}
                     >
-                      <span className="w-2.5 h-2.5 rounded-full border border-black/20" style={{ backgroundColor: c.hex }} />
-                      <span>{c.name}</span>
-                      {isSelected && <Check size={12} className="text-brand-gold" />}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedColors((prev) =>
+                            isSelected ? prev.filter((clr) => clr !== c.name) : [...prev, c.name]
+                          );
+                          markDirty();
+                        }}
+                        className="inline-flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span
+                          className="w-2.5 h-2.5 rounded-full border border-black/20 shrink-0"
+                          style={{ backgroundColor: c.hex }}
+                        />
+                        <span>{c.name}</span>
+                        {isSelected && <Check size={12} className="text-brand-gold" />}
+                      </button>
+
+                      {isCustom && (
+                        <button
+                          type="button"
+                          title={`Delete custom colour ${c.name}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveCustomColor(c.name);
+                          }}
+                          className="p-0.5 rounded-full hover:bg-danger/20 hover:text-danger text-text-muted transition-colors cursor-pointer ml-0.5"
+                        >
+                          <X size={11} />
+                        </button>
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -791,8 +1036,28 @@ export const ProductEditorPage: React.FC = () => {
                 <tbody className="divide-y divide-border/60">
                   {variants.map((v, idx) => (
                     <tr key={`${v.size}-${v.color}-${idx}`} className="hover:bg-surface-alt/30">
-                      <td className="p-2.5 font-semibold text-text">{v.size}</td>
-                      <td className="p-2.5 text-text">{v.color}</td>
+                      <td className="p-2.5 font-semibold text-text">
+                        <input
+                          type="text"
+                          value={v.size}
+                          onChange={(e) => handleUpdateVariant(idx, 'size', e.target.value.toUpperCase())}
+                          className="w-16 px-1.5 py-1 rounded bg-bg border border-border font-semibold text-xs text-text"
+                        />
+                      </td>
+                      <td className="p-2.5 text-text">
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full border border-black/20 shrink-0"
+                            style={{ backgroundColor: getColorDef(v.color).hex }}
+                          />
+                          <input
+                            type="text"
+                            value={v.color}
+                            onChange={(e) => handleUpdateVariant(idx, 'color', e.target.value)}
+                            className="w-28 px-1.5 py-1 rounded bg-bg border border-border text-xs text-text"
+                          />
+                        </div>
+                      </td>
                       <td className="p-2.5">
                         <input
                           type="text"
@@ -835,6 +1100,21 @@ export const ProductEditorPage: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+
+              {/* Table Footer with Add Variant Button */}
+              <div className="flex items-center justify-between p-2.5 bg-surface-alt/40 border-t border-border">
+                <button
+                  type="button"
+                  onClick={handleAddSingleVariant}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-brand-gold hover:text-brand-crimson transition-colors"
+                >
+                  <Plus size={13} />
+                  <span>Add Individual Variant Row</span>
+                </button>
+                <span className="text-[11px] text-text-muted">
+                  Total Variants: {variants.length}
+                </span>
+              </div>
             </div>
           </div>
         </form>
@@ -912,6 +1192,24 @@ export const ProductEditorPage: React.FC = () => {
                     ))}
                     {selectedSizes.length > 4 && (
                       <span className="text-[9px] text-text-muted">+{selectedSizes.length - 4}</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Available Colours preview */}
+                <div className="pt-1.5 flex items-center gap-1.5">
+                  <span className="text-[10px] text-text-muted">Colours:</span>
+                  <div className="flex items-center gap-1">
+                    {selectedColors.slice(0, 5).map((clr) => (
+                      <span
+                        key={clr}
+                        title={clr}
+                        className="w-3 h-3 rounded-full border border-black/20 shadow-xs inline-block"
+                        style={{ backgroundColor: getColorDef(clr).hex }}
+                      />
+                    ))}
+                    {selectedColors.length > 5 && (
+                      <span className="text-[9px] text-text-muted">+{selectedColors.length - 5}</span>
                     )}
                   </div>
                 </div>
