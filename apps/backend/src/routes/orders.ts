@@ -74,7 +74,7 @@ ordersRouter.get('/', verifyJWT, async (req, res, next) => {
     }
 
     if (search && search.trim()) {
-      query += ` AND o.order_number ILIKE ?`;
+      query += ` AND LOWER(o.order_number) LIKE LOWER(?)`;
       params.push(`%${search.trim()}%`);
     }
 
@@ -392,10 +392,15 @@ ordersRouter.post('/verify-payment', validate(verifyPaymentSchema, 'body'), asyn
       isValid = true;
     } else {
       try {
-        isValid = crypto.timingSafeEqual(
-          Buffer.from(razorpay_signature, 'utf8'),
-          Buffer.from(expectedSignature, 'utf8')
-        );
+        const sigBuf = Buffer.from(razorpay_signature, 'hex');
+        const expBuf = Buffer.from(expectedSignature, 'hex');
+        // timingSafeEqual requires equal-length buffers
+        if (sigBuf.length === expBuf.length) {
+          isValid = crypto.timingSafeEqual(sigBuf, expBuf);
+        } else {
+          crypto.timingSafeEqual(expBuf, expBuf); // dummy for timing safety
+          isValid = false;
+        }
       } catch {
         isValid = false;
       }
@@ -411,7 +416,28 @@ ordersRouter.post('/verify-payment', validate(verifyPaymentSchema, 'body'), asyn
       return;
     }
 
-    // Atomic transaction to mark paid
+    // Idempotency: already-paid orders return success immediately (webhook may beat client)
+    if (order.payment_status === 'paid') {
+      res.json({
+        success: true,
+        order_id: order.id,
+        order_number: order.order_number,
+        payment_status: 'paid',
+      });
+      return;
+    }
+
+    // Fetch order items so we can decrement stock
+    const orderItems = (await db
+      .prepare('SELECT variant_id, quantity FROM order_items WHERE order_id = ?')
+      .all(order.id)) as Array<{ variant_id: string; quantity: number }>;
+
+    // Find the user's latest cart so we can clear it after payment
+    const userCart = (await db
+      .prepare('SELECT id FROM carts WHERE user_id = ? ORDER BY updated_at DESC LIMIT 1')
+      .get(order.user_id)) as { id: string } | undefined;
+
+    // Atomic transaction: mark paid + decrement stock + clear cart
     await db.transaction(async (tx) => {
       await tx.prepare(
         `UPDATE orders
@@ -432,6 +458,19 @@ ordersRouter.post('/verify-payment', validate(verifyPaymentSchema, 'body'), asyn
         'Payment verified successfully via Razorpay SDK & server HMAC check',
         'customer_checkout'
       );
+
+      // Decrement stock for each item (mirrors the COD path)
+      for (const item of orderItems) {
+        await tx.prepare(
+          'UPDATE product_variants SET stock = GREATEST(0, stock - ?) WHERE id = ?'
+        ).run(item.quantity, item.variant_id);
+      }
+
+      // Clear the user's cart
+      if (userCart) {
+        await tx.prepare('DELETE FROM cart_items WHERE cart_id = ?').run(userCart.id);
+        await tx.prepare('UPDATE carts SET coupon_code = NULL WHERE id = ?').run(userCart.id);
+      }
     });
 
     res.json({
