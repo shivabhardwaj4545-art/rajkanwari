@@ -729,14 +729,14 @@ export const AdminInventoryPage: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setAuditDrawerOpen(false)}
-              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs"
+              className="fixed inset-x-0 top-16 bottom-0 z-40 bg-black/50 backdrop-blur-xs"
             />
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-              className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-surface border-l border-border shadow-2xl p-6 flex flex-col"
+              className="fixed top-16 bottom-0 right-0 z-50 w-full max-w-md bg-surface border-l border-border shadow-2xl p-6 flex flex-col"
             >
               <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
                 <div className="flex items-center gap-2 text-brand-gold">

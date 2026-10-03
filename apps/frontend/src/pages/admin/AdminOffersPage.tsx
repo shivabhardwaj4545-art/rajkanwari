@@ -37,7 +37,7 @@ export const AdminOffersPage: React.FC = () => {
   // Form Fields
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
-  const [offerCategory, setOfferCategory] = useState<string>('Festive Offer');
+  const [offerCategory, setOfferCategory] = useState<string>('none');
   const [customOfferCategory, setCustomOfferCategory] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [type, setType] = useState<'percent' | 'flat' | 'free_shipping'>('percent');
@@ -76,34 +76,52 @@ export const AdminOffersPage: React.FC = () => {
     api.getProducts({ limit: 50 }).then((r) => setProducts(r.data)).catch(console.error);
   }, []);
 
+  // Helper: normalise null/empty offer_category to 'none' for consistent filtering
+  const getCat = (o: AdminOfferItem) => o.offer_category?.trim() || 'none';
+
   // Filter offers by derived_status and offer_category
   const filteredOffers = useMemo(() => {
     return offers.filter((o) => {
       const matchesStatus = o.derived_status === activeTab;
-      const matchesCat =
-        categoryFilter === 'all' || (o.offer_category || 'Festive Offer') === categoryFilter;
+      const matchesCat = categoryFilter === 'all' || getCat(o) === categoryFilter;
       return matchesStatus && matchesCat;
     });
   }, [offers, activeTab, categoryFilter]);
 
+  // Count per tab (unfiltered by category) — for badge totals
+  const tabCounts = useMemo(() => ({
+    running: offers.filter((o) => o.derived_status === 'running').length,
+    scheduled: offers.filter((o) => o.derived_status === 'scheduled').length,
+    expired: offers.filter((o) => o.derived_status === 'expired').length,
+  }), [offers]);
+
+  // Count per tab filtered by current category — for "x of y" badge
+  const tabFilteredCounts = useMemo(() => ({
+    running: offers.filter((o) => o.derived_status === 'running' && (categoryFilter === 'all' || getCat(o) === categoryFilter)).length,
+    scheduled: offers.filter((o) => o.derived_status === 'scheduled' && (categoryFilter === 'all' || getCat(o) === categoryFilter)).length,
+    expired: offers.filter((o) => o.derived_status === 'expired' && (categoryFilter === 'all' || getCat(o) === categoryFilter)).length,
+  }), [offers, categoryFilter]);
+
   // Dynamically compute category filter pills (presets + custom ones found in offers)
   const categoryOptions = useMemo(() => {
     const defaultCats = [
-      { id: 'all', label: 'All Offers' },
-      { id: 'Festive Offer', label: '🪔 Festive' },
+      { id: 'all',            label: 'All Offers' },
+      { id: 'none',           label: '🎯 General' },
+      { id: 'Festive Offer',  label: '🪔 Festive' },
       { id: 'Clearance Sale', label: '⚡ Clearance' },
-      { id: 'Flash Deal', label: '🔥 Flash Deal' },
-      { id: 'Exclusive Offer', label: '💎 VIP Exclusive' },
-      { id: 'Free Shipping', label: '🚚 Free Shipping' },
-      { id: 'First Order', label: '🎁 First Order' },
-      { id: 'Combo Deal', label: '📦 Combo Deal' },
+      { id: 'Flash Deal',     label: '🔥 Flash Deal' },
+      { id: 'Exclusive Offer',label: '💎 VIP Exclusive' },
+      { id: 'Free Shipping',  label: '🚚 Free Shipping' },
+      { id: 'First Order',    label: '🎁 First Order' },
+      { id: 'Combo Deal',     label: '📦 Combo Deal' },
     ];
 
     const knownIds = new Set(defaultCats.map((c) => c.id));
     const customCats: { id: string; label: string }[] = [];
 
     offers.forEach((o) => {
-      const cat = o.offer_category;
+      const cat = o.offer_category?.trim();
+      // Only add as custom if it's a non-empty, non-known category
       if (cat && !knownIds.has(cat) && !customCats.some((c) => c.id === cat)) {
         customCats.push({ id: cat, label: `✨ ${cat}` });
       }
@@ -183,8 +201,10 @@ export const AdminOffersPage: React.FC = () => {
     setSaving(true);
     try {
       const effectiveOfferCategory =
-        offerCategory === 'custom'
-          ? customOfferCategory.trim() || 'Festive Offer'
+        offerCategory === 'none'
+          ? null                                              // General coupon — no category tag
+          : offerCategory === 'custom'
+          ? customOfferCategory.trim() || null
           : offerCategory;
 
       const payload = {
@@ -259,13 +279,19 @@ export const AdminOffersPage: React.FC = () => {
         <div className="border-b border-border flex items-center justify-between gap-4 overflow-x-auto pb-1">
           <div className="flex items-center gap-8">
             {(['running', 'scheduled', 'expired'] as TabStatus[]).map((tab) => {
-              const count = offers.filter((o) => o.derived_status === tab).length;
+              const total = tabCounts[tab];
+              const filtered = tabFilteredCounts[tab];
+              const showFiltered = categoryFilter !== 'all' && filtered !== total;
               const isActive = activeTab === tab;
 
               return (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab)}
+                  onClick={() => {
+                    setActiveTab(tab);
+                    // Reset category filter when switching tabs to avoid stuck empty state
+                    setCategoryFilter('all');
+                  }}
                   className={`relative pb-3 text-xs font-semibold transition-colors flex items-center gap-2 capitalize shrink-0 ${
                     isActive ? 'text-brand-crimson dark:text-brand-gold' : 'text-text-muted hover:text-text'
                   }`}
@@ -278,7 +304,7 @@ export const AdminOffersPage: React.FC = () => {
                         : 'bg-surface-alt text-text-muted'
                     }`}
                   >
-                    {count}
+                    {showFiltered ? `${filtered}/${total}` : total}
                   </span>
 
                   {/* Animated sliding underline */}
@@ -324,17 +350,28 @@ export const AdminOffersPage: React.FC = () => {
             No {activeTab} {categoryFilter !== 'all' ? `"${categoryFilter}"` : ''} Promotions
           </h3>
           <p className="text-xs text-text-muted max-w-sm mx-auto">
-            {activeTab === 'running'
+            {categoryFilter !== 'all' && tabCounts[activeTab] > 0
+              ? `There are ${tabCounts[activeTab]} ${activeTab} offer(s) in total — none match the selected category filter.`
+              : activeTab === 'running'
               ? 'No promotions are currently active within their scheduled date window.'
               : activeTab === 'scheduled'
               ? 'No upcoming promotions scheduled for future dates.'
               : 'No expired promotions found in the archives.'}
           </p>
+          {categoryFilter !== 'all' && (
+            <button
+              onClick={() => setCategoryFilter('all')}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-surface-alt border border-border text-xs font-semibold text-text-muted hover:text-text transition-colors"
+            >
+              <X size={13} />
+              Clear Category Filter
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredOffers.map((offer) => {
-            const catName = offer.offer_category || 'Festive Offer';
+            const catName = offer.offer_category?.trim() || 'none';
             return (
               <div
                 key={offer.id}
@@ -344,13 +381,14 @@ export const AdminOffersPage: React.FC = () => {
                   {/* Category Pill Tag */}
                   <div className="flex items-center justify-between gap-2">
                     <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-brand-gold/15 text-brand-gold border border-brand-gold/30 uppercase tracking-wider">
-                      {catName === 'Clearance Sale' ? '⚡ CLEARANCE' :
-                       catName === 'Flash Deal' ? '🔥 FLASH DEAL' :
-                       catName === 'Exclusive Offer' ? '💎 VIP EXCLUSIVE' :
-                       catName === 'Free Shipping' ? '🚚 FREE SHIPPING' :
-                       catName === 'First Order' ? '🎁 WELCOME SPECIAL' :
-                       catName === 'Combo Deal' ? '📦 COMBO SAVINGS' :
-                       catName === 'Festive Offer' ? '🪔 FESTIVE OFFER' :
+                      {catName === 'none'          ? '🎯 GENERAL OFFER' :
+                       catName === 'Clearance Sale' ? '⚡ CLEARANCE' :
+                       catName === 'Flash Deal'     ? '🔥 FLASH DEAL' :
+                       catName === 'Exclusive Offer'? '💎 VIP EXCLUSIVE' :
+                       catName === 'Free Shipping'  ? '🚚 FREE SHIPPING' :
+                       catName === 'First Order'    ? '🎁 FIRST ORDER' :
+                       catName === 'Combo Deal'     ? '📦 COMBO SAVINGS' :
+                       catName === 'Festive Offer'  ? '🪔 FESTIVE OFFER' :
                        `✨ ${catName.toUpperCase()}`}
                     </span>
 
@@ -511,19 +549,27 @@ export const AdminOffersPage: React.FC = () => {
 
                 {/* Offer Category Selector */}
                 <div>
-                  <label className="block font-semibold text-text mb-1">
-                    Special Offer Category <span className="text-brand-crimson">*</span>
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block font-semibold text-text">
+                      Special Offer Category
+                    </label>
+                    {offerCategory === 'none' && (
+                      <span className="text-[10px] text-text-muted bg-surface-alt px-2 py-0.5 rounded-full border border-border">
+                        🎯 General coupon — no category tag applied
+                      </span>
+                    )}
+                  </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
-                      { id: 'Festive Offer', label: '🪔 Festive Offer' },
-                      { id: 'Clearance Sale', label: '⚡ Clearance' },
-                      { id: 'Flash Deal', label: '🔥 Flash Deal' },
-                      { id: 'Exclusive Offer', label: '💎 VIP Exclusive' },
-                      { id: 'Free Shipping', label: '🚚 Free Shipping' },
-                      { id: 'First Order', label: '🎁 First Order' },
-                      { id: 'Combo Deal', label: '📦 Combo Savings' },
-                      { id: 'custom', label: '✨ Custom Category' },
+                      { id: 'none',           label: '🎯 None / General' },
+                      { id: 'Festive Offer',  label: '🪔 Festive Offer' },
+                      { id: 'Clearance Sale', label: '⚡ Clearance Sale' },
+                      { id: 'Flash Deal',     label: '🔥 Flash Deal' },
+                      { id: 'Exclusive Offer',label: '💎 VIP Exclusive' },
+                      { id: 'Free Shipping',  label: '🚚 Free Shipping' },
+                      { id: 'First Order',    label: '🎁 First Order' },
+                      { id: 'Combo Deal',     label: '📦 Combo Savings' },
+                      { id: 'custom',         label: '✨ Custom Category' },
                     ].map((cat) => (
                       <button
                         key={cat.id}
