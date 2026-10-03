@@ -8,7 +8,9 @@
   ],
   "scripts": {
     "dev": "concurrently -k -n BACKEND,FRONTEND -c blue,magenta \"npm run dev --workspace=apps/backend\" \"npm run dev --workspace=apps/frontend\"",
+    "build": "npm run build:all",
     "build:all": "npm run build --workspace=packages/types && npm run build --workspace=apps/backend && npm run build --workspace=apps/frontend",
+    "start": "npm run start --workspace=apps/backend",
     "check:types": "npm run check:types --workspace=packages/types && npm run check:types --workspace=apps/backend && npm run check:types --workspace=apps/frontend",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
