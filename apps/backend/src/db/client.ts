@@ -21,7 +21,10 @@ const connectionString =
 let poolConfig: pkg.PoolConfig;
 
 if (connectionString) {
-  const isLocalHost = connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
+  const isLocalHost =
+    connectionString.includes('localhost') ||
+    connectionString.includes('127.0.0.1') ||
+    connectionString.includes('railway.internal');
   const disableSsl = process.env.PGSSLMODE === 'disable' || process.env.PGSSL === 'false';
 
   poolConfig = {
@@ -39,7 +42,7 @@ if (connectionString) {
   const password = process.env.PGPASSWORD || process.env.POSTGRES_PASSWORD || 'Shiva@123';
   const database = process.env.PGDATABASE || process.env.POSTGRES_DB || (process.env.NODE_ENV === 'production' ? 'railway' : 'shikkis');
 
-  const isLocalHost = host === 'localhost' || host === '127.0.0.1';
+  const isLocalHost = host === 'localhost' || host === '127.0.0.1' || host.includes('railway.internal');
   const disableSsl = process.env.PGSSLMODE === 'disable' || process.env.PGSSL === 'false';
 
   poolConfig = {

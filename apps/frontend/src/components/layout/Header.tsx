@@ -224,10 +224,10 @@ export const Header: React.FC = () => {
                 id="admin-console-button"
                 aria-label="Admin Console"
                 title="Admin Console"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-crimson/10 text-brand-crimson dark:bg-brand-gold/15 dark:text-brand-gold text-xs font-semibold border border-brand-crimson/30 dark:border-brand-gold/40 hover:bg-brand-crimson hover:text-white dark:hover:bg-brand-gold dark:hover:text-black transition-all shadow-xs"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-crimson/10 text-brand-crimson dark:bg-brand-gold/15 dark:text-brand-gold text-xs font-semibold border border-brand-crimson/30 dark:border-brand-gold/40 hover:bg-brand-crimson hover:text-white dark:hover:bg-brand-gold dark:hover:text-black transition-all shadow-xs"
               >
                 <LayoutDashboard size={14} />
-                <span className="hidden sm:inline">Admin</span>
+                <span>Admin</span>
               </Link>
             )}
 
@@ -238,7 +238,7 @@ export const Header: React.FC = () => {
               aria-label={user ? `Account (${user.first_name})` : 'Sign in or register'}
               title={user ? `Account (${user.first_name})` : 'Sign in / Register'}
               className={[
-                'relative flex h-9 w-9 items-center justify-center rounded-full',
+                'relative hidden sm:flex h-9 w-9 items-center justify-center rounded-full',
                 'border border-border/80 bg-surface',
                 'text-text hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold hover:bg-surface-alt/60',
                 'transition-colors duration-200 cursor-pointer shadow-2xs',
@@ -257,7 +257,7 @@ export const Header: React.FC = () => {
               aria-label="My Orders"
               title="My Orders & Receipts"
               className={[
-                'relative flex h-9 w-9 items-center justify-center rounded-full',
+                'relative hidden sm:flex h-9 w-9 items-center justify-center rounded-full',
                 'border border-border/80 bg-surface',
                 'text-text hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold hover:bg-surface-alt/60',
                 'transition-colors duration-200 cursor-pointer shadow-2xs',
@@ -428,17 +428,29 @@ export const Header: React.FC = () => {
               })}
 
               <div className="mt-auto pt-6 border-t border-border space-y-1">
+                {user?.role === 'owner' && (
+                  <NavLink
+                    to="/admin"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-bold text-brand-crimson dark:text-brand-gold hover:bg-surface-alt transition-colors uppercase tracking-wider"
+                  >
+                    <LayoutDashboard size={16} />
+                    <span>Admin Console</span>
+                  </NavLink>
+                )}
                 <NavLink
                   to="/orders"
+                  onClick={() => setMenuOpen(false)}
                   className="block rounded-md px-3 py-2.5 text-sm font-semibold text-text hover:text-brand-crimson dark:hover:text-brand-gold hover:bg-surface-alt transition-colors"
                 >
                   My Orders & Receipts
                 </NavLink>
                 <NavLink
                   to="/auth"
+                  onClick={() => setMenuOpen(false)}
                   className="block rounded-md px-3 py-2.5 text-sm font-semibold text-text hover:text-brand-crimson dark:hover:text-brand-gold hover:bg-surface-alt transition-colors"
                 >
-                  Sign in / Register
+                  {user ? `Account (${user.first_name})` : 'Sign in / Register'}
                 </NavLink>
               </div>
             </motion.nav>

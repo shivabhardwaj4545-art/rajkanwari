@@ -385,7 +385,7 @@ export const HomePage: React.FC = () => {
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.6, delay: 0.25 }}
-                              className="font-serif text-4xl sm:text-5xl lg:text-6xl font-normal leading-[1.1] tracking-tight mt-2 mb-3"
+                              className="font-serif text-2xl sm:text-4xl lg:text-6xl font-normal leading-[1.15] tracking-tight mt-1.5 mb-2 sm:mb-3"
                               style={textStyle as any}
                             >
                               {currentBanner?.title || 'Timeless Elegance'}
@@ -397,7 +397,7 @@ export const HomePage: React.FC = () => {
                               initial={{ opacity: 0, y: 15 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.5, delay: 0.4 }}
-                              className={`text-sm sm:text-base font-sans leading-relaxed font-medium max-w-lg text-white/95 [text-shadow:_0_1px_10px_rgba(0,0,0,0.9)] ${
+                              className={`text-xs sm:text-base font-sans leading-relaxed font-medium max-w-lg text-white/95 [text-shadow:_0_1px_10px_rgba(0,0,0,0.9)] ${
                                 isRightAligned ? 'ml-auto text-right' : 'mr-auto text-left'
                               }`}
                             >
@@ -409,14 +409,14 @@ export const HomePage: React.FC = () => {
                             initial={{ opacity: 0, y: 20, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             transition={{ duration: 0.5, delay: 0.55 }}
-                            className={`pt-3 w-full flex ${isRightAligned ? 'justify-end' : 'justify-start'}`}
+                            className={`pt-2 sm:pt-3 w-full flex ${isRightAligned ? 'justify-end' : 'justify-start'}`}
                           >
                             <Link
                               to={currentBanner?.cta_link || '/catalog'}
-                              className="inline-flex items-center gap-2 rounded-full bg-brand-crimson hover:opacity-90 text-white px-7 py-3 text-xs sm:text-sm font-semibold tracking-wide transition-all shadow-xl hover:shadow-2xl active:scale-95 border border-white/20"
+                              className="inline-flex items-center gap-2 rounded-full bg-brand-crimson hover:opacity-90 text-white px-5 sm:px-7 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold tracking-wide transition-all shadow-xl hover:shadow-2xl active:scale-95 border border-white/20"
                             >
                               <span>{currentBanner?.cta_text || 'Explore Collection'}</span>
-                              <ArrowRight size={16} />
+                              <ArrowRight size={15} />
                             </Link>
                           </motion.div>
                         </div>
@@ -440,7 +440,7 @@ export const HomePage: React.FC = () => {
               type="button"
               onClick={prevSlide}
               aria-label="Previous slide"
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-surface/80 hover:bg-surface text-text border border-border backdrop-blur-sm transition-all shadow-sm"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 hidden sm:flex h-10 w-10 items-center justify-center rounded-full bg-surface/80 hover:bg-surface text-text border border-border backdrop-blur-sm transition-all shadow-sm"
             >
               <ChevronLeft size={20} />
             </button>
@@ -448,7 +448,7 @@ export const HomePage: React.FC = () => {
               type="button"
               onClick={nextSlide}
               aria-label="Next slide"
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-surface/80 hover:bg-surface text-text border border-border backdrop-blur-sm transition-all shadow-sm"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 hidden sm:flex h-10 w-10 items-center justify-center rounded-full bg-surface/80 hover:bg-surface text-text border border-border backdrop-blur-sm transition-all shadow-sm"
             >
               <ChevronRight size={20} />
             </button>
@@ -481,12 +481,12 @@ export const HomePage: React.FC = () => {
             type="button"
             onClick={() => setOfferIndex((prev) => (prev - 1 + announcementItems.length) % announcementItems.length)}
             aria-label="Previous announcement"
-            className="p-1 rounded-full text-brand-gold/80 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+            className="hidden sm:block p-1 rounded-full text-brand-gold/80 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
           >
             <ChevronLeft size={16} />
           </button>
 
-          <div className="flex-1 overflow-hidden px-2">
+          <div className="flex-1 overflow-hidden px-1 sm:px-2">
             <AnimatePresence mode="wait">
               <motion.div
                 key={offerIndex}
@@ -494,23 +494,23 @@ export const HomePage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="flex flex-wrap items-center justify-center gap-2 text-center text-xs sm:text-sm font-medium"
+                className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-center text-xs sm:text-sm font-medium"
               >
-                <span className="font-bold text-brand-gold uppercase tracking-wider">
+                <span className="font-bold text-brand-gold uppercase tracking-wider text-[11px] sm:text-xs">
                   {announcementItems[offerIndex].badge}:
                 </span>
-                <span>{announcementItems[offerIndex].text}</span>
+                <span className="text-[11px] sm:text-xs">{announcementItems[offerIndex].text}</span>
                 {announcementItems[offerIndex].code && (
-                  <span className="bg-brand-gold/20 border border-brand-gold/40 px-2 py-0.5 rounded text-[11px] font-bold text-brand-gold uppercase">
+                  <span className="bg-brand-gold/20 border border-brand-gold/40 px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold text-brand-gold uppercase">
                     {announcementItems[offerIndex].code}
                   </span>
                 )}
                 <Link
                   to={announcementItems[offerIndex].link}
-                  className="ml-1 font-bold underline underline-offset-4 hover:text-brand-gold transition-colors inline-flex items-center gap-1"
+                  className="ml-1 font-bold underline underline-offset-4 hover:text-brand-gold transition-colors inline-flex items-center gap-0.5 text-[11px] sm:text-xs"
                 >
                   <span>{announcementItems[offerIndex].linkText}</span>
-                  <ArrowRight size={13} />
+                  <ArrowRight size={12} />
                 </Link>
               </motion.div>
             </AnimatePresence>
@@ -520,7 +520,7 @@ export const HomePage: React.FC = () => {
             type="button"
             onClick={() => setOfferIndex((prev) => (prev + 1) % announcementItems.length)}
             aria-label="Next announcement"
-            className="p-1 rounded-full text-brand-gold/80 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+            className="hidden sm:block p-1 rounded-full text-brand-gold/80 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
           >
             <ChevronRight size={16} />
           </button>

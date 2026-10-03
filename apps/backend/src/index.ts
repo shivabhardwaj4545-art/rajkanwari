@@ -166,8 +166,8 @@ app.use(errorHandler);
 
 // ── Server start + Graceful shutdown ──────────────────────────────────────────
 if (process.env.NODE_ENV !== 'test') {
-  const server = app.listen(PORT, () => {
-    console.info(`🛍  Rajkanwari backend running at http://localhost:${PORT} [${NODE_ENV}]`);
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    console.info(`🛍  Rajkanwari backend running at http://0.0.0.0:${PORT} [${NODE_ENV}]`);
   });
 
   process.on('SIGTERM', () => {
