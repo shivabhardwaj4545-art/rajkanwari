@@ -586,7 +586,7 @@ ordersRouter.post('/', validate(createOrderSchema, 'body'), async (req, res, nex
     // Get authoritative cart
     let cart = (await db
       .prepare('SELECT * FROM carts WHERE user_id = ? OR session_id = ? ORDER BY updated_at DESC LIMIT 1')
-      .get(userId, sessionId)) as any;
+      .get(userId || null, sessionId || null)) as any;
 
     if (!cart) {
       res.status(400).json({ error: { code: 'CART_EMPTY', message: 'Cart is empty' } });

@@ -374,7 +374,8 @@ export function parseSqlAndParams(sql: string, params: any[]): { text: string; v
 
   let paramIndex = 1;
   const text = /\$\d+/.test(sql) ? sql : sql.replace(/\?/g, () => `$${paramIndex++}`);
-  const values = params.length === 1 && Array.isArray(params[0]) ? params[0] : params;
+  const rawValues = params.length === 1 && Array.isArray(params[0]) ? params[0] : params;
+  const values = rawValues.map((v) => (v === undefined ? null : v));
   return { text, values };
 }
 
