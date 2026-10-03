@@ -2054,15 +2054,24 @@ adminRouter.get('/customers/:id', async (req, res, next) => {
 // ============================================================================
 
 const getPeriodSqlFilter = (period: string | undefined, tableAlias = 'o') => {
+  const now = Date.now();
   switch (period) {
-    case 'today':
-      return `AND ${tableAlias}.created_at >= CURRENT_DATE`;
-    case 'week':
-      return `AND ${tableAlias}.created_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'`;
-    case 'month':
-      return `AND ${tableAlias}.created_at >= CURRENT_TIMESTAMP - INTERVAL '30 days'`;
-    case 'year':
-      return `AND ${tableAlias}.created_at >= CURRENT_TIMESTAMP - INTERVAL '365 days'`;
+    case 'today': {
+      const todayIso = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+      return `AND ${tableAlias}.created_at >= '${todayIso}'`;
+    }
+    case 'week': {
+      const weekIso = new Date(now - 7 * 86400000).toISOString();
+      return `AND ${tableAlias}.created_at >= '${weekIso}'`;
+    }
+    case 'month': {
+      const monthIso = new Date(now - 30 * 86400000).toISOString();
+      return `AND ${tableAlias}.created_at >= '${monthIso}'`;
+    }
+    case 'year': {
+      const yearIso = new Date(now - 365 * 86400000).toISOString();
+      return `AND ${tableAlias}.created_at >= '${yearIso}'`;
+    }
     case 'all':
     default:
       return '';
@@ -2111,17 +2120,18 @@ adminRouter.get('/reports/kpis', async (req, res, next) => {
 adminRouter.get('/reports/revenue-trend', async (_req, res, next) => {
   try {
     const db = getDb();
+    const sixDaysAgoIso = new Date(Date.now() - 6 * 86400000).toISOString().split('T')[0];
 
     // Query daily sums for the last 7 days
     const trendSql = `
       SELECT
-        TO_CHAR(o.created_at, 'YYYY-MM-DD') as date,
+        SUBSTR(o.created_at::text, 1, 10) as date,
         COALESCE(SUM(o.total_amount), 0) as revenue,
         COUNT(o.id) as orders
       FROM orders o
       WHERE o.payment_status = 'paid'
-        AND o.created_at >= CURRENT_DATE - INTERVAL '6 days'
-      GROUP BY TO_CHAR(o.created_at, 'YYYY-MM-DD')
+        AND o.created_at >= '${sixDaysAgoIso}'
+      GROUP BY SUBSTR(o.created_at::text, 1, 10)
       ORDER BY date ASC
     `;
 

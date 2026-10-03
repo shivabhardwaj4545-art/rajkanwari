@@ -341,6 +341,7 @@ function parseSqliteParams(sql: string, params: any[]): { text: string; values: 
   }
 
   // Convert PostgreSQL specific functions/syntax to SQLite equivalents
+  text = text.replace(/::text/gi, '');
   text = text.replace(/\bILIKE\b/gi, 'LIKE');
   text = text.replace(/\bTIMESTAMPTZ\b/gi, 'TEXT');
   text = text.replace(/\bBIGINT\b/gi, 'INTEGER');
