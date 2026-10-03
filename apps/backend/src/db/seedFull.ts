@@ -282,7 +282,6 @@ const now = new Date();
 const pastDate = new Date(now.getTime() - 30 * 86400000).toISOString();
 const futureDate = new Date(now.getTime() + 60 * 86400000).toISOString();
 const farFutureDate = new Date(now.getTime() + 180 * 86400000).toISOString();
-const expiredDate = new Date(now.getTime() - 5 * 86400000).toISOString();
 
 // 1. Running 10% auto-applied discount (or code SHIKKIS10)
 await insertOffer.run({
