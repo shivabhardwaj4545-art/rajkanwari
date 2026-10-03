@@ -14,6 +14,7 @@ import {
 import React, { useEffect, useState } from 'react';
 
 import { api, type AdminBannerItem } from '@/lib/api';
+import { Portal } from '@/components/ui/Portal';
 
 export const AdminBannersPage: React.FC = () => {
   const [banners, setBanners] = useState<AdminBannerItem[]>([]);
@@ -477,7 +478,8 @@ export const AdminBannersPage: React.FC = () => {
 
       <AnimatePresence>
         {modalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:py-8 bg-black/60 backdrop-blur-xs overflow-y-auto">
+          <Portal>
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:py-8 bg-black/60 backdrop-blur-xs overflow-y-auto">
             <motion.div
               initial={{ scale: 0.96, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -819,8 +821,9 @@ export const AdminBannersPage: React.FC = () => {
               </div>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+        </Portal>
+      )}
+    </AnimatePresence>
     </div>
   );
 };

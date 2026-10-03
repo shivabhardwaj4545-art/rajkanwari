@@ -25,6 +25,7 @@ import {
   type CategoryItem,
 } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
+import { Portal } from '@/components/ui/Portal';
 
 export interface ColorDef {
   name: string;
@@ -1227,41 +1228,43 @@ export const ProductEditorPage: React.FC = () => {
       {/* Delete Confirmation Modal */}
       <AnimatePresence>
         {deleteImageTarget !== null && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="max-w-sm w-full bg-surface border border-border rounded-xl p-6 text-center shadow-xl space-y-4"
-            >
-              <div className="w-12 h-12 rounded-full bg-danger/10 text-danger flex items-center justify-center mx-auto">
-                <Trash2 size={24} />
-              </div>
-              <div>
-                <h3 className="font-serif text-lg font-bold text-text">Remove Image?</h3>
-                <p className="text-xs text-text-muted mt-1">
-                  Are you sure you want to remove this image from the product gallery?
-                </p>
-              </div>
+          <Portal>
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="max-w-sm w-full bg-surface border border-border rounded-xl p-6 text-center shadow-xl space-y-4"
+              >
+                <div className="w-12 h-12 rounded-full bg-danger/10 text-danger flex items-center justify-center mx-auto">
+                  <Trash2 size={24} />
+                </div>
+                <div>
+                  <h3 className="font-serif text-lg font-bold text-text">Remove Image?</h3>
+                  <p className="text-xs text-text-muted mt-1">
+                    Are you sure you want to remove this image from the product gallery?
+                  </p>
+                </div>
 
-              <div className="flex items-center gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setDeleteImageTarget(null)}
-                  className="flex-1 py-2 rounded-lg border border-border text-xs font-medium text-text hover:bg-surface-alt"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => confirmDeleteImage(deleteImageTarget)}
-                  className="flex-1 py-2 rounded-lg bg-danger text-white text-xs font-semibold shadow hover:bg-danger/90"
-                >
-                  Delete Image
-                </button>
-              </div>
-            </motion.div>
-          </div>
+                <div className="flex items-center gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setDeleteImageTarget(null)}
+                    className="flex-1 py-2 rounded-lg border border-border text-xs font-medium text-text hover:bg-surface-alt"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => confirmDeleteImage(deleteImageTarget)}
+                    className="flex-1 py-2 rounded-lg bg-danger text-white text-xs font-semibold shadow hover:bg-danger/90"
+                  >
+                    Delete Image
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          </Portal>
         )}
       </AnimatePresence>
     </div>

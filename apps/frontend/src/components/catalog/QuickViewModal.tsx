@@ -7,6 +7,7 @@ import type { ProductItem, ProductVariant } from '@/lib/api';
 import { formatDiscount, formatPrice } from '@/lib/format';
 import { fadeIn, scaleIn } from '@/lib/motion';
 import { useFocusTrap } from '@/lib/useFocusTrap';
+import { Portal } from '@/components/ui/Portal';
 
 interface QuickViewModalProps {
   product: ProductItem | null;
@@ -50,7 +51,8 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+      <Portal>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
         {/* Backdrop */}
         <motion.div
           variants={fadeIn}
@@ -257,6 +259,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </Portal>
+  </AnimatePresence>
   );
 };

@@ -23,6 +23,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 
 import { pageTransition, useMotionSafe } from '@/lib/motion';
 import { BrandLogo } from '@/components/ui/BrandLogo';
+import { Portal } from '@/components/ui/Portal';
 import { useAuthStore } from '@/stores/auth.store';
 
 interface NavItem {
@@ -263,20 +264,20 @@ export const AdminLayout: React.FC = () => {
         {/* Mobile / Tablet Drawer (< 1024px) */}
         <AnimatePresence>
           {mobileMenuOpen && (
-            <>
+            <Portal>
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setMobileMenuOpen(false)}
-                className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs lg:hidden"
+                className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs lg:hidden"
               />
               <motion.div
                 initial={{ x: '-100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
                 transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-                className="fixed inset-y-0 left-0 z-50 w-72 bg-surface border-r border-border shadow-2xl flex flex-col lg:hidden"
+                className="fixed inset-y-0 left-0 z-[101] w-72 bg-surface border-r border-border shadow-2xl flex flex-col lg:hidden"
               >
                 <div className="h-16 px-4 flex items-center justify-between border-b border-border">
                   <div className="font-serif text-xl font-bold text-brand-crimson">Admin Menu</div>
@@ -330,7 +331,7 @@ export const AdminLayout: React.FC = () => {
                   </Link>
                 </div>
               </motion.div>
-            </>
+            </Portal>
           )}
         </AnimatePresence>
 

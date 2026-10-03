@@ -3,6 +3,7 @@ import { RotateCcw, X } from 'lucide-react';
 import React from 'react';
 
 import type { CategoryItem } from '@/lib/api';
+import { Portal } from '@/components/ui/Portal';
 import type { FilterState } from './FilterSidebar';
 
 interface MobileFilterDrawerProps {
@@ -58,7 +59,8 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 md:hidden flex flex-col justify-end">
+        <Portal>
+          <div className="fixed inset-0 z-[100] md:hidden flex flex-col justify-end">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -310,7 +312,8 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
             </div>
           </motion.div>
         </div>
-      )}
-    </AnimatePresence>
+      </Portal>
+    )}
+  </AnimatePresence>
   );
 };

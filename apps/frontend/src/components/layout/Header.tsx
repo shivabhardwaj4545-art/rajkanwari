@@ -6,6 +6,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { slideInRight, useMotionSafe } from '@/lib/motion';
 import { api } from '@/lib/api';
 import { BrandLogo } from '@/components/ui/BrandLogo';
+import { Portal } from '@/components/ui/Portal';
 import { useFocusTrap } from '@/lib/useFocusTrap';
 import { useAuthStore } from '@/stores/auth.store';
 import { useCartStore } from '@/stores/cart.store';
@@ -314,7 +315,7 @@ export const Header: React.FC = () => {
       {/* ── Mobile drawer ──────────────────────────────────────────────────── */}
       <AnimatePresence>
         {menuOpen && (
-          <>
+          <Portal>
             {/* Overlay */}
             <motion.div
               key="overlay"
@@ -322,7 +323,7 @@ export const Header: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-30 bg-black/40 md:hidden"
+              className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs md:hidden"
               onClick={() => setMenuOpen(false)}
               aria-hidden
             />
@@ -340,7 +341,7 @@ export const Header: React.FC = () => {
               aria-modal="true"
               aria-label="Mobile navigation"
               className={[
-                'fixed right-0 top-0 bottom-0 z-40 w-72 md:hidden',
+                'fixed right-0 top-0 bottom-0 z-[101] w-72 md:hidden',
                 'bg-surface border-l border-border shadow-2xl',
                 'flex flex-col gap-1 px-6 pt-20 pb-8',
                 'overflow-y-auto focus:outline-none',
@@ -454,7 +455,7 @@ export const Header: React.FC = () => {
                 </NavLink>
               </div>
             </motion.nav>
-          </>
+          </Portal>
         )}
       </AnimatePresence>
     </>

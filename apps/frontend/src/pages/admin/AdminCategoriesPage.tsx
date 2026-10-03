@@ -13,6 +13,7 @@ import {
 import React, { useEffect, useState } from 'react';
 
 import { api, type CategoryItem } from '@/lib/api';
+import { Portal } from '@/components/ui/Portal';
 
 export const AdminCategoriesPage: React.FC = () => {
   const [categories, setCategories] = useState<CategoryItem[]>([]);
@@ -334,7 +335,8 @@ export const AdminCategoriesPage: React.FC = () => {
       {/* Add / Edit Category Modal */}
       <AnimatePresence>
         {modalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <Portal>
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -474,8 +476,9 @@ export const AdminCategoriesPage: React.FC = () => {
               </form>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+        </Portal>
+      )}
+    </AnimatePresence>
     </div>
   );
 };

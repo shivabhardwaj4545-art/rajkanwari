@@ -17,6 +17,7 @@ import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { api, type AdminOrderDetail, type AdminPackingSlipData } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
 import { PackingSlipModal } from './PackingSlipModal';
+import { Portal } from '@/components/ui/Portal';
 
 export const AdminOrderDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -511,52 +512,54 @@ export const AdminOrderDetailPage: React.FC = () => {
 
       {/* ── Refund Confirmation Modal ────────────────────────────────────── */}
       {showRefundModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-[var(--surface)] text-[var(--text)] border border-[var(--border)] rounded-xl shadow-2xl p-6 space-y-4">
-            <div className="flex items-center space-x-2 text-purple-600 dark:text-purple-400">
-              <RotateCcw className="w-5 h-5" />
-              <h3 className="font-serif font-bold text-lg">Confirm Refund</h3>
-            </div>
-            <p className="text-xs text-[var(--text-muted)]">
-              Are you sure you want to refund order <strong>{order.order_number}</strong>?
-              This will refund <strong>{formatPrice(order.total_amount)}</strong> via the payment gateway and update the payment status to <em>refunded</em>.
-            </p>
-
-            <div>
-              <label className="text-xs font-semibold block mb-1">Reason for Refund</label>
-              <input
-                type="text"
-                value={refundReason}
-                onChange={(e) => setRefundReason(e.target.value)}
-                placeholder="e.g., Customer return, defective product, cancellation"
-                className="w-full p-2.5 text-xs rounded-lg border border-[var(--border)] bg-[var(--surface-alt)] text-[var(--text)] focus:outline-none focus:border-[var(--brand-crimson)]"
-              />
-            </div>
-
-            {refundError && (
-              <div className="p-2.5 rounded border border-rose-500/30 bg-rose-500/10 text-xs text-rose-600">
-                {refundError}
+        <Portal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="w-full max-w-md bg-[var(--surface)] text-[var(--text)] border border-[var(--border)] rounded-xl shadow-2xl p-6 space-y-4">
+              <div className="flex items-center space-x-2 text-purple-600 dark:text-purple-400">
+                <RotateCcw className="w-5 h-5" />
+                <h3 className="font-serif font-bold text-lg">Confirm Refund</h3>
               </div>
-            )}
+              <p className="text-xs text-[var(--text-muted)]">
+                Are you sure you want to refund order <strong>{order.order_number}</strong>?
+                This will refund <strong>{formatPrice(order.total_amount)}</strong> via the payment gateway and update the payment status to <em>refunded</em>.
+              </p>
 
-            <div className="flex justify-end space-x-2 pt-2">
-              <button
-                onClick={() => setShowRefundModal(false)}
-                className="px-4 py-2 text-xs font-semibold rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--surface-alt)]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleRefund}
-                disabled={refunding}
-                className="px-4 py-2 text-xs font-semibold rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition flex items-center space-x-1.5"
-              >
-                {refunding && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-                <span>Process Refund</span>
-              </button>
+              <div>
+                <label className="text-xs font-semibold block mb-1">Reason for Refund</label>
+                <input
+                  type="text"
+                  value={refundReason}
+                  onChange={(e) => setRefundReason(e.target.value)}
+                  placeholder="e.g., Customer return, defective product, cancellation"
+                  className="w-full p-2.5 text-xs rounded-lg border border-[var(--border)] bg-[var(--surface-alt)] text-[var(--text)] focus:outline-none focus:border-[var(--brand-crimson)]"
+                />
+              </div>
+
+              {refundError && (
+                <div className="p-2.5 rounded border border-rose-500/30 bg-rose-500/10 text-xs text-rose-600">
+                  {refundError}
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-2 pt-2">
+                <button
+                  onClick={() => setShowRefundModal(false)}
+                  className="px-4 py-2 text-xs font-semibold rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--surface-alt)]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleRefund}
+                  disabled={refunding}
+                  className="px-4 py-2 text-xs font-semibold rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition flex items-center space-x-1.5"
+                >
+                  {refunding && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Process Refund</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
 
       {/* ── Packing Slip Modal ────────────────────────────────────────────── */}

@@ -19,6 +19,7 @@ import {
   type ProductItem,
 } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
+import { Portal } from '@/components/ui/Portal';
 
 type TabStatus = 'running' | 'scheduled' | 'expired';
 
@@ -488,7 +489,8 @@ export const AdminOffersPage: React.FC = () => {
       {/* ── Offer Builder Modal ─────────────────────────────────────────────── */}
       <AnimatePresence>
         {modalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:py-8 bg-black/60 backdrop-blur-xs overflow-y-auto">
+          <Portal>
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:py-8 bg-black/60 backdrop-blur-xs overflow-y-auto">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -857,8 +859,9 @@ export const AdminOffersPage: React.FC = () => {
             </div>
           </motion.div>
         </div>
-      )}
-      </AnimatePresence>
+      </Portal>
+    )}
+    </AnimatePresence>
     </div>
   );
 };

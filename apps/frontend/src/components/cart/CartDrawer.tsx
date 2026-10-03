@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '@/lib/format';
 import { useFocusTrap } from '@/lib/useFocusTrap';
 import { useCartStore } from '@/stores/cart.store';
+import { Portal } from '@/components/ui/Portal';
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -63,7 +64,8 @@ export const CartDrawer: React.FC = () => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden flex justify-end">
+        <Portal>
+          <div className="fixed inset-0 z-[100] overflow-hidden flex justify-end">
           {/* Backdrop Fade */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -331,7 +333,8 @@ export const CartDrawer: React.FC = () => {
             )}
           </motion.div>
         </div>
-      )}
-    </AnimatePresence>
+      </Portal>
+    )}
+  </AnimatePresence>
   );
 };

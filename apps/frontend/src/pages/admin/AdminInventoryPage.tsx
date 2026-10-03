@@ -16,6 +16,7 @@ import {
 import React, { useEffect, useState } from 'react';
 
 import { api, type AdminAuditLogItem, type AdminInventoryItem, type ProductItem } from '@/lib/api';
+import { Portal } from '@/components/ui/Portal';
 
 export const AdminInventoryPage: React.FC = () => {
   const [items, setItems] = useState<AdminInventoryItem[]>([]);
@@ -462,8 +463,9 @@ export const AdminInventoryPage: React.FC = () => {
       {/* ── Add New Inventory Variant Item Modal ────────────────────────────── */}
       <AnimatePresence>
         {addModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-            <motion.div
+          <Portal>
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+              <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
@@ -657,86 +659,89 @@ export const AdminInventoryPage: React.FC = () => {
               </form>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+        </Portal>
+      )}
+    </AnimatePresence>
 
       {/* ── Batch Stock Update Modal ────────────────────────────────────────── */}
       <AnimatePresence>
         {batchModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="max-w-md w-full bg-surface border border-border rounded-xl p-6 shadow-2xl space-y-4"
-            >
-              <div className="flex items-center justify-between border-b border-border pb-3">
-                <div className="flex items-center gap-2 text-brand-crimson">
-                  <Warehouse size={20} />
-                  <h3 className="font-serif text-lg font-bold text-text">Batch Stock Restock</h3>
+          <Portal>
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="max-w-md w-full bg-surface border border-border rounded-xl p-6 shadow-2xl space-y-4"
+              >
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <div className="flex items-center gap-2 text-brand-crimson">
+                    <Warehouse size={20} />
+                    <h3 className="font-serif text-lg font-bold text-text">Batch Stock Restock</h3>
+                  </div>
+                  <button onClick={() => setBatchModalOpen(false)} className="p-1 rounded text-text-muted hover:text-text">
+                    <X size={18} />
+                  </button>
                 </div>
-                <button onClick={() => setBatchModalOpen(false)} className="p-1 rounded text-text-muted hover:text-text">
-                  <X size={18} />
-                </button>
-              </div>
 
-              <p className="text-xs text-text-muted leading-relaxed">
-                You have selected <strong className="text-text">{selectedVariantIds.length}</strong> variants.
-                Every adjustment will be written to the permanent <code className="text-brand-gold">audit_log</code>.
-              </p>
+                <p className="text-xs text-text-muted leading-relaxed">
+                  You have selected <strong className="text-text">{selectedVariantIds.length}</strong> variants.
+                  Every adjustment will be written to the permanent <code className="text-brand-gold">audit_log</code>.
+                </p>
 
-              <div>
-                <label className="block text-xs font-semibold text-text mb-1">
-                  New Quantity for Selected Variants:
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  value={batchStockValue}
-                  onChange={(e) => setBatchStockValue(Math.max(0, parseInt(e.target.value) || 0))}
-                  className="w-full px-3 py-2.5 rounded-lg bg-bg border border-border font-mono font-bold text-base text-text focus:outline-hidden focus:border-brand-gold"
-                />
-              </div>
+                <div>
+                  <label className="block text-xs font-semibold text-text mb-1">
+                    New Quantity for Selected Variants:
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={batchStockValue}
+                    onChange={(e) => setBatchStockValue(Math.max(0, parseInt(e.target.value) || 0))}
+                    className="w-full px-3 py-2.5 rounded-lg bg-bg border border-border font-mono font-bold text-base text-text focus:outline-hidden focus:border-brand-gold"
+                  />
+                </div>
 
-              <div className="flex items-center gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setBatchModalOpen(false)}
-                  className="flex-1 py-2 rounded-lg border border-border text-xs font-medium text-text hover:bg-surface-alt"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleApplyBatchUpdate}
-                  disabled={batchUpdating}
-                  className="flex-1 py-2 rounded-lg bg-brand-crimson text-white text-xs font-semibold shadow hover:bg-brand-crimson/90 disabled:opacity-50"
-                >
-                  {batchUpdating ? 'Applying...' : 'Apply Stock Update'}
-                </button>
-              </div>
-            </motion.div>
-          </div>
+                <div className="flex items-center gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setBatchModalOpen(false)}
+                    className="flex-1 py-2 rounded-lg border border-border text-xs font-medium text-text hover:bg-surface-alt"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleApplyBatchUpdate}
+                    disabled={batchUpdating}
+                    className="flex-1 py-2 rounded-lg bg-brand-crimson text-white text-xs font-semibold shadow hover:bg-brand-crimson/90 disabled:opacity-50"
+                  >
+                    {batchUpdating ? 'Applying...' : 'Apply Stock Update'}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          </Portal>
         )}
       </AnimatePresence>
 
       {/* ── Audit Trail Slide-Over Drawer ───────────────────────────────────── */}
       <AnimatePresence>
         {auditDrawerOpen && (
-          <>
+          <Portal>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setAuditDrawerOpen(false)}
-              className="fixed inset-x-0 top-16 bottom-0 z-40 bg-black/50 backdrop-blur-xs"
+              className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs"
             />
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-              className="fixed top-16 bottom-0 right-0 z-50 w-full max-w-md bg-surface border-l border-border shadow-2xl p-6 flex flex-col"
+              className="fixed inset-y-0 right-0 z-[101] w-full max-w-md bg-surface border-l border-border shadow-2xl p-6 flex flex-col"
             >
               <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
                 <div className="flex items-center gap-2 text-brand-gold">
@@ -784,7 +789,7 @@ export const AdminInventoryPage: React.FC = () => {
                 )}
               </div>
             </motion.div>
-          </>
+          </Portal>
         )}
       </AnimatePresence>
     </div>
