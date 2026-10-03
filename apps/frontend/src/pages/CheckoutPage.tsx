@@ -225,7 +225,8 @@ export const CheckoutPage: React.FC = () => {
           !res.razorpay.key_id ||
           res.razorpay.key_id.includes('demo') ||
           res.razorpay.key_id.includes('mock') ||
-          res.razorpay.key_id === 'rzp_test_shikkis_demo_key';
+          res.razorpay.key_id === 'rzp_test_shikkis_demo_key' ||
+          res.razorpay.key_id.startsWith('rzp_test_');
 
         if (isMockKey) {
           try {
