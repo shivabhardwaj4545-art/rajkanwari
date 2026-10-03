@@ -330,67 +330,89 @@ await insertOffer.run({
   created_by: ownerId,
 });
 
-// 3. Expired Offer
-await insertOffer.run({
-  id: 'ofr_newyear_expired',
-  name: 'Early Bird Winter Sale',
-  code: 'WINTER15',
-  type: 'percent',
-  value: 15,
-  max_discount: 300000,
-  min_cart_value: 499900,
-  starts_at: '2025-12-01 00:00:00',
-  ends_at: expiredDate,
-  is_active: 0,
-  stackable: 0,
-  usage_limit: 200,
-  used_count: 200,
-  per_user_limit: 1,
-  scope: 'all',
-  scope_ids: '[]',
-  banner_image_url: null,
-  priority: 1,
-  created_by: ownerId,
-});
-
-console.log('✅ 3 Offers seeded (1 running, 1 festival scheduled, 1 expired).');
-
 // ── Banners for Home Hero Carousel ──────────────────────────────────────────
 const insertBanner = db.prepare(`
-  INSERT INTO banners (id, title, subtitle, image_url, cta_text, cta_link, text_alignment, display_order, starts_at, ends_at, is_active, created_by)
-  VALUES (@id, @title, @subtitle, @image_url, @cta_text, @cta_link, @text_alignment, @display_order, @starts_at, @ends_at, 1, @created_by)
+  INSERT INTO banners (id, title, subtitle, image_url, cta_text, cta_link, text_alignment, text_color, display_order, starts_at, ends_at, is_active, created_by)
+  VALUES (@id, @title, @subtitle, @image_url, @cta_text, @cta_link, @text_alignment, @text_color, @display_order, @starts_at, @ends_at, 1, @created_by)
 `);
 
 const banners = [
   {
     id: 'bnr_01',
+    title: 'Graceful silhouettes. Rich fabrics. Designed for every special moment.',
+    subtitle: 'Exquisite handcrafted silk suits, zari brocades & royal heritage edits for memorable celebrations.',
+    image_url: '/images/banner_scarlet_anarkali.jpg',
+    cta_text: 'Explore Collection',
+    cta_link: '/catalog',
+    text_alignment: 'left',
+    text_color: '#D4AF37',
+    display_order: 1,
+  },
+  {
+    id: 'bnr_02',
     title: 'Heritage Handloom Festive Edit',
     subtitle: 'Graceful emerald green suits, woven zari brocades & artisan dupattas for timeless celebrations.',
     image_url: '/images/banner_festive_trio.jpg',
     cta_text: 'EXPLORE FESTIVE COLLECTION',
     cta_link: '/catalog?occasion=Festive',
     text_alignment: 'left',
-    display_order: 1,
-  },
-  {
-    id: 'bnr_02',
-    title: "Make Room For What's New",
-    subtitle: 'Too Rajkunwari To Blend In. Discover our newest handcrafted arrivals & festive edits.',
-    image_url: '/images/hero-timeless-elegance.jpg',
-    cta_text: 'SHOP NEW ARRIVALS',
-    cta_link: '/catalog?sort=newest',
-    text_alignment: 'right',
+    text_color: 'white',
     display_order: 2,
   },
   {
     id: 'bnr_03',
+    title: 'Celebrate in elegance. Styles crafted for memories that last.',
+    subtitle: 'Hand-embroidered couture, shimmering sequins & pure silk drapes for your special days.',
+    image_url: '/images/hero-timeless-elegance.jpg',
+    cta_text: 'Explore Collection',
+    cta_link: '/catalog',
+    text_alignment: 'right',
+    text_color: 'white',
+    display_order: 3,
+  },
+  {
+    id: 'bnr_04',
+    title: 'Playful looks. Comfortable fabrics. Made for every little adventure.',
+    subtitle: 'Vibrant handcrafted ethnic wear for young princes & princesses crafted with soft pure cottons.',
+    image_url: '/images/hero-timeless-elegance.jpg',
+    cta_text: 'Explore Collection',
+    cta_link: '/catalog',
+    text_alignment: 'left',
+    text_color: 'white',
+    display_order: 4,
+  },
+  {
+    id: 'bnr_05',
+    title: 'Refined craftsmanship. Modern comfort. Style that speaks for itself.',
+    subtitle: 'Regal Kurta sets, Bandhgala jackets & silk Sherwanis tailored for the modern gentleman.',
+    image_url: '/images/hero-timeless-elegance.jpg',
+    cta_text: 'Explore Collection',
+    cta_link: '/catalog?gender=men',
+    text_alignment: 'right',
+    text_color: 'white',
+    display_order: 5,
+  },
+  {
+    id: 'bnr_06',
     title: 'The Royal Anarkali & Suit Edit',
     subtitle: 'Scarlet red silk flared Anarkalis & hand-embroidered heritage couture crafted for royalty.',
     image_url: '/images/banner_scarlet_anarkali.jpg',
     cta_text: 'SHOP ANARKALIS & SUITS',
     cta_link: '/catalog?category=anarkalis',
+    text_alignment: 'left',
+    text_color: 'white',
+    display_order: 6,
+  },
+  {
+    id: 'bnr_07',
+    title: 'Easy silhouettes. Contemporary style. Made to move with you.',
+    subtitle: 'Lightweight Indo-Western gowns, fusion crop-top skirts & effortless festive drapes.',
+    image_url: '/images/hero-timeless-elegance.jpg',
+    cta_text: 'Explore Collection',
+    cta_link: '/catalog',
     text_alignment: 'right',
-    display_order: 3,
+    text_color: 'white',
+    display_order: 7,
   },
 ];
 
@@ -403,8 +425,7 @@ for (const b of banners) {
   });
 }
 
-
-console.log('âœ… 3 Hero Banners seeded.');
+console.log('✅ 7 Hero Banners seeded successfully.');
 
 // â”€â”€ 4. Products and Variants (30 products) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const insertProduct = db.prepare(`
