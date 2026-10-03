@@ -111,7 +111,51 @@ export const HomePage: React.FC = () => {
             },
           ];
 
-          setBanners(loadedBanners.length > 0 ? loadedBanners : fallbackBanners);
+          // Synthesize dynamic hero banner slides from active special offers
+          const offerHeroBanners: BannerItem[] = loadedOffers
+            .filter((o) => o.offer_category && o.offer_category.toLowerCase() !== 'none')
+            .map((o, idx) => {
+              let discText = '';
+              if (o.type === 'percent') {
+                discText = `Enjoy ${o.value}% off`;
+              } else if (o.type === 'flat') {
+                discText = `Flat ₹${Math.round(o.value / 100).toLocaleString('en-IN')} off`;
+              } else if (o.type === 'free_shipping') {
+                discText = 'Free Doorstep Shipping';
+              } else {
+                discText = 'Special promotional pricing';
+              }
+
+              const minCartText =
+                o.min_cart_value > 0
+                  ? ` on orders above ₹${Math.round(o.min_cart_value / 100).toLocaleString('en-IN')}`
+                  : '';
+
+              const fallbackImages = [
+                '/images/banner_festive_trio.jpg',
+                '/images/hero-timeless-elegance.jpg',
+                '/images/banner_scarlet_anarkali.jpg',
+              ];
+
+              return {
+                id: `offer_hero_${o.id}`,
+                title: o.name,
+                subtitle: `${discText}${minCartText}. Curated style applied directly to selected handcrafted favorites.`,
+                image_url: o.banner_image_url || fallbackImages[idx % fallbackImages.length],
+                cta_text: `Shop ${o.offer_category}`,
+                cta_link: `/catalog?offer_id=${encodeURIComponent(o.id)}&offer_category=${encodeURIComponent(o.offer_category || '')}`,
+                text_alignment: idx % 2 === 0 ? 'left' : 'right',
+                text_color: 'white',
+                offer_category: o.offer_category || 'Festive Offer',
+                gradient_style: 'crimson_gold',
+                display_order: idx,
+              };
+            });
+
+          // Prepend active special offer slides so they appear prominently in the hero carousel
+          const combinedBanners = [...offerHeroBanners, ...loadedBanners];
+
+          setBanners(combinedBanners.length > 0 ? combinedBanners : fallbackBanners);
           setCategories(loadedCategories);
           setFeaturedProducts(loadedProducts);
           setActiveOffers(loadedOffers);
@@ -375,7 +419,8 @@ export const HomePage: React.FC = () => {
                                  bannerCat === 'Free Shipping' ? '🚚 FREE SHIPPING' :
                                  bannerCat === 'First Order' ? '🎁 WELCOME SPECIAL' :
                                  bannerCat === 'Combo Deal' ? '📦 COMBO SAVINGS' :
-                                 '🪔 FESTIVE OFFER'}
+                                 bannerCat === 'Festive Offer' ? '🪔 FESTIVE OFFER' :
+                                 `✨ ${bannerCat.toUpperCase()}`}
                               </span>
                             )}
                             <span className="text-xs sm:text-sm font-extrabold uppercase tracking-[0.25em] text-brand-gold block [text-shadow:_0_1px_8px_rgba(0,0,0,0.9)]">

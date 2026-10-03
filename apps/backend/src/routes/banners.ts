@@ -13,8 +13,11 @@ bannersRouter.get('/active', async (_req, res, next) => {
     const rows = await db
       .prepare(`
         SELECT
-          id, title, subtitle, image_url, cta_text, cta_link, text_alignment, display_order,
-          starts_at, ends_at
+          id, title, subtitle, image_url, cta_text, cta_link, text_alignment,
+          COALESCE(text_color, 'white') as text_color,
+          COALESCE(offer_category, 'None') as offer_category,
+          COALESCE(gradient_style, 'dark_vignette') as gradient_style,
+          display_order, starts_at, ends_at
         FROM banners
         WHERE is_active = 1
           AND (starts_at IS NULL OR starts_at <= ?)

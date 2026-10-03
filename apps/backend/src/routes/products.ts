@@ -8,6 +8,7 @@ interface OfferRow {
   id: string;
   name: string;
   code: string | null;
+  offer_category?: string;
   type: 'percent' | 'flat' | 'bxgy' | 'free_shipping';
   value: number;
   max_discount: number | null;
@@ -17,26 +18,27 @@ interface OfferRow {
 }
 
 /**
- * Fetch all active auto-applied offers (code IS NULL)
+ * Fetch all active promotional offers (product-scoped & high priority first)
  */
 async function getActiveAutoOffers(): Promise<OfferRow[]> {
   const nowIso = new Date().toISOString();
   const rows = await db
     .prepare(`
-      SELECT id, name, code, type, value, max_discount, min_cart_value, scope, scope_ids
+      SELECT id, name, code, COALESCE(offer_category, 'Special Offer') as offer_category,
+             type, value, max_discount, min_cart_value, scope, scope_ids
       FROM offers
       WHERE is_active = 1
-        AND code IS NULL
         AND (starts_at IS NULL OR starts_at <= ?)
         AND (ends_at IS NULL OR ends_at >= ?)
-      ORDER BY priority DESC
+      ORDER BY (CASE WHEN scope = 'product' THEN 0 WHEN scope = 'category' THEN 1 ELSE 2 END),
+               priority DESC, created_at DESC
     `)
     .all(nowIso, nowIso);
   return rows as OfferRow[];
 }
 
 /**
- * Computes base discounted price and applies any applicable auto-applied offer
+ * Computes base discounted price and applies any applicable promotional offer
  */
 function computePrices(
   mrpPaise: number,
@@ -49,7 +51,13 @@ function computePrices(
   const basePricePaise = mrpPaise - baseDiscountPaise;
 
   let offerDiscountPaise = 0;
-  let appliedOffer: { id: string; name: string; discount_paise: number } | null = null;
+  let appliedOffer: {
+    id: string;
+    name: string;
+    offer_category: string;
+    discount_paise: number;
+    code: string | null;
+  } | null = null;
 
   for (const offer of activeOffers) {
     let scopeMatches = false;
@@ -80,7 +88,13 @@ function computePrices(
           disc = maxDisc;
         }
         offerDiscountPaise = disc;
-        appliedOffer = { id: offer.id, name: offer.name, discount_paise: disc };
+        appliedOffer = {
+          id: offer.id,
+          name: offer.name,
+          offer_category: offer.offer_category || 'Special Offer',
+          discount_paise: disc,
+          code: offer.code || null,
+        };
         break;
       } else if (offer.type === 'flat') {
         let disc = offerVal;
@@ -88,7 +102,13 @@ function computePrices(
           disc = maxDisc;
         }
         offerDiscountPaise = Math.min(disc, basePricePaise);
-        appliedOffer = { id: offer.id, name: offer.name, discount_paise: offerDiscountPaise };
+        appliedOffer = {
+          id: offer.id,
+          name: offer.name,
+          offer_category: offer.offer_category || 'Special Offer',
+          discount_paise: offerDiscountPaise,
+          code: offer.code || null,
+        };
         break;
       }
     }
@@ -198,6 +218,8 @@ productsRouter.get('/', async (req, res) => {
     min_discount,
     in_stock,
     is_featured,
+    offer_id,
+    offer_category,
     sort = 'newest',
     limit = '12',
     cursor,
@@ -206,6 +228,55 @@ productsRouter.get('/', async (req, res) => {
 
   const activeOffers = await getActiveAutoOffers();
   const parsedLimit = Math.min(Math.max(parseInt(limit as string, 10) || 12, 1), 50);
+
+  // Identify products that belong to special offers or banners to prioritize at the top
+  const prioritizedProductIds: string[] = [];
+  if (offer_id) {
+    const targetOffer = activeOffers.find((o) => o.id === offer_id);
+    if (targetOffer && targetOffer.scope === 'product') {
+      try {
+        const prdIds: string[] = typeof targetOffer.scope_ids === 'string'
+          ? JSON.parse(targetOffer.scope_ids || '[]')
+          : targetOffer.scope_ids || [];
+        prioritizedProductIds.push(...prdIds);
+      } catch {
+        // ignore JSON parse error
+      }
+    }
+  } else if (offer_category && offer_category !== 'all') {
+    const targetCat = (offer_category as string).trim().toLowerCase();
+    const matchingOffers = activeOffers.filter(
+      (o) => (o.offer_category || '').trim().toLowerCase() === targetCat
+    );
+    for (const mo of matchingOffers) {
+      if (mo.scope === 'product') {
+        try {
+          const prdIds: string[] = typeof mo.scope_ids === 'string'
+            ? JSON.parse(mo.scope_ids || '[]')
+            : mo.scope_ids || [];
+          prioritizedProductIds.push(...prdIds);
+        } catch {
+          // ignore
+        }
+      }
+    }
+  } else {
+    // General catalog browsing: rank all products with an active product-scoped special offer at the top
+    for (const o of activeOffers) {
+      if (o.scope === 'product') {
+        try {
+          const prdIds: string[] = typeof o.scope_ids === 'string'
+            ? JSON.parse(o.scope_ids || '[]')
+            : o.scope_ids || [];
+          prioritizedProductIds.push(...prdIds);
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }
+
+  const uniquePriorityIds = Array.from(new Set(prioritizedProductIds.filter(Boolean)));
 
   const whereClauses: string[] = ['p.is_active = 1'];
   const params: unknown[] = [];
@@ -297,6 +368,15 @@ productsRouter.get('/', async (req, res) => {
     orderBy = 'p.created_at DESC';
   }
 
+  // Prepend priority order if matching offer/banner products exist
+  let finalOrderBy = orderBy;
+  const orderParams: unknown[] = [];
+  if (uniquePriorityIds.length > 0) {
+    const priorityPlaceholders = uniquePriorityIds.map(() => '?').join(', ');
+    finalOrderBy = `(CASE WHEN p.id IN (${priorityPlaceholders}) THEN 0 ELSE 1 END), ${orderBy}`;
+    orderParams.push(...uniquePriorityIds);
+  }
+
   const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
 
   // Get total matching count
@@ -326,7 +406,7 @@ productsRouter.get('/', async (req, res) => {
     }
   }
 
-  const queryParams = [...params, parsedLimit, offset];
+  const queryParams = [...params, ...orderParams, parsedLimit, offset];
 
   const rows = (await db
     .prepare(`
@@ -342,7 +422,7 @@ productsRouter.get('/', async (req, res) => {
       FROM products p
       JOIN categories c ON c.id = p.category_id
       ${whereSql}
-      ORDER BY ${orderBy}
+      ORDER BY ${finalOrderBy}
       LIMIT ? OFFSET ?
     `)
     .all(...queryParams)) as Array<{

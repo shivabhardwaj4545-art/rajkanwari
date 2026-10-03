@@ -145,6 +145,12 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
                   )}
                 </div>
 
+                {product.price.applied_offer && (
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-brand-gold/15 px-2.5 py-1 text-xs font-semibold text-text border border-brand-gold/40">
+                    <span>✨ {product.price.applied_offer.offer_category ? `${product.price.applied_offer.offer_category}: ` : ''}{product.price.applied_offer.name}</span>
+                  </div>
+                )}
+
                 <p className="mt-3 text-xs text-text-muted line-clamp-3 leading-relaxed">
                   {product.description}
                 </p>

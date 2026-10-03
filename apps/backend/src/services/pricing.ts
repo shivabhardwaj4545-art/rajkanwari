@@ -64,6 +64,7 @@ interface OfferDbRow {
   id: string;
   name: string;
   code: string | null;
+  offer_category?: string;
   type: 'percent' | 'flat' | 'bxgy' | 'free_shipping';
   value: number;
   max_discount: number | null;
@@ -183,8 +184,10 @@ export async function calculateCart(
   const discounts: NamedDiscount[] = [];
   let nonStackableAutoApplied = false;
 
-  // 4. Apply auto-offers (code IS NULL) matching scope
-  const autoOffers = activeOffers.filter((o) => o.code === null || o.code === '');
+  // 4. Apply auto-offers matching scope (code IS NULL, product-scoped, or has special offer category)
+  const autoOffers = activeOffers.filter(
+    (o) => o.code === null || o.code === '' || o.scope === 'product' || (o.offer_category && o.offer_category !== 'none')
+  );
 
   for (const offer of autoOffers) {
     const minCartValue = Number(offer.min_cart_value);

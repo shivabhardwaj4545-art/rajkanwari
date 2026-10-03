@@ -24,6 +24,7 @@ export const CatalogPage: React.FC = () => {
 
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [products, setProducts] = useState<ProductItem[]>([]);
+  const [activeOffers, setActiveOffers] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -38,6 +39,9 @@ export const CatalogPage: React.FC = () => {
   const currentGender = searchParams.get('gender') || undefined;
   const currentOccasion = searchParams.get('occasion') || undefined;
   const currentSort = searchParams.get('sort') || 'newest';
+  const currentOfferId = searchParams.get('offer_id') || undefined;
+  const currentOfferCategory = searchParams.get('offer_category') || undefined;
+  const currentBannerId = searchParams.get('banner_id') || undefined;
   const currentMinPrice = searchParams.get('min_price')
     ? parseInt(searchParams.get('min_price')!, 10)
     : undefined;
@@ -79,18 +83,37 @@ export const CatalogPage: React.FC = () => {
     if (filters.min_price || filters.max_price) count++;
     if (filters.min_discount) count++;
     if (filters.in_stock) count++;
+    if (currentOfferId || currentOfferCategory) count++;
     return count;
-  }, [filters]);
+  }, [filters, currentOfferId, currentOfferCategory]);
 
-  // Fetch categories list on mount
+  // Fetch categories and active offers list on mount
   useEffect(() => {
     api
       .getCategories()
       .then((res) => setCategories(res.data || []))
       .catch((err) => console.error('Failed to load categories:', err));
+
+    api
+      .getActiveOffers()
+      .then((res) => setActiveOffers(res.data || []))
+      .catch((err) => console.error('Failed to load offers:', err));
   }, []);
 
-  // Fetch products whenever filters or sort change in the URL
+  // Details for current promotional offer if clicked via banner or hero slide
+  const activeOfferDetail = useMemo(() => {
+    if (currentOfferId) {
+      return activeOffers.find((o) => o.id === currentOfferId);
+    }
+    if (currentOfferCategory && currentOfferCategory !== 'all') {
+      return activeOffers.find(
+        (o) => (o.offer_category || '').toLowerCase() === currentOfferCategory.toLowerCase()
+      );
+    }
+    return undefined;
+  }, [activeOffers, currentOfferId, currentOfferCategory]);
+
+  // Fetch products whenever filters, sort or offer params change in the URL
   useEffect(() => {
     let active = true;
     setLoading(true);
@@ -104,8 +127,11 @@ export const CatalogPage: React.FC = () => {
         max_price: filters.max_price,
         min_discount: filters.min_discount,
         in_stock: filters.in_stock,
+        offer_id: currentOfferId,
+        offer_category: currentOfferCategory,
+        banner_id: currentBannerId,
         sort: currentSort,
-        limit: 30, // Show generous catalog grid
+        limit: 36, // Show generous catalog grid
       })
       .then((res) => {
         if (active) {
@@ -126,7 +152,15 @@ export const CatalogPage: React.FC = () => {
     return () => {
       active = false;
     };
-  }, [filters, currentSort]);
+  }, [filters, currentSort, currentOfferId, currentOfferCategory]);
+
+  const handleClearOfferFilter = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete('offer_id');
+    params.delete('offer_category');
+    params.delete('banner_id');
+    setSearchParams(params);
+  };
 
   // Sync filter changes to URL search params (so back button works & URLs are shareable)
   const handleFilterChange = (newFilters: FilterState) => {
@@ -194,6 +228,39 @@ export const CatalogPage: React.FC = () => {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 md:px-8">
+      {/* ── Active Promotional / Banner Highlight ─────────────────────────── */}
+      {activeOfferDetail && (
+        <div className="mb-6 rounded-xl border border-brand-gold/40 bg-gradient-to-r from-brand-crimson/15 via-surface to-brand-gold/15 p-4 sm:p-6 shadow-sm backdrop-blur-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-0.5 rounded-full bg-brand-gold/20 text-brand-gold border border-brand-gold/40 text-[10px] font-extrabold uppercase tracking-widest">
+                {activeOfferDetail.offer_category ? `⚡ ${activeOfferDetail.offer_category.toUpperCase()}` : '🪔 SPECIAL OFFER'}
+              </span>
+              <span className="text-xs font-semibold text-brand-gold">
+                {activeOfferDetail.type === 'percent'
+                  ? `${activeOfferDetail.value}% OFF Applied`
+                  : activeOfferDetail.type === 'flat'
+                  ? `Flat ₹${activeOfferDetail.value / 100} OFF Applied`
+                  : 'Exclusive Offer Applied'}
+              </span>
+            </div>
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-text">
+              {activeOfferDetail.name}
+            </h2>
+            <p className="text-xs sm:text-sm text-text-muted max-w-2xl">
+              Promotional products are displayed at the top of the collection with discounted prices already calculated.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleClearOfferFilter}
+            className="self-start sm:self-center shrink-0 px-4 py-2 rounded-lg border border-border bg-surface text-xs font-semibold text-text hover:bg-surface-alt hover:border-brand-gold transition-colors shadow-sm"
+          >
+            Show All Products
+          </button>
+        </div>
+      )}
+
       {/* ── Page Header ──────────────────────────────────────────────────── */}
       <div className="mb-8 pb-6 border-b border-border">
         <span className="text-xs font-semibold uppercase tracking-widest text-brand-gold">

@@ -70,14 +70,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
           )}
         </Link>
 
-        {/* Discount badge in top-left */}
-        {hasDiscount && (
-          <div className="absolute top-2.5 left-2.5 z-10">
+        {/* Discount & Special Offer badges in top-left */}
+        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start">
+          {product.price.applied_offer?.offer_category && (
+            <span className="inline-flex items-center rounded-sm bg-brand-gold text-text px-2 py-0.5 text-[10px] font-extrabold tracking-wider uppercase shadow-md">
+              {product.price.applied_offer.offer_category === 'Clearance Sale' ? '⚡ CLEARANCE' :
+               product.price.applied_offer.offer_category === 'Flash Deal' ? '🔥 FLASH DEAL' :
+               product.price.applied_offer.offer_category === 'Exclusive Offer' ? '💎 VIP DEAL' :
+               product.price.applied_offer.offer_category === 'Free Shipping' ? '🚚 FREE SHIP' :
+               product.price.applied_offer.offer_category === 'Festive Offer' ? '🪔 FESTIVE' :
+               product.price.applied_offer.offer_category.toUpperCase()}
+            </span>
+          )}
+          {hasDiscount && (
             <span className="inline-flex items-center rounded-sm bg-brand-crimson px-2 py-0.5 text-[11px] font-semibold tracking-wide text-white uppercase shadow-sm">
               {formatDiscount(product.price.effective_discount_percent)}
             </span>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Stock pill in top-right */}
         <div className="absolute top-2.5 right-2.5 z-10">
@@ -146,8 +156,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
           {/* Applied active promotional offer notice */}
           <div className="min-h-[1.25rem] mt-0.5">
             {product.price.applied_offer ? (
-              <p className="text-[10px] font-medium text-brand-gold truncate">
-                ✨ {product.price.applied_offer.name}
+              <p className="text-[10px] font-semibold text-brand-gold truncate" title={product.price.applied_offer.name}>
+                ✨ {product.price.applied_offer.offer_category ? `${product.price.applied_offer.offer_category}: ` : ''}{product.price.applied_offer.name}
               </p>
             ) : null}
           </div>

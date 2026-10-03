@@ -5,7 +5,13 @@ export interface ProductPrice {
   offer_discount_paise: number;
   final_price_paise: number;
   effective_discount_percent: number;
-  applied_offer: { id: string; name: string; discount_paise: number } | null;
+  applied_offer: {
+    id: string;
+    name: string;
+    offer_category?: string;
+    code?: string | null;
+    discount_paise: number;
+  } | null;
 }
 
 export interface ProductVariant {
@@ -84,6 +90,8 @@ export interface OfferItem {
   value: number;
   max_discount: number | null;
   min_cart_value: number;
+  scope?: 'all' | 'category' | 'product';
+  scope_ids?: string[] | string;
   banner_image_url?: string | null;
 }
 
