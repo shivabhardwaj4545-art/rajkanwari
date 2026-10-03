@@ -238,7 +238,7 @@ export const AdminReportsPage: React.FC = () => {
           <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
             Total Revenue
           </span>
-          <div className="text-2xl sm:text-3xl font-serif font-bold text-[var(--brand-crimson)] font-mono">
+          <div className="text-2xl sm:text-3xl font-sans font-bold text-[var(--brand-crimson)]">
             <AnimatedNumber
               value={kpis.total_revenue}
               formatter={(val) => formatPrice(val)}
@@ -251,7 +251,7 @@ export const AdminReportsPage: React.FC = () => {
           <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
             Total Orders
           </span>
-          <div className="text-2xl sm:text-3xl font-serif font-bold text-[var(--text)] font-mono">
+          <div className="text-2xl sm:text-3xl font-sans font-bold text-[var(--text)]">
             <AnimatedNumber value={kpis.total_orders} />
           </div>
           <span className="text-[10px] text-[var(--text-muted)]">Completed & confirmed</span>
@@ -261,7 +261,7 @@ export const AdminReportsPage: React.FC = () => {
           <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
             Average Order Value
           </span>
-          <div className="text-2xl sm:text-3xl font-serif font-bold text-[var(--brand-gold)] font-mono">
+          <div className="text-2xl sm:text-3xl font-sans font-bold text-[var(--brand-gold)]">
             <AnimatedNumber
               value={kpis.aov}
               formatter={(val) => formatPrice(val)}
@@ -274,7 +274,7 @@ export const AdminReportsPage: React.FC = () => {
           <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
             Units Sold
           </span>
-          <div className="text-2xl sm:text-3xl font-serif font-bold text-[var(--text)] font-mono">
+          <div className="text-2xl sm:text-3xl font-sans font-bold text-[var(--text)]">
             <AnimatedNumber value={kpis.units_sold} />
           </div>
           <span className="text-[10px] text-[var(--text-muted)]">Garments & accessories</span>

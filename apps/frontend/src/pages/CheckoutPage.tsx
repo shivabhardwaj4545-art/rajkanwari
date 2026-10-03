@@ -1089,8 +1089,8 @@ export const CheckoutPage: React.FC = () => {
                 </div>
 
                 <div className="pt-3 border-t border-border flex justify-between items-baseline">
-                  <span className="font-serif text-base font-bold text-text">Total Amount</span>
-                  <span className="font-serif text-xl font-bold text-brand-crimson dark:text-brand-gold">
+                  <span className="font-sans text-base font-bold text-text">Total Amount</span>
+                  <span className="font-sans text-xl font-bold text-brand-crimson dark:text-brand-gold">
                     {formatPrice(breakdown.total_paise)}
                   </span>
                 </div>

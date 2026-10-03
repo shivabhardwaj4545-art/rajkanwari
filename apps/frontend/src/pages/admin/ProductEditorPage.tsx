@@ -527,7 +527,7 @@ export const ProductEditorPage: React.FC = () => {
             <div className="p-3 rounded-lg bg-surface-alt/70 border border-border flex items-center justify-between text-xs">
               <span className="text-text-muted">Calculated Customer Selling Price:</span>
               <div className="flex items-baseline gap-2">
-                <span className="font-serif text-lg font-bold text-brand-crimson">
+                <span className="font-sans text-lg font-bold text-brand-crimson">
                   {formatPrice(sellingPricePaise)}
                 </span>
                 {discountPercent > 0 && (
@@ -891,7 +891,7 @@ export const ProductEditorPage: React.FC = () => {
                 </h3>
 
                 <div className="flex items-baseline gap-2 pt-0.5">
-                  <span className="font-serif text-base font-bold text-brand-crimson">
+                  <span className="font-sans text-base font-bold text-brand-crimson">
                     {formatPrice(sellingPricePaise)}
                   </span>
                   {discountPercent > 0 && (

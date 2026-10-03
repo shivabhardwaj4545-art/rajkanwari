@@ -313,7 +313,7 @@ export const CartDrawer: React.FC = () => {
 
                   <div className="flex justify-between text-sm font-semibold text-text pt-2 border-t border-border">
                     <span>Estimated Total</span>
-                    <span className="font-serif text-base font-bold text-brand-crimson dark:text-brand-gold">
+                    <span className="font-sans text-base font-bold text-brand-crimson dark:text-brand-gold">
                       {formatPrice(breakdown.total_paise)}
                     </span>
                   </div>
