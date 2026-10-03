@@ -30,7 +30,9 @@ if (connectionString) {
   poolConfig = {
     connectionString,
     ssl: disableSsl || isLocalHost ? false : { rejectUnauthorized: false },
-    connectionTimeoutMillis: 3000,
+    connectionTimeoutMillis: 15000,
+    idleTimeoutMillis: 30000,
+    max: 20,
   };
 } else {
   const host =
@@ -52,7 +54,9 @@ if (connectionString) {
     password,
     database,
     ssl: disableSsl || isLocalHost ? false : { rejectUnauthorized: false },
-    connectionTimeoutMillis: 3000,
+    connectionTimeoutMillis: 15000,
+    idleTimeoutMillis: 30000,
+    max: 20,
   };
 }
 
