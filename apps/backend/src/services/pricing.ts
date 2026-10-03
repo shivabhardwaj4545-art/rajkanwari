@@ -166,16 +166,18 @@ export async function calculateCart(
     });
   }
 
+  const nowIso = new Date().toISOString();
   // 3. Load active offers where is_active = 1 and now between starts_at and ends_at
   const activeOffers = (await db
     .prepare(`
       SELECT *
       FROM offers
       WHERE is_active = 1
-        AND CURRENT_TIMESTAMP BETWEEN starts_at AND ends_at
+        AND (starts_at IS NULL OR starts_at <= ?)
+        AND (ends_at IS NULL OR ends_at >= ?)
       ORDER BY priority DESC
     `)
-    .all()) as OfferDbRow[];
+    .all(nowIso, nowIso)) as OfferDbRow[];
 
   const appliedOffers: Array<{ id: string; name: string; type: string; discount_paise: number }> = [];
   const discounts: NamedDiscount[] = [];

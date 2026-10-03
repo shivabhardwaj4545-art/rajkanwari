@@ -20,17 +20,18 @@ interface OfferRow {
  * Fetch all active auto-applied offers (code IS NULL)
  */
 async function getActiveAutoOffers(): Promise<OfferRow[]> {
+  const nowIso = new Date().toISOString();
   const rows = await db
     .prepare(`
       SELECT id, name, code, type, value, max_discount, min_cart_value, scope, scope_ids
       FROM offers
       WHERE is_active = 1
         AND code IS NULL
-        AND (starts_at IS NULL OR starts_at <= CURRENT_TIMESTAMP)
-        AND (ends_at IS NULL OR ends_at >= CURRENT_TIMESTAMP)
+        AND (starts_at IS NULL OR starts_at <= ?)
+        AND (ends_at IS NULL OR ends_at >= ?)
       ORDER BY priority DESC
     `)
-    .all();
+    .all(nowIso, nowIso);
   return rows as OfferRow[];
 }
 
