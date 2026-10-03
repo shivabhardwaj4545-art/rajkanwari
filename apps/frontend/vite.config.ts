@@ -10,7 +10,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@shikkis/types': path.resolve(__dirname, '../../packages/types/src/index.ts'),
+      '@rajkanwari/types': path.resolve(__dirname, '../../packages/types/src/index.ts'),
     },
   },
   server: {

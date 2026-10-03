@@ -1,5 +1,5 @@
 {
-  "name": "@shikkis/backend",
+  "name": "@rajkanwari/backend",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -12,7 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@shikkis/types": "*",
+    "@rajkanwari/types": "*",
     "@types/pg": "^8.23.1",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^11.8.1",

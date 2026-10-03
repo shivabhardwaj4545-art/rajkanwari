@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
-import type { UserRole } from '@shikkis/types';
+import type { UserRole } from '@rajkanwari/types';
 
 export const JWT_SECRET = process.env.JWT_SECRET ?? 'rajkanwari-super-secret-jwt-key-change-in-prod';
 const JWT_ACCESS_EXPIRY = '15m';

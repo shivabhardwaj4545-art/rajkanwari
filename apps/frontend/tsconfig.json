@@ -10,7 +10,7 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@shikkis/types": ["../../packages/types/src/index.ts"],
+      "@rajkanwari/types": ["../../packages/types/src/index.ts"],
       "@/*": ["./src/*"]
     }
   },

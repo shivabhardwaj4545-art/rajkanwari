@@ -6,7 +6,7 @@
     "module": "node16",
     "target": "ES2022",
     "paths": {
-      "@shikkis/types": ["../../packages/types/src/index.ts"]
+      "@rajkanwari/types": ["../../packages/types/src/index.ts"]
     }
   },
   "include": ["src", "../../packages/types/src"],
