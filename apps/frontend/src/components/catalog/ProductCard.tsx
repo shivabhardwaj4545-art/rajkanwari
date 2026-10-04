@@ -146,23 +146,41 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
           )}
         </div>
 
-        {/* Top-Right Floating Wishlist Button */}
-        <button
-          type="button"
-          onClick={handleToggleWishlist}
-          title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
-          aria-label={isInWishlist ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
-          className="absolute top-2.5 right-2.5 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-surface/90 hover:bg-surface text-text backdrop-blur-md border border-border/70 shadow-sm transition-transform duration-200 hover:scale-110 active:scale-95 cursor-pointer"
-        >
-          <Heart
-            size={16}
-            className={`transition-colors duration-200 ${
-              isInWishlist
-                ? 'fill-brand-crimson text-brand-crimson dark:fill-brand-gold dark:text-brand-gold'
-                : 'text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold'
-            }`}
-          />
-        </button>
+        {/* Top-Right Floating Actions (Wishlist + Quick View) */}
+        <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5">
+          {onQuickView && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onQuickView(product);
+              }}
+              title="Quick View"
+              aria-label={`Quick view ${product.name}`}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-surface/90 hover:bg-surface text-text backdrop-blur-md border border-border/70 shadow-sm transition-all duration-200 hover:scale-110 active:scale-95 hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold cursor-pointer"
+            >
+              <Eye size={15} />
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={handleToggleWishlist}
+            title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+            aria-label={isInWishlist ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-surface/90 hover:bg-surface text-text backdrop-blur-md border border-border/70 shadow-sm transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+          >
+            <Heart
+              size={15}
+              className={`transition-colors duration-200 ${
+                isInWishlist
+                  ? 'fill-brand-crimson text-brand-crimson dark:fill-brand-gold dark:text-brand-gold'
+                  : 'text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold'
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
       {/* ── Details ──────────────────────────────────────────────────────── */}
@@ -219,29 +237,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
           )}
 
           {/* ── Direct Action Buttons (Positioned below image and details, not covering photo) ── */}
-          <div className="mt-3 pt-2.5 border-t border-border/40 flex items-center gap-2">
-            {onQuickView && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onQuickView(product);
-                }}
-                className="flex items-center justify-center gap-1 rounded-lg border border-border bg-surface px-2.5 py-2 text-xs font-semibold text-text hover:border-brand-gold hover:text-brand-crimson dark:hover:text-brand-gold hover:bg-surface-alt transition-colors min-h-[40px] cursor-pointer"
-                aria-label={`Quick view ${product.name}`}
-                title="Quick View"
-              >
-                <Eye size={14} className="text-brand-gold shrink-0" />
-                <span className="text-xs">View</span>
-              </button>
-            )}
-
+          {/* ── Direct Add to Bag Action (Full-width, clean, and elegant) ── */}
+          <div className="mt-3.5 pt-3 border-t border-border/40">
             <button
               type="button"
               disabled={isOutOfStock || addingToCart}
               onClick={handleDirectAddToCart}
-              className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-all min-h-[40px] cursor-pointer shadow-xs ${
+              className={`w-full min-h-[42px] flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-xs cursor-pointer ${
                 isOutOfStock
                   ? 'bg-surface-alt text-text-muted/60 border border-border/40 cursor-not-allowed'
                   : justAdded
@@ -252,13 +254,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
             >
               {justAdded ? (
                 <>
-                  <Check size={14} className="shrink-0" />
-                  <span>Added</span>
+                  <Check size={15} />
+                  <span>Added to Bag</span>
                 </>
               ) : (
                 <>
-                  <ShoppingBag size={14} className="shrink-0" />
-                  <span className="truncate">{isOutOfStock ? 'Sold Out' : 'Add to Bag'}</span>
+                  <ShoppingBag size={15} />
+                  <span>{isOutOfStock ? 'Sold Out' : 'Add to Bag'}</span>
                 </>
               )}
             </button>
