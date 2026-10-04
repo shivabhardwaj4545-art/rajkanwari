@@ -634,7 +634,7 @@ export const HomePage: React.FC = () => {
       {/* ── 5. Subscribe Newsletter Section (Matching Reference Design) ────── */}
       <section
         aria-label="Subscribe Newsletter"
-        className="w-full bg-surface-alt border-y border-border py-12 lg:py-16 overflow-hidden relative my-8"
+        className="w-full bg-surface-alt border-y border-border/40 py-12 lg:py-16 overflow-hidden relative my-8"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
           {/* Left Decorative Floating Flat-lay Image */}

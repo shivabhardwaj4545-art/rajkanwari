@@ -21,7 +21,7 @@ const FOOTER_LINKS = {
 };
 
 export const Footer: React.FC = () => (
-  <footer className="border-t border-border bg-surface-alt" aria-label="Site footer">
+  <footer className="border-t border-border/40 bg-surface" aria-label="Site footer">
     <div className="mx-auto max-w-7xl px-4 py-12 md:px-8">
       <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
 
@@ -87,7 +87,7 @@ export const Footer: React.FC = () => (
       </div>
 
       {/* ── Bottom row ─────────────────────────────────────────────────────── */}
-      <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-border pt-6">
+      <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-border/40 pt-6">
         <p className="text-xs text-text-muted">
           © {new Date().getFullYear()} Rajkanwari — House of Ethnic Wear. Flagship Boutique: Jodhpur, Rajasthan. All rights reserved.
         </p>

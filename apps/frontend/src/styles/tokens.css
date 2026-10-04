@@ -8,24 +8,24 @@
    ============================================================================= */
 
 :root {
-  /* ── Brand Palette (User Specified) ────────────────────────────────────────── */
-  --brand-primary: #4f5437;   /* PRIMARY (#4F5437) */
-  --brand-gold: #b89a5a;      /* ACCENT (#B89A5A) */
-  --brand-crimson: #8e2731;   /* SALE/FESTIVE (#8E2731) */
-  --brand-sale: #8e2731;      /* SALE/FESTIVE (#8E2731) */
+  /* ── Brand Palette ─────────────────────────────────────────────────────────── */
+  --brand-primary: #4F5437;
+  --brand-gold: #D4AF37;
+  --brand-crimson: #9B1B30;
+  --brand-sale: #9B1B30;
 
   /* ── Semantic ─────────────────────────────────────────────────────────────── */
-  --success: #2d6a4f;
-  --warning: #b89a5a;
-  --danger: #8e2731;
+  --success: #2D6A4F;
+  --warning: #F4A261;
+  --danger: #E76F51;
 
-  /* ── Theme Tokens (User Specified) ───────────────────────────────────────── */
-  --bg: #f7f2e8;           /* BACKGROUND (#F7F2E8) */
-  --surface: #fbf8f0;      /* NAVBAR / SURFACE (#FBF8F0) */
-  --surface-alt: #f7f2e8;  /* Subtle section background (#F7F2E8) */
-  --text: #2d2a24;         /* TEXT (#2D2A24) */
-  --text-muted: #756d60;   /* MUTED TEXT (#756D60) */
-  --border: #d8c9a9;       /* BORDER (#D8C9A9) */
+  /* ── Light Theme Tokens ───────────────────────────────────────────────────── */
+  --bg: #FEFBF8;
+  --surface: #FFFFFF;
+  --surface-alt: #FEFBF8;
+  --text: #2C1810;
+  --text-muted: #7A6A5F;
+  --border: #E8D4A0;
 
   /* ── Typography ──────────────────────────────────────────────────────────── */
   --font-serif: 'Cormorant Garamond', Georgia, serif;
@@ -40,19 +40,19 @@
 
 /* ── Global Theme Settings ─────────────────────────────────────────────────── */
 [data-theme='light'] {
-  --brand-primary: #4f5437;
-  --brand-gold: #b89a5a;
-  --brand-crimson: #8e2731;
-  --brand-sale: #8e2731;
-  --bg: #f7f2e8;
-  --surface: #fbf8f0;
-  --surface-alt: #f7f2e8;
-  --text: #2d2a24;
-  --text-muted: #756d60;
-  --border: #d8c9a9;
-  --success: #2d6a4f;
-  --warning: #b89a5a;
-  --danger: #8e2731;
+  --brand-primary: #4F5437;
+  --brand-gold: #D4AF37;
+  --brand-crimson: #9B1B30;
+  --brand-sale: #9B1B30;
+  --bg: #FEFBF8;
+  --surface: #FFFFFF;
+  --surface-alt: #FEFBF8;
+  --text: #2C1810;
+  --text-muted: #7A6A5F;
+  --border: #E8D4A0;
+  --success: #2D6A4F;
+  --warning: #F4A261;
+  --danger: #E76F51;
 }
 
 [data-theme='dark'] {
