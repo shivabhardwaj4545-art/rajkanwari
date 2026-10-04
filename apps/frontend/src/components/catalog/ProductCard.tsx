@@ -107,25 +107,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
           )}
         </Link>
 
-        {/* Refined Luxury Badges in top-left */}
-        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start">
-          <div className="flex flex-wrap gap-1.5 items-center">
-            {product.price.applied_offer?.offer_category && (
-              <span className="inline-flex items-center rounded-full bg-brand-gold text-text px-2.5 py-0.5 text-[9px] font-extrabold tracking-wider uppercase shadow-xs">
-                {product.price.applied_offer.offer_category === 'Clearance Sale' ? 'Clearance' :
-                 product.price.applied_offer.offer_category === 'Flash Deal' ? 'Flash Deal' :
-                 product.price.applied_offer.offer_category === 'Exclusive Offer' ? 'VIP Deal' :
-                 product.price.applied_offer.offer_category === 'Free Shipping' ? 'Free Ship' :
-                 product.price.applied_offer.offer_category === 'Festive Offer' ? 'Festive' :
-                 product.price.applied_offer.offer_category.toUpperCase()}
-              </span>
-            )}
-            {hasDiscount && (
-              <span className="inline-flex items-center rounded-full bg-brand-crimson px-2 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase shadow-xs">
-                {formatDiscount(product.price.effective_discount_percent)}
-              </span>
-            )}
-          </div>
+        {/* Refined Luxury Badges in top-left (Clean vertical stack to avoid any horizontal collision) */}
+        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start max-w-[55%] pointer-events-none">
+          {product.price.applied_offer?.offer_category && (
+            <span className="inline-flex items-center rounded-full bg-brand-gold text-text px-2.5 py-0.5 text-[9px] font-extrabold tracking-wider uppercase shadow-xs">
+              {product.price.applied_offer.offer_category === 'Clearance Sale' ? 'Clearance' :
+               product.price.applied_offer.offer_category === 'Flash Deal' ? 'Flash Deal' :
+               product.price.applied_offer.offer_category === 'Exclusive Offer' ? 'VIP Deal' :
+               product.price.applied_offer.offer_category === 'Free Shipping' ? 'Free Ship' :
+               product.price.applied_offer.offer_category === 'Festive Offer' ? 'Festive' :
+               product.price.applied_offer.offer_category.toUpperCase()}
+            </span>
+          )}
+          {hasDiscount && (
+            <span className="inline-flex items-center rounded-full bg-brand-crimson px-2 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase shadow-xs">
+              {formatDiscount(product.price.effective_discount_percent)}
+            </span>
+          )}
 
           {/* Stock warning pill below promotional tags */}
           {(isOutOfStock || isLowStock) && (
@@ -146,30 +144,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
           )}
         </div>
 
-        {/* Top-Right Floating Actions (Wishlist + Quick View) */}
-        <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5">
-          {onQuickView && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onQuickView(product);
-              }}
-              title="Quick View"
-              aria-label={`Quick view ${product.name}`}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-surface/90 hover:bg-surface text-text backdrop-blur-md border border-border/70 shadow-sm transition-all duration-200 hover:scale-110 active:scale-95 hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold cursor-pointer"
-            >
-              <Eye size={15} />
-            </button>
-          )}
-
+        {/* Top-Right Floating Actions (Vertical dock for perfect balance and zero overlap) */}
+        <div className="absolute top-2.5 right-2.5 z-20 flex flex-col gap-1.5 items-center">
           <button
             type="button"
             onClick={handleToggleWishlist}
             title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
             aria-label={isInWishlist ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-surface/90 hover:bg-surface text-text backdrop-blur-md border border-border/70 shadow-sm transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+            className="flex h-8.5 w-8.5 items-center justify-center rounded-full bg-surface/95 hover:bg-surface text-text backdrop-blur-md border border-border/80 shadow-sm transition-all duration-200 hover:scale-110 active:scale-95 hover:border-brand-gold cursor-pointer"
           >
             <Heart
               size={15}
@@ -180,6 +162,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
               }`}
             />
           </button>
+
+          {onQuickView && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onQuickView(product);
+              }}
+              title="Quick View"
+              aria-label={`Quick view ${product.name}`}
+              className="flex h-8.5 w-8.5 items-center justify-center rounded-full bg-surface/95 hover:bg-surface text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold backdrop-blur-md border border-border/80 shadow-sm transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+            >
+              <Eye size={15} />
+            </button>
+          )}
         </div>
       </div>
 
