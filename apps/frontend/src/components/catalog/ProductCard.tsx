@@ -144,25 +144,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
           )}
         </div>
 
-        {/* Top-Right Floating Actions (Vertical dock for perfect balance and zero overlap) */}
-        <div className="absolute top-2.5 right-2.5 z-20 flex flex-col gap-1.5 items-center">
-          <button
-            type="button"
-            onClick={handleToggleWishlist}
-            title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
-            aria-label={isInWishlist ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
-            className="flex h-8.5 w-8.5 items-center justify-center rounded-full bg-surface/95 hover:bg-surface text-text backdrop-blur-md border border-border/80 shadow-sm transition-all duration-200 hover:scale-110 active:scale-95 hover:border-brand-gold cursor-pointer"
-          >
-            <Heart
-              size={15}
-              className={`transition-colors duration-200 ${
-                isInWishlist
-                  ? 'fill-brand-crimson text-brand-crimson dark:fill-brand-gold dark:text-brand-gold'
-                  : 'text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold'
-              }`}
-            />
-          </button>
-
+        {/* Top-Right Floating Actions Cluster (Quick View on left side of Wishlist, equal size as previous wishlist icon) */}
+        <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5">
           {onQuickView && (
             <button
               type="button"
@@ -173,11 +156,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
               }}
               title="Quick View"
               aria-label={`Quick view ${product.name}`}
-              className="flex h-8.5 w-8.5 items-center justify-center rounded-full bg-surface/95 hover:bg-surface text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold backdrop-blur-md border border-border/80 shadow-sm transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-surface/90 hover:bg-surface text-text backdrop-blur-md border border-border/70 shadow-sm transition-transform duration-200 hover:scale-110 active:scale-95 hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold cursor-pointer"
             >
-              <Eye size={15} />
+              <Eye size={16} className="text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold transition-colors" />
             </button>
           )}
+
+          <button
+            type="button"
+            onClick={handleToggleWishlist}
+            title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+            aria-label={isInWishlist ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-surface/90 hover:bg-surface text-text backdrop-blur-md border border-border/70 shadow-sm transition-transform duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+          >
+            <Heart
+              size={16}
+              className={`transition-colors duration-200 ${
+                isInWishlist
+                  ? 'fill-brand-crimson text-brand-crimson dark:fill-brand-gold dark:text-brand-gold'
+                  : 'text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold'
+              }`}
+            />
+          </button>
         </div>
       </div>
 
