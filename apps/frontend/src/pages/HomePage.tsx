@@ -188,6 +188,21 @@ export const HomePage: React.FC = () => {
     return () => clearInterval(interval);
   }, [featuredProducts, prefersReducedMotion]);
 
+  // Manual scroll controls for Category and Featured Product carousels
+  const scrollCategories = (direction: 'left' | 'right') => {
+    if (categoryScrollRef.current) {
+      const scrollAmount = direction === 'left' ? -260 : 260;
+      categoryScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const scrollProducts = (direction: 'left' | 'right') => {
+    if (productScrollRef.current) {
+      const scrollAmount = direction === 'left' ? -320 : 320;
+      productScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   // Keyboard navigation for carousel
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -539,13 +554,33 @@ export const HomePage: React.FC = () => {
               Shop by Category
             </h2>
           </div>
-          <Link
-            to="/catalog"
-            className="mt-2 sm:mt-0 text-xs font-semibold uppercase tracking-wider text-brand-crimson dark:text-brand-gold hover:underline flex items-center gap-1"
-          >
-            <span>View All Categories</span>
-            <ArrowRight size={14} />
-          </Link>
+          <div className="mt-4 sm:mt-0 flex items-center gap-4">
+            <Link
+              to="/catalog"
+              className="text-xs font-semibold uppercase tracking-wider text-brand-crimson dark:text-brand-gold hover:underline flex items-center gap-1"
+            >
+              <span>View All Categories</span>
+              <ArrowRight size={14} />
+            </Link>
+            <div className="hidden sm:flex items-center gap-1.5 ml-1 border-l border-border pl-3">
+              <button
+                type="button"
+                onClick={() => scrollCategories('left')}
+                aria-label="Scroll categories left"
+                className="p-1.5 rounded-full border border-border bg-surface text-text hover:bg-surface-alt hover:text-brand-crimson dark:hover:text-brand-gold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold cursor-pointer"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollCategories('right')}
+                aria-label="Scroll categories right"
+                className="p-1.5 rounded-full border border-border bg-surface text-text hover:bg-surface-alt hover:text-brand-crimson dark:hover:text-brand-gold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold cursor-pointer"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Auto-scrolling Category Carousel */}
@@ -594,13 +629,33 @@ export const HomePage: React.FC = () => {
               Featured Creations
             </h2>
           </div>
-          <Link
-            to="/catalog?sort=newest"
-            className="mt-2 sm:mt-0 text-xs font-semibold uppercase tracking-wider text-brand-crimson dark:text-brand-gold hover:underline flex items-center gap-1"
-          >
-            <span>Explore Entire Catalog</span>
-            <ArrowRight size={14} />
-          </Link>
+          <div className="mt-4 sm:mt-0 flex items-center gap-4">
+            <Link
+              to="/catalog?sort=newest"
+              className="text-xs font-semibold uppercase tracking-wider text-brand-crimson dark:text-brand-gold hover:underline flex items-center gap-1"
+            >
+              <span>Explore Entire Catalog</span>
+              <ArrowRight size={14} />
+            </Link>
+            <div className="hidden sm:flex items-center gap-1.5 ml-1 border-l border-border pl-3">
+              <button
+                type="button"
+                onClick={() => scrollProducts('left')}
+                aria-label="Scroll featured products left"
+                className="p-1.5 rounded-full border border-border bg-surface text-text hover:bg-surface-alt hover:text-brand-crimson dark:hover:text-brand-gold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold cursor-pointer"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollProducts('right')}
+                aria-label="Scroll featured products right"
+                className="p-1.5 rounded-full border border-border bg-surface text-text hover:bg-surface-alt hover:text-brand-crimson dark:hover:text-brand-gold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold cursor-pointer"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Auto-scrolling Featured Products Carousel */}

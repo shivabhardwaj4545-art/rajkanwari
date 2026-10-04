@@ -72,6 +72,20 @@
     background: var(--text-muted);
   }
 
+  /* Universal scrollbar-none utility to hide scrollbars cleanly while preserving scroll functionality */
+  .scrollbar-none,
+  .no-scrollbar {
+    -ms-overflow-style: none !important; /* IE and Edge */
+    scrollbar-width: none !important; /* Firefox */
+  }
+  .scrollbar-none::-webkit-scrollbar,
+  .no-scrollbar::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
+
   /* Heading font */
   h1,
   h2,
