@@ -17,24 +17,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
   const primaryImg = product.images?.[0] || DEFAULT_ETHNIC_IMAGE;
   const secondaryImg = product.images?.[1];
 
-  // Stock calculations
+  // Stock calculations — only show warning if low stock or out of stock
   const totalStock = product.total_stock ?? 0;
-  let stockLabel = 'In Stock';
-  let stockBadgeClass = 'bg-success/15 text-success border-success/30';
-
-  if (totalStock === 0) {
-    stockLabel = 'Out of Stock';
-    stockBadgeClass = 'bg-danger/15 text-danger border-danger/30';
-  } else if (totalStock <= 5) {
-    stockLabel = `Only ${totalStock} left`;
-    stockBadgeClass = 'bg-warning/15 text-warning border-warning/30';
-  }
+  const isOutOfStock = totalStock === 0;
+  const isLowStock = totalStock > 0 && totalStock <= 5;
 
   const hasDiscount = product.price.effective_discount_percent > 0;
 
   return (
     <article
-      className="group relative flex flex-col h-full rounded-lg border border-border bg-surface overflow-hidden transition-all duration-300 hover:shadow-md hover:border-brand-gold/50"
+      className="group relative flex flex-col h-full rounded-xl border border-border/80 bg-surface overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-brand-gold/60"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -49,7 +41,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
             loading="lazy"
             className={[
               'h-full w-full object-cover object-top transition-transform duration-500 ease-out',
-              'group-hover:scale-[1.04]',
+              'group-hover:scale-[1.05]',
               secondaryImg && isHovered ? 'opacity-0' : 'opacity-100',
             ].join(' ')}
           />
@@ -63,59 +55,65 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
               loading="lazy"
               className={[
                 'absolute inset-0 h-full w-full object-cover object-top transition-all duration-500 ease-out',
-                'group-hover:scale-[1.04]',
+                'group-hover:scale-[1.05]',
                 isHovered ? 'opacity-100' : 'opacity-0',
               ].join(' ')}
             />
           )}
         </Link>
 
-        {/* Discount & Special Offer badges in top-left */}
-        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start">
+        {/* Refined Luxury Badges in top-left */}
+        <div className="absolute top-2.5 left-2.5 z-10 flex flex-wrap gap-1.5 items-center">
           {product.price.applied_offer?.offer_category && (
-            <span className="inline-flex items-center rounded-sm bg-brand-gold text-text px-2 py-0.5 text-[10px] font-extrabold tracking-wider uppercase shadow-md">
-              {product.price.applied_offer.offer_category === 'Clearance Sale' ? '⚡ CLEARANCE' :
-               product.price.applied_offer.offer_category === 'Flash Deal' ? '🔥 FLASH DEAL' :
-               product.price.applied_offer.offer_category === 'Exclusive Offer' ? '💎 VIP DEAL' :
-               product.price.applied_offer.offer_category === 'Free Shipping' ? '🚚 FREE SHIP' :
-               product.price.applied_offer.offer_category === 'Festive Offer' ? '🪔 FESTIVE' :
+            <span className="inline-flex items-center rounded-full bg-brand-gold text-text px-2.5 py-0.5 text-[9px] font-extrabold tracking-wider uppercase shadow-xs">
+              {product.price.applied_offer.offer_category === 'Clearance Sale' ? 'Clearance' :
+               product.price.applied_offer.offer_category === 'Flash Deal' ? 'Flash Deal' :
+               product.price.applied_offer.offer_category === 'Exclusive Offer' ? 'VIP Deal' :
+               product.price.applied_offer.offer_category === 'Free Shipping' ? 'Free Ship' :
+               product.price.applied_offer.offer_category === 'Festive Offer' ? 'Festive' :
                product.price.applied_offer.offer_category.toUpperCase()}
             </span>
           )}
           {hasDiscount && (
-            <span className="inline-flex items-center rounded-sm bg-brand-crimson px-2 py-0.5 text-[11px] font-semibold tracking-wide text-white uppercase shadow-sm">
+            <span className="inline-flex items-center rounded-full bg-brand-crimson px-2 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase shadow-xs">
               {formatDiscount(product.price.effective_discount_percent)}
             </span>
           )}
         </div>
 
-        {/* Stock pill in top-right */}
-        <div className="absolute top-2.5 right-2.5 z-10">
-          <span
-            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium tracking-tight backdrop-blur-md ${stockBadgeClass}`}
-          >
+        {/* Stock warning ONLY if low stock or out of stock (Never clutter with In Stock) */}
+        {(isOutOfStock || isLowStock) && (
+          <div className="absolute top-2.5 right-2.5 z-10">
             <span
-              className={`mr-1 h-1.5 w-1.5 rounded-full ${
-                totalStock === 0 ? 'bg-danger' : totalStock <= 5 ? 'bg-warning' : 'bg-success'
+              className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium tracking-tight backdrop-blur-md ${
+                isOutOfStock
+                  ? 'bg-danger/20 text-danger border-danger/40'
+                  : 'bg-warning/20 text-warning border-warning/40'
               }`}
-            />
-            {stockLabel}
-          </span>
-        </div>
+            >
+              <span
+                className={`mr-1 h-1.5 w-1.5 rounded-full ${
+                  isOutOfStock ? 'bg-danger' : 'bg-warning'
+                }`}
+              />
+              {isOutOfStock ? 'Out of Stock' : `Only ${totalStock} left`}
+            </span>
+          </div>
+        )}
 
-        {/* Quick View Button (hover reveal on desktop, always visible on touch) */}
+        {/* Floating Glassmorphic Quick View Button */}
         {onQuickView && (
-          <div className="absolute bottom-3 inset-x-3 z-10 transition-all duration-200 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 max-md:opacity-100 max-md:translate-y-0">
+          <div className="absolute bottom-3 inset-x-3 z-10 transition-all duration-300 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 max-md:opacity-100 max-md:translate-y-0">
             <button
               type="button"
               onClick={(e) => {
                 e.preventDefault();
                 onQuickView(product);
               }}
-              className="flex w-full items-center justify-center gap-1.5 rounded-md bg-surface/90 hover:bg-surface text-text text-xs font-medium py-2 px-3 backdrop-blur-sm border border-border shadow-sm hover:border-brand-gold hover:text-brand-crimson dark:hover:text-brand-gold transition-colors"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-surface/95 hover:bg-surface text-text text-xs font-semibold py-2 px-3 backdrop-blur-md border border-border/80 shadow-md hover:border-brand-gold hover:text-brand-crimson dark:hover:text-brand-gold transition-all cursor-pointer"
               aria-label={`Quick view ${product.name}`}
             >
-              <Eye size={14} />
+              <Eye size={13} className="text-brand-gold" />
               <span>Quick View</span>
             </button>
           </div>
@@ -123,23 +121,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
       </div>
 
       {/* ── Details ──────────────────────────────────────────────────────── */}
-      <div className="flex flex-1 flex-col justify-between p-3.5 sm:p-4">
+      <div className="flex flex-1 flex-col justify-between p-3.5 sm:p-4 bg-surface">
         <div>
-          {/* Category & Fabric badge */}
-          <div className="mb-1.5 flex items-center justify-between text-[11px] text-text-muted">
-            <span className="uppercase tracking-wider font-medium">{product.category_name}</span>
-            <span className="truncate max-w-[110px]">{product.fabric}</span>
+          {/* Eyebrow: Category & Fabric */}
+          <div className="mb-1 flex items-center justify-between text-[11px] text-text-muted">
+            <span className="uppercase tracking-widest font-medium text-brand-gold text-[10px]">
+              {product.category_name}
+            </span>
+            {product.fabric && (
+              <span className="text-[11px] text-text-muted truncate max-w-[120px]">
+                {product.fabric}
+              </span>
+            )}
           </div>
 
           {/* Product Name */}
-          <h3 className="line-clamp-2 text-sm font-medium leading-snug text-text transition-colors group-hover:text-brand-crimson dark:group-hover:text-brand-gold min-h-[2.5rem]">
-            <Link to={`/products/${product.slug}`}>{product.name}</Link>
+          <h3 className="line-clamp-2 text-sm font-sans font-medium leading-snug text-text transition-colors group-hover:text-brand-crimson dark:group-hover:text-brand-gold min-h-[2.5rem]">
+            <Link to={`/products/${product.slug}`} className="hover:underline">
+              {product.name}
+            </Link>
           </h3>
         </div>
 
         {/* Price block & offer banner */}
         <div className="mt-3 pt-2 border-t border-border/40 flex flex-col justify-end">
-          <div className="flex items-baseline gap-2 min-h-[1.5rem]">
+          <div className="flex items-baseline gap-2 flex-wrap min-h-[1.5rem]">
             {/* Final price in crimson (gold on dark) */}
             <span className="font-sans text-base font-bold text-brand-crimson dark:text-brand-gold tracking-tight">
               {formatPrice(product.price.final_price_paise)}
@@ -147,20 +153,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
 
             {/* Struck-through MRP */}
             {hasDiscount && (
-              <span className="font-sans text-xs text-text-muted line-through font-medium">
+              <span className="font-sans text-xs text-text-muted line-through font-normal">
                 {formatPrice(product.price.mrp_paise)}
+              </span>
+            )}
+
+            {/* Subtle discount percentage tag */}
+            {hasDiscount && (
+              <span className="text-[11px] font-semibold text-brand-sale">
+                ({formatDiscount(product.price.effective_discount_percent)})
               </span>
             )}
           </div>
 
           {/* Applied active promotional offer notice */}
-          <div className="min-h-[1.25rem] mt-0.5">
-            {product.price.applied_offer ? (
-              <p className="text-[10px] font-semibold text-brand-gold truncate" title={product.price.applied_offer.name}>
-                ✨ {product.price.applied_offer.offer_category ? `${product.price.applied_offer.offer_category}: ` : ''}{product.price.applied_offer.name}
-              </p>
-            ) : null}
-          </div>
+          {product.price.applied_offer && (
+            <p className="text-[10px] font-medium text-brand-gold mt-1 truncate" title={product.price.applied_offer.name}>
+              ✨ {product.price.applied_offer.name}
+            </p>
+          )}
         </div>
       </div>
     </article>

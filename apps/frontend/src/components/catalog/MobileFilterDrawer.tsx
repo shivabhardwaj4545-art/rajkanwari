@@ -118,21 +118,30 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
             </div>
 
             {/* Scrollable Filter Body */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
-              {/* In-Stock Toggle */}
-              <label className="flex items-center justify-between cursor-pointer py-1">
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6 scrollbar-none">
+              {/* In-Stock Toggle Switch */}
+              <div className="flex items-center justify-between py-1">
                 <span className="text-sm font-medium text-text">In-Stock Only</span>
-                <input
-                  type="checkbox"
-                  checked={Boolean(filters.in_stock)}
-                  onChange={(e) => onFilterChange({ ...filters, in_stock: e.target.checked })}
-                  className="h-5 w-5 rounded border-border text-brand-crimson focus:ring-brand-crimson/20"
-                />
-              </label>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={Boolean(filters.in_stock)}
+                  onClick={() => onFilterChange({ ...filters, in_stock: !filters.in_stock })}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold ${
+                    filters.in_stock ? 'bg-brand-gold' : 'bg-surface-alt border-border'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+                      filters.in_stock ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
 
               {/* Gender */}
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2.5">
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-2.5">
                   Gender
                 </h3>
                 <div className="grid grid-cols-4 gap-2">
@@ -149,10 +158,10 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                             gender: g.value === 'all' ? undefined : g.value,
                           })
                         }
-                        className={`py-2 px-1 rounded-md text-xs font-medium border text-center transition-all ${
+                        className={`py-2 px-1 rounded-lg text-xs font-medium border text-center transition-all cursor-pointer ${
                           isSelected
-                            ? 'border-brand-crimson bg-brand-crimson text-white shadow-sm'
-                            : 'border-border bg-surface-alt text-text'
+                            ? 'border-brand-crimson bg-brand-crimson/10 text-brand-crimson dark:border-brand-gold dark:text-brand-gold dark:bg-brand-gold/10 font-semibold shadow-xs'
+                            : 'border-border/80 bg-surface-alt text-text'
                         }`}
                       >
                         {g.label}
@@ -164,17 +173,17 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
 
               {/* Categories */}
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2.5">
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-2.5">
                   Categories
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => onFilterChange({ ...filters, category: undefined })}
-                    className={`py-1.5 px-3 rounded-md text-xs font-medium border transition-all ${
+                    className={`py-1.5 px-3 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
                       !filters.category
-                        ? 'border-brand-crimson bg-brand-crimson text-white'
-                        : 'border-border bg-surface-alt text-text'
+                        ? 'border-brand-crimson bg-brand-crimson/10 text-brand-crimson dark:border-brand-gold dark:text-brand-gold dark:bg-brand-gold/10 font-semibold shadow-xs'
+                        : 'border-border/80 bg-surface-alt text-text'
                     }`}
                   >
                     All
@@ -191,10 +200,10 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                             category: isSelected ? undefined : c.slug,
                           })
                         }
-                        className={`py-1.5 px-3 rounded-md text-xs font-medium border transition-all ${
+                        className={`py-1.5 px-3 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
                           isSelected
-                            ? 'border-brand-crimson bg-brand-crimson text-white'
-                            : 'border-border bg-surface-alt text-text'
+                            ? 'border-brand-crimson bg-brand-crimson/10 text-brand-crimson dark:border-brand-gold dark:text-brand-gold dark:bg-brand-gold/10 font-semibold shadow-xs'
+                            : 'border-border/80 bg-surface-alt text-text'
                         }`}
                       >
                         {c.name}

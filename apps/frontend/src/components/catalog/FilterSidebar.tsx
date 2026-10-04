@@ -58,14 +58,14 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   activeFilterCount,
 }) => {
   return (
-    <aside className="w-64 flex-shrink-0 space-y-6">
+    <aside className="w-64 flex-shrink-0 space-y-5 rounded-2xl border border-border/80 bg-surface/80 backdrop-blur-sm p-5 shadow-xs">
       {/* Header with active count & Reset button */}
-      <div className="flex items-center justify-between pb-3 border-b border-border">
+      <div className="flex items-center justify-between pb-3 border-b border-border/80">
         <div className="flex items-center gap-2">
-          <SlidersHorizontal size={18} className="text-text" />
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-text">Filters</h2>
+          <SlidersHorizontal size={16} className="text-brand-gold" />
+          <h2 className="text-xs font-bold uppercase tracking-wider text-text">Filters</h2>
           {activeFilterCount > 0 && (
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-crimson text-[11px] font-bold text-white">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-crimson text-[10px] font-bold text-white shadow-xs">
               {activeFilterCount}
             </span>
           )}
@@ -75,41 +75,61 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <button
             type="button"
             onClick={onReset}
-            className="flex items-center gap-1 text-xs font-medium text-brand-crimson dark:text-brand-gold hover:underline"
+            className="flex items-center gap-1 text-[11px] font-medium text-brand-crimson dark:text-brand-gold hover:underline cursor-pointer"
           >
-            <RotateCcw size={12} />
-            <span>Reset</span>
+            <RotateCcw size={11} />
+            <span>Reset All</span>
           </button>
         )}
       </div>
 
-      {/* In-Stock Toggle */}
-      <div className="pb-4 border-b border-border">
-        <label className="flex items-center justify-between cursor-pointer group">
-          <span className="text-sm font-medium text-text group-hover:text-brand-crimson dark:group-hover:text-brand-gold transition-colors">
+      {/* In-Stock Toggle Switch */}
+      <div className="pb-4 border-b border-border/80">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-text">
             In-Stock Only
           </span>
-          <input
-            type="checkbox"
-            checked={Boolean(filters.in_stock)}
-            onChange={(e) => onFilterChange({ ...filters, in_stock: e.target.checked })}
-            className="h-4 w-4 rounded border-border text-brand-crimson focus:ring-brand-crimson/20"
-          />
-        </label>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={Boolean(filters.in_stock)}
+            onClick={() => onFilterChange({ ...filters, in_stock: !filters.in_stock })}
+            className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold ${
+              filters.in_stock ? 'bg-brand-gold' : 'bg-surface-alt border-border'
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+                filters.in_stock ? 'translate-x-4' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
-      {/* Categories */}
-      <div className="pb-5 border-b border-border">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
-          Categories
-        </h3>
-        <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+      {/* Categories — Clean display of all 8 items without scrollbars */}
+      <div className="pb-5 border-b border-border/80">
+        <div className="flex items-center justify-between mb-2.5">
+          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+            Categories
+          </h3>
+          {filters.category && (
+            <button
+              type="button"
+              onClick={() => onFilterChange({ ...filters, category: undefined })}
+              className="text-[10px] text-brand-crimson dark:text-brand-gold hover:underline cursor-pointer"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+        <div className="space-y-1">
           <button
             type="button"
             onClick={() => onFilterChange({ ...filters, category: undefined })}
-            className={`flex w-full items-center justify-between py-1.5 px-2 rounded-md text-xs transition-colors ${
+            className={`flex w-full items-center justify-between py-1.5 px-2.5 rounded-lg text-xs transition-colors cursor-pointer ${
               !filters.category
-                ? 'bg-brand-crimson/10 text-brand-crimson dark:text-brand-gold font-semibold'
+                ? 'bg-brand-crimson/10 text-brand-crimson dark:text-brand-gold dark:bg-brand-gold/10 font-semibold'
                 : 'text-text hover:bg-surface-alt'
             }`}
           >
@@ -127,14 +147,14 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     category: isSelected ? undefined : c.slug,
                   })
                 }
-                className={`flex w-full items-center justify-between py-1.5 px-2 rounded-md text-xs transition-colors ${
+                className={`flex w-full items-center justify-between py-1.5 px-2.5 rounded-lg text-xs transition-colors cursor-pointer ${
                   isSelected
-                    ? 'bg-brand-crimson/10 text-brand-crimson dark:text-brand-gold font-semibold'
+                    ? 'bg-brand-crimson/10 text-brand-crimson dark:text-brand-gold dark:bg-brand-gold/10 font-semibold'
                     : 'text-text hover:bg-surface-alt'
                 }`}
               >
-                <span>{c.name}</span>
-                <span className="text-[11px] text-text-muted">({c.product_count})</span>
+                <span className="truncate">{c.name}</span>
+                <span className="text-[10px] text-text-muted ml-2 font-mono">({c.product_count})</span>
               </button>
             );
           })}
@@ -142,11 +162,11 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       </div>
 
       {/* Gender */}
-      <div className="pb-5 border-b border-border">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+      <div className="pb-5 border-b border-border/80">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-2.5">
           Gender
         </h3>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="grid grid-cols-2 gap-1.5">
           {GENDERS.map((g) => {
             const isSelected =
               (g.value === 'all' && !filters.gender) || filters.gender === g.value;
@@ -160,10 +180,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     gender: g.value === 'all' ? undefined : g.value,
                   })
                 }
-                className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-all ${
+                className={`py-1.5 px-2.5 rounded-lg text-xs font-medium border text-center transition-all cursor-pointer ${
                   isSelected
-                    ? 'border-brand-crimson bg-brand-crimson text-white shadow-sm'
-                    : 'border-border bg-surface text-text hover:border-brand-gold'
+                    ? 'border-brand-crimson bg-brand-crimson/10 text-brand-crimson dark:border-brand-gold dark:text-brand-gold dark:bg-brand-gold/10 font-semibold shadow-xs'
+                    : 'border-border/80 bg-surface text-text hover:border-brand-gold/60 hover:bg-surface-alt'
                 }`}
               >
                 {g.label}
@@ -174,11 +194,11 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       </div>
 
       {/* Price Range */}
-      <div className="pb-5 border-b border-border">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+      <div className="pb-5 border-b border-border/80">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-2.5">
           Price Range
         </h3>
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           {PRICE_RANGES.map((pr, idx) => {
             const isSelected =
               filters.min_price === pr.min && filters.max_price === pr.max;
@@ -193,7 +213,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     max_price: isSelected ? undefined : pr.max,
                   })
                 }
-                className={`flex w-full items-center justify-between py-1.5 px-2 rounded-md text-xs transition-colors ${
+                className={`flex w-full items-center justify-between py-1.5 px-2.5 rounded-lg text-xs transition-colors cursor-pointer ${
                   isSelected
                     ? 'bg-brand-gold/15 text-brand-crimson dark:text-brand-gold font-semibold'
                     : 'text-text hover:bg-surface-alt'
@@ -208,11 +228,11 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       </div>
 
       {/* Occasion */}
-      <div className="pb-5 border-b border-border">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+      <div className="pb-5 border-b border-border/80">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-2.5">
           Occasion
         </h3>
-        <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+        <div className="space-y-1">
           {OCCASIONS.map((occ) => {
             const isSelected = filters.occasion === occ;
             return (
@@ -225,7 +245,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     occasion: isSelected ? undefined : occ,
                   })
                 }
-                className={`flex w-full items-center justify-between py-1.5 px-2 rounded-md text-xs transition-colors ${
+                className={`flex w-full items-center justify-between py-1.5 px-2.5 rounded-lg text-xs transition-colors cursor-pointer ${
                   isSelected
                     ? 'bg-brand-crimson/10 text-brand-crimson dark:text-brand-gold font-semibold'
                     : 'text-text hover:bg-surface-alt'
@@ -241,7 +261,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
       {/* Minimum Discount */}
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-2.5">
           Discounts
         </h3>
         <div className="space-y-1">
@@ -257,7 +277,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     min_discount: isSelected ? undefined : d.value,
                   })
                 }
-                className={`flex w-full items-center justify-between py-1.5 px-2 rounded-md text-xs transition-colors ${
+                className={`flex w-full items-center justify-between py-1.5 px-2.5 rounded-lg text-xs transition-colors cursor-pointer ${
                   isSelected
                     ? 'bg-brand-crimson/10 text-brand-crimson dark:text-brand-gold font-semibold'
                     : 'text-text hover:bg-surface-alt'

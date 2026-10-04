@@ -274,19 +274,19 @@ export const CatalogPage: React.FC = () => {
         </p>
       </div>
 
-      {/* ── Toolbar: Filter Button (Mobile) + Results Count + Sort Dropdown ── */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        {/* Mobile Filter Trigger (<768px) */}
-        <div className="flex items-center gap-3">
+      {/* ── Toolbar: Results Count + Active Filter Tags + Sort Dropdown ── */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/80 bg-surface/60 backdrop-blur-xs p-3 sm:px-4 shadow-2xs">
+        {/* Left: Mobile Filter Trigger + Results Count + Active Filter Pills */}
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
             type="button"
             onClick={() => setIsMobileDrawerOpen(true)}
-            className="md:hidden flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-xs font-medium text-text shadow-sm hover:border-brand-gold transition-colors"
+            className="md:hidden flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text shadow-xs hover:border-brand-gold transition-colors cursor-pointer"
           >
-            <Filter size={15} />
+            <Filter size={14} className="text-brand-gold" />
             <span>Filters</span>
             {activeFilterCount > 0 && (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-crimson text-[10px] font-bold text-white">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand-crimson text-[9px] font-bold text-white">
                 {activeFilterCount}
               </span>
             )}
@@ -296,10 +296,57 @@ export const CatalogPage: React.FC = () => {
             Showing <strong className="font-semibold text-text">{products.length}</strong> of{' '}
             <strong className="font-semibold text-text">{totalCount}</strong> items
           </span>
+
+          {/* Active Filter Pills for quick removal */}
+          {filters.category && (
+            <button
+              type="button"
+              onClick={() => handleFilterChange({ ...filters, category: undefined })}
+              className="inline-flex items-center gap-1 rounded-full bg-surface border border-border px-2.5 py-0.5 text-[11px] text-text hover:border-brand-crimson hover:text-brand-crimson transition-colors cursor-pointer"
+              title="Remove category filter"
+            >
+              <span>{currentCategoryName}</span>
+              <span className="text-text-muted hover:text-brand-crimson font-bold text-xs">×</span>
+            </button>
+          )}
+
+          {filters.gender && filters.gender !== 'all' && (
+            <button
+              type="button"
+              onClick={() => handleFilterChange({ ...filters, gender: undefined })}
+              className="inline-flex items-center gap-1 rounded-full bg-surface border border-border px-2.5 py-0.5 text-[11px] text-text hover:border-brand-crimson hover:text-brand-crimson transition-colors cursor-pointer"
+              title="Remove gender filter"
+            >
+              <span className="capitalize">{filters.gender}</span>
+              <span className="text-text-muted hover:text-brand-crimson font-bold text-xs">×</span>
+            </button>
+          )}
+
+          {filters.in_stock && (
+            <button
+              type="button"
+              onClick={() => handleFilterChange({ ...filters, in_stock: undefined })}
+              className="inline-flex items-center gap-1 rounded-full bg-surface border border-border px-2.5 py-0.5 text-[11px] text-text hover:border-brand-crimson hover:text-brand-crimson transition-colors cursor-pointer"
+              title="Remove in-stock filter"
+            >
+              <span>In-Stock Only</span>
+              <span className="text-text-muted hover:text-brand-crimson font-bold text-xs">×</span>
+            </button>
+          )}
+
+          {activeFilterCount > 0 && (
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="text-[11px] font-medium text-brand-crimson dark:text-brand-gold hover:underline ml-1 cursor-pointer"
+            >
+              Clear all
+            </button>
+          )}
         </div>
 
-        {/* Sort Dropdown */}
-        <div className="flex items-center gap-2">
+        {/* Right: Sort Dropdown */}
+        <div className="flex items-center gap-2 ml-auto">
           <label htmlFor="sort-select" className="text-xs font-medium text-text-muted hidden sm:block">
             Sort by:
           </label>
@@ -308,7 +355,7 @@ export const CatalogPage: React.FC = () => {
               id="sort-select"
               value={currentSort}
               onChange={(e) => handleSortChange(e.target.value)}
-              className="appearance-none rounded-lg border border-border bg-surface pl-3 pr-8 py-2 text-xs font-medium text-text shadow-sm focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors cursor-pointer"
+              className="appearance-none rounded-lg border border-border bg-surface pl-3 pr-8 py-1.5 text-xs font-medium text-text shadow-xs focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors cursor-pointer"
             >
               {SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -317,7 +364,7 @@ export const CatalogPage: React.FC = () => {
               ))}
             </select>
             <ArrowUpDown
-              size={14}
+              size={13}
               className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted"
             />
           </div>
@@ -325,9 +372,9 @@ export const CatalogPage: React.FC = () => {
       </div>
 
       {/* ── Main Catalog Layout: Sidebar + Grid ───────────────────────────── */}
-      <div className="flex gap-8">
+      <div className="flex gap-8 items-start">
         {/* Desktop Filter Sidebar (>768px) */}
-        <div className="hidden md:block">
+        <div className="hidden md:block sticky top-24">
           <FilterSidebar
             categories={categories}
             filters={filters}
@@ -341,10 +388,10 @@ export const CatalogPage: React.FC = () => {
         <main className="flex-1 min-w-0">
           {/* Skeleton Cards on Loading (Never a spinner) */}
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6">
-              {Array.from({ length: 9 }).map((_, i) => (
-                <div key={i} className="space-y-3 rounded-lg border border-border bg-surface p-3">
-                  <Skeleton className="aspect-[3/4] w-full rounded-md" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="space-y-3 rounded-xl border border-border/80 bg-surface p-3">
+                  <Skeleton className="aspect-[4/5] w-full rounded-lg" />
                   <Skeleton className="h-4 w-3/4 rounded" />
                   <Skeleton className="h-3 w-1/2 rounded" />
                   <div className="pt-2 flex justify-between">
@@ -356,7 +403,7 @@ export const CatalogPage: React.FC = () => {
             </div>
           ) : products.length === 0 ? (
             /* Empty State with reset suggestion */
-            <div className="py-16 text-center rounded-xl border border-dashed border-border bg-surface/40 p-8">
+            <div className="py-16 text-center rounded-2xl border border-dashed border-border bg-surface/40 p-8">
               <EmptyState
                 title="No products match your selected criteria"
                 description="Try broadening your filters or resetting to view all available collections."
@@ -364,7 +411,7 @@ export const CatalogPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleResetFilters}
-                    className="inline-flex items-center gap-2 rounded-lg bg-brand-crimson px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-brand-crimson/90 active:scale-[0.98] transition-all"
+                    className="inline-flex items-center gap-2 rounded-lg bg-brand-crimson px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-brand-crimson/90 active:scale-[0.98] transition-all cursor-pointer"
                   >
                     <RotateCcw size={14} />
                     <span>Clear all filters</span>
@@ -373,12 +420,12 @@ export const CatalogPage: React.FC = () => {
               />
             </div>
           ) : (
-            /* Responsive Product Grid */
+            /* Responsive Product Grid conforming to AGENTS.md */
             <motion.div
               variants={staggerContainer}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6"
             >
               {products.map((product) => (
                 <motion.div key={product.id} variants={staggerItem} className="h-full">
