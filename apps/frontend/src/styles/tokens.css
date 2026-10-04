@@ -96,7 +96,11 @@ html[data-theme='dark'] {
   }
 }
 
-/* ── Royal Dark Gradient Utilities ─────────────────────────────────────────── */
+/* ── Royal Gradient Utilities ─────────────────────────────────────────────── */
+.bg-royal-sand-gradient {
+  background: linear-gradient(135deg, #F3EBDD 0%, #DFCEB0 50%, #ECE1CD 100%);
+}
+
 .bg-royal-dark-gradient {
   background: linear-gradient(135deg, #140D0A 0%, #261216 50%, #140D0A 100%);
 }
