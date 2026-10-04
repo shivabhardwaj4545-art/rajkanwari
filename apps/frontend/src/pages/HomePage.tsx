@@ -308,19 +308,41 @@ export const HomePage: React.FC = () => {
               className="absolute inset-0"
             >
               {/* Full-bleed Animated Background Image (Ken Burns 3s Smooth Zoom & Pan) */}
-              <motion.img
-                key={`img-${currentBanner?.id || currentSlide}`}
-                initial={{ scale: prefersReducedMotion ? 1 : 1.12, opacity: 0.85 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 3, ease: 'easeOut' }}
-                src={currentBanner?.image_url || '/images/banner_festive_trio.jpg'}
-                alt={currentBanner?.title || 'Rajkanwari House of Ethnic Wear'}
-                className={`h-full w-full object-cover ${
-                  currentBanner?.image_url?.includes('scarlet_anarkali')
-                    ? 'object-left-top'
-                    : 'object-center'
-                }`}
-              />
+              {(() => {
+                const rawUrl = currentBanner?.image_url;
+                let resolvedUrl = '/images/banner_festive_trio.jpg';
+                if (rawUrl) {
+                  if (rawUrl.startsWith('http') || rawUrl.startsWith('/')) {
+                    resolvedUrl = rawUrl;
+                  } else if (rawUrl.startsWith('media_')) {
+                    resolvedUrl = `/uploads/${rawUrl}`;
+                  } else {
+                    resolvedUrl = `/${rawUrl}`;
+                  }
+                }
+
+                return (
+                  <motion.img
+                    key={`img-${currentBanner?.id || currentSlide}`}
+                    initial={{ scale: prefersReducedMotion ? 1 : 1.12, opacity: 0.85 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: prefersReducedMotion ? 0 : 3, ease: 'easeOut' }}
+                    src={resolvedUrl}
+                    alt={currentBanner?.title || 'Rajkanwari House of Ethnic Wear'}
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.src.includes('banner_festive_trio.jpg')) {
+                        target.src = '/images/banner_festive_trio.jpg';
+                      }
+                    }}
+                    className={`h-full w-full object-cover ${
+                      currentBanner?.image_url?.includes('scarlet_anarkali')
+                        ? 'object-left-top'
+                        : 'object-center'
+                    }`}
+                  />
+                );
+              })()}
 
               {/* Content Overlay with Gradient Backdrop & Animated Entrances */}
               {(() => {

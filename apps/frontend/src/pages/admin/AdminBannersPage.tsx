@@ -16,6 +16,13 @@ import React, { useEffect, useState } from 'react';
 import { api, type AdminBannerItem } from '@/lib/api';
 import { Portal } from '@/components/ui/Portal';
 
+const resolveBannerImageUrl = (rawUrl?: string): string => {
+  if (!rawUrl) return '/images/banner_festive_trio.jpg';
+  if (rawUrl.startsWith('http') || rawUrl.startsWith('/')) return rawUrl;
+  if (rawUrl.startsWith('media_')) return `/uploads/${rawUrl}`;
+  return `/${rawUrl}`;
+};
+
 export const AdminBannersPage: React.FC = () => {
   const [banners, setBanners] = useState<AdminBannerItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -331,10 +338,17 @@ export const AdminBannersPage: React.FC = () => {
                 ))}
               </div>
             </div>
+
             <div className="relative h-72 sm:h-96 w-full overflow-hidden bg-bg flex items-center">
               <img
-                src={activeBanner.image_url}
+                src={resolveBannerImageUrl(activeBanner.image_url)}
                 alt={activeBanner.title}
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.src.includes('banner_festive_trio.jpg')) {
+                    target.src = '/images/banner_festive_trio.jpg';
+                  }
+                }}
                 className="absolute inset-0 w-full h-full object-cover object-center"
               />
               <div className={`absolute inset-0 bg-gradient-to-r ${gradientClass}`} />
@@ -422,8 +436,14 @@ export const AdminBannersPage: React.FC = () => {
 
                   <div className="w-24 h-14 rounded-lg overflow-hidden bg-surface-alt border border-border shrink-0">
                     <img
-                      src={banner.image_url}
+                      src={resolveBannerImageUrl(banner.image_url)}
                       alt={banner.title}
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        if (!target.src.includes('banner_festive_trio.jpg')) {
+                          target.src = '/images/banner_festive_trio.jpg';
+                        }
+                      }}
                       className="w-full h-full object-cover object-top"
                     />
                   </div>
