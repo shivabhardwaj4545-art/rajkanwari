@@ -387,7 +387,7 @@ export const AdminProductsPage: React.FC = () => {
                   <td className="p-3.5">
                     <Link
                       to={`/admin/products/${prod.id}`}
-                      className="font-medium text-text hover:text-brand-crimson font-serif text-sm transition-colors block line-clamp-1"
+                      className="font-medium text-text hover:text-brand-crimson font-sans text-sm transition-colors block line-clamp-1"
                     >
                       {prod.name}
                     </Link>
@@ -404,17 +404,17 @@ export const AdminProductsPage: React.FC = () => {
                   <td className="p-3.5 capitalize text-text-muted">{prod.gender}</td>
 
                   {/* Price */}
-                  <td className="p-3.5 font-medium text-text">
+                  <td className="p-3.5 font-sans font-semibold text-text tabular-nums">
                     {formatPrice(prod.final_price_paise)}
                     {prod.discount_percent > 0 && (
-                      <span className="block text-[10px] text-text-muted line-through">
+                      <span className="block text-[10px] text-text-muted line-through font-normal">
                         {formatPrice(prod.mrp)}
                       </span>
                     )}
                   </td>
 
                   {/* Discount */}
-                  <td className="p-3.5">
+                  <td className="p-3.5 font-sans tabular-nums">
                     {prod.discount_percent > 0 ? (
                       <span className="px-2 py-0.5 rounded-full bg-brand-crimson/10 text-brand-crimson font-semibold text-[10px]">
                         {prod.discount_percent}% OFF
@@ -425,7 +425,7 @@ export const AdminProductsPage: React.FC = () => {
                   </td>
 
                   {/* Stock */}
-                  <td className="p-3.5">
+                  <td className="p-3.5 font-sans tabular-nums">
                     <span
                       className={`font-semibold ${
                         prod.total_stock === 0
@@ -532,7 +532,7 @@ export const AdminProductsPage: React.FC = () => {
                 <div className="min-w-0">
                   <Link
                     to={`/admin/products/${prod.id}`}
-                    className="font-serif font-semibold text-text text-sm hover:text-brand-crimson truncate block"
+                    className="font-sans font-semibold text-text text-sm hover:text-brand-crimson truncate block"
                   >
                     {prod.name}
                   </Link>
@@ -542,11 +542,11 @@ export const AdminProductsPage: React.FC = () => {
                     <span>{prod.category_name}</span>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs font-bold text-text">
+                    <span className="text-xs font-bold text-text font-sans tabular-nums">
                       {formatPrice(prod.final_price_paise)}
                     </span>
                     <span
-                      className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                      className={`text-[10px] font-semibold px-1.5 py-0.5 rounded font-sans tabular-nums ${
                         prod.total_stock === 0
                           ? 'bg-danger/10 text-danger'
                           : prod.total_stock < 5

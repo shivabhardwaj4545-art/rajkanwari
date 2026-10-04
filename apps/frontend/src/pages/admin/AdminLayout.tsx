@@ -17,6 +17,8 @@ import {
   Users,
   Warehouse,
   X,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -25,6 +27,7 @@ import { pageTransition, useMotionSafe } from '@/lib/motion';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { Portal } from '@/components/ui/Portal';
 import { useAuthStore } from '@/stores/auth.store';
+import { useThemeStore } from '@/stores/theme.store';
 
 interface NavItem {
   label: string;
@@ -53,6 +56,7 @@ export const AdminLayout: React.FC = () => {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { resolved: themeResolved, setPreference } = useThemeStore();
 
   useEffect(() => {
     initAuth();
@@ -177,6 +181,21 @@ export const AdminLayout: React.FC = () => {
             <ExternalLink size={14} />
             <span>Storefront</span>
           </Link>
+
+          {/* Theme Toggle */}
+          <button
+            onClick={() => setPreference(themeResolved === 'dark' ? 'light' : 'dark')}
+            className="p-2 rounded-lg text-text-muted hover:text-text hover:bg-surface-alt transition-colors"
+            title={themeResolved === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            aria-label="Toggle theme"
+            id="admin-theme-toggle"
+          >
+            {themeResolved === 'dark' ? (
+              <Sun size={17} className="text-brand-gold hover:rotate-45 transition-transform" />
+            ) : (
+              <Moon size={17} className="hover:-rotate-12 transition-transform" />
+            )}
+          </button>
 
           {/* Owner Identity pill */}
           <div className="flex items-center gap-2 pl-3 border-l border-border">

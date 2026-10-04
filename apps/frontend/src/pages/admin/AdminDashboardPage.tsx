@@ -28,8 +28,8 @@ export const AdminDashboardPage: React.FC = () => {
     try {
       setLoading(true);
       const [prodRes, invRes, offRes, banRes, auditRes] = await Promise.all([
-        api.adminGetProducts({ limit: 100 }),
-        api.adminGetInventory({ limit: 100 }),
+        api.adminGetProducts({ limit: 500 }),
+        api.adminGetInventory({ limit: 500 }),
         api.adminGetOffers(),
         api.adminGetBanners(),
         api.adminGetInventoryAuditLogs(),
@@ -102,7 +102,7 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <div className="font-serif text-3xl font-bold text-text">{stats.totalProducts}</div>
+            <div className="font-sans text-3xl font-bold tracking-tight text-text tabular-nums">{stats.totalProducts}</div>
             <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
               {stats.activeProducts} Active
             </div>
@@ -129,7 +129,7 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <div className="font-serif text-3xl font-bold text-text">{stats.lowStockVariants}</div>
+            <div className="font-sans text-3xl font-bold tracking-tight text-text tabular-nums">{stats.lowStockVariants}</div>
             <span className="text-xs text-text-muted group-hover:text-brand-crimson flex items-center gap-1 transition-colors">
               Manage &rarr;
             </span>
@@ -148,7 +148,7 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <div className="font-serif text-3xl font-bold text-text">{stats.runningOffers}</div>
+            <div className="font-sans text-3xl font-bold tracking-tight text-text tabular-nums">{stats.runningOffers}</div>
             <span className="text-xs text-brand-gold font-medium">Live On Store</span>
           </div>
         </Link>
@@ -165,7 +165,7 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <div className="font-serif text-3xl font-bold text-text">{stats.activeBanners}</div>
+            <div className="font-sans text-3xl font-bold tracking-tight text-text tabular-nums">{stats.activeBanners}</div>
             <span className="text-xs text-text-muted group-hover:text-brand-crimson flex items-center gap-1 transition-colors">
               Configure &rarr;
             </span>
@@ -243,7 +243,7 @@ export const AdminDashboardPage: React.FC = () => {
               <tbody className="divide-y divide-border/50">
                 {recentAudit.map((log) => (
                   <tr key={log.id} className="hover:bg-surface-alt/40 transition-colors">
-                    <td className="py-2.5 text-text-muted whitespace-nowrap">
+                    <td className="py-2.5 text-text-muted whitespace-nowrap font-sans">
                       {new Date(log.created_at).toLocaleTimeString('en-IN', {
                         hour: '2-digit',
                         minute: '2-digit',
@@ -256,13 +256,13 @@ export const AdminDashboardPage: React.FC = () => {
                         {log.action}
                       </span>
                     </td>
-                    <td className="py-2.5 font-mono text-text">
+                    <td className="py-2.5 font-mono text-xs text-text font-semibold">
                       {log.changes?.variant_sku || log.entity_id}
                     </td>
-                    <td className="py-2.5">
-                      <span className="text-text-muted">{log.changes?.old_stock ?? '—'}</span>
-                      <span className="mx-1.5 text-brand-crimson">&rarr;</span>
-                      <span className="font-semibold text-text">{log.changes?.new_stock ?? '—'}</span>
+                    <td className="py-2.5 font-sans tabular-nums text-xs">
+                      <span className="text-text-muted font-medium">{log.changes?.old_stock ?? '—'}</span>
+                      <span className="mx-1.5 text-brand-crimson font-bold">&rarr;</span>
+                      <span className="font-bold text-text">{log.changes?.new_stock ?? '—'}</span>
                     </td>
                     <td className="py-2.5 text-right text-text-muted">
                       {log.first_name ? `${log.first_name} ${log.last_name || ''}` : 'Owner'}

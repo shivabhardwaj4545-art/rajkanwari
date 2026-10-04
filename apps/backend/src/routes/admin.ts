@@ -2086,27 +2086,40 @@ adminRouter.get('/reports/kpis', async (req, res, next) => {
   try {
     const db = getDb();
     const period = (req.query.period as string) || 'month';
-    const periodSql = getPeriodSqlFilter(period, 'o');
 
     const kpiSql = `
       SELECT
-        COALESCE(SUM(CASE WHEN o.payment_status = 'paid' THEN o.total_amount ELSE 0 END), 0) as total_revenue,
-        COUNT(DISTINCT CASE WHEN o.payment_status = 'paid' THEN o.id END) as total_orders,
-        COALESCE(AVG(CASE WHEN o.payment_status = 'paid' THEN o.total_amount ELSE NULL END), 0) as aov,
-        COALESCE(SUM(CASE WHEN o.payment_status = 'paid' THEN oi.quantity ELSE 0 END), 0) as units_sold
-      FROM orders o
-      LEFT JOIN order_items oi ON o.id = oi.order_id
-      WHERE 1=1 ${periodSql}
+        COALESCE((
+          SELECT SUM(o2.total_amount)
+          FROM orders o2
+          WHERE o2.payment_status = 'paid' ${getPeriodSqlFilter(period, 'o2')}
+        ), 0) as total_revenue,
+        COALESCE((
+          SELECT COUNT(o3.id)
+          FROM orders o3
+          WHERE o3.payment_status = 'paid' ${getPeriodSqlFilter(period, 'o3')}
+        ), 0) as total_orders,
+        COALESCE((
+          SELECT AVG(o4.total_amount)
+          FROM orders o4
+          WHERE o4.payment_status = 'paid' ${getPeriodSqlFilter(period, 'o4')}
+        ), 0) as aov,
+        COALESCE((
+          SELECT SUM(oi.quantity)
+          FROM order_items oi
+          JOIN orders o5 ON oi.order_id = o5.id
+          WHERE o5.payment_status = 'paid' ${getPeriodSqlFilter(period, 'o5')}
+        ), 0) as units_sold
     `;
 
     const row = await db.prepare(kpiSql).get() as any;
 
     res.json({
       period,
-      total_revenue: row.total_revenue,
-      total_orders: row.total_orders,
-      aov: Math.round(row.aov),
-      units_sold: row.units_sold,
+      total_revenue: row ? Number(row.total_revenue) : 0,
+      total_orders: row ? Number(row.total_orders) : 0,
+      aov: row && row.aov ? Math.round(Number(row.aov)) : 0,
+      units_sold: row ? Number(row.units_sold) : 0,
     });
   } catch (err) {
     next(err);

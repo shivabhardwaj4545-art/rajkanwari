@@ -365,7 +365,7 @@ export const AdminOrdersPage: React.FC = () => {
                       </div>
                     </td>
                     <td className="py-3.5 px-4">{getStatusBadge(ord.order_status)}</td>
-                    <td className="py-3.5 px-4 text-right font-mono font-bold text-[var(--text)]">
+                    <td className="py-3.5 px-4 text-right font-sans font-bold text-sm tabular-nums text-[var(--text)]">
                       {formatPrice(ord.total_amount)}
                     </td>
                     <td className="py-3.5 px-4 text-center">
@@ -465,7 +465,7 @@ export const AdminOrdersPage: React.FC = () => {
                     </span>
                   </div>
 
-                  <div className="text-right font-mono font-bold text-sm text-[var(--brand-crimson)]">
+                  <div className="text-right font-sans font-bold text-sm tabular-nums text-[var(--brand-crimson)]">
                     {formatPrice(ord.total_amount)}
                   </div>
                 </div>

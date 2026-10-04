@@ -369,7 +369,7 @@ export const AdminInventoryPage: React.FC = () => {
 
                     {/* Product Name */}
                     <td className="p-3.5 font-medium text-text">
-                      <span className="font-serif text-sm block line-clamp-1">{item.product_name}</span>
+                      <span className="font-sans font-medium text-sm block line-clamp-1">{item.product_name}</span>
                       <span className="text-[10px] text-text-muted font-mono">{item.product_sku}</span>
                     </td>
 
@@ -392,7 +392,7 @@ export const AdminInventoryPage: React.FC = () => {
                     <td className="p-3.5 text-text-muted">{item.category_name}</td>
 
                     {/* Stock Value */}
-                    <td className="p-3.5 text-right font-mono font-bold text-sm">
+                    <td className="p-3.5 text-right font-sans font-bold text-sm tabular-nums">
                       <span
                         className={
                           item.is_out_of_stock

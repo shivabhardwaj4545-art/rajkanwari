@@ -352,20 +352,20 @@ export const AdminOrderDetailPage: React.FC = () => {
             </table>
 
             {/* Receipt Arithmetic Breakdown */}
-            <div className="border-t border-[var(--border)] pt-4 space-y-1.5 text-xs font-mono">
+            <div className="border-t border-[var(--border)] pt-4 space-y-1.5 text-xs font-sans tabular-nums">
               <div className="flex justify-between text-[var(--text-muted)]">
                 <span>Subtotal</span>
-                <span>{formatPrice(order.subtotal)}</span>
+                <span className="font-semibold text-[var(--text)]">{formatPrice(order.subtotal)}</span>
               </div>
               {order.discount_amount > 0 && (
-                <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
                   <span>Promotional Savings</span>
                   <span>- {formatPrice(order.discount_amount)}</span>
                 </div>
               )}
               <div className="flex justify-between text-[var(--text-muted)]">
                 <span>Shipping ({order.fulfillment_type})</span>
-                <span>{order.shipping_cost === 0 ? 'FREE' : formatPrice(order.shipping_cost)}</span>
+                <span className="font-semibold text-[var(--text)]">{order.shipping_cost === 0 ? 'FREE' : formatPrice(order.shipping_cost)}</span>
               </div>
               <div className="flex justify-between text-[var(--text-muted)]">
                 <span>GST (Taxes included)</span>
@@ -373,7 +373,7 @@ export const AdminOrderDetailPage: React.FC = () => {
               </div>
               <div className="flex justify-between pt-2 border-t border-[var(--border)] font-bold text-sm text-[var(--text)]">
                 <span>Grand Total</span>
-                <span className="text-[var(--brand-crimson)]">{formatPrice(order.total_amount)}</span>
+                <span className="text-[var(--brand-crimson)] text-base font-bold">{formatPrice(order.total_amount)}</span>
               </div>
             </div>
           </div>

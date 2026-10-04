@@ -110,7 +110,7 @@ export const AdminCustomerDetailPage: React.FC = () => {
           <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
             Lifetime Spend
           </span>
-          <p className="text-xl sm:text-2xl font-serif font-bold text-[var(--brand-crimson)] mt-1">
+          <p className="text-xl sm:text-2xl font-sans font-bold tracking-tight tabular-nums text-[var(--brand-crimson)] mt-1">
             {formatPrice(analytics.lifetime_spend)}
           </p>
           <span className="text-[10px] text-[var(--text-muted)]">Across paid purchases</span>
@@ -120,13 +120,13 @@ export const AdminCustomerDetailPage: React.FC = () => {
           <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
             Total Orders
           </span>
-          <p className="text-xl sm:text-2xl font-serif font-bold text-[var(--text)] mt-1">
+          <p className="text-xl sm:text-2xl font-sans font-bold tracking-tight tabular-nums text-[var(--text)] mt-1">
             {analytics.total_orders}
           </p>
-          <div className="flex items-center space-x-2 text-[10px] text-[var(--text-muted)]">
-            <span className="text-emerald-600">{analytics.completed_orders} completed</span>
+          <div className="flex items-center space-x-2 text-[10px] text-[var(--text-muted)] font-sans tabular-nums">
+            <span className="text-emerald-600 font-medium">{analytics.completed_orders} completed</span>
             <span>•</span>
-            <span className="text-rose-600">{analytics.cancelled_orders} cancelled</span>
+            <span className="text-rose-600 font-medium">{analytics.cancelled_orders} cancelled</span>
           </div>
         </div>
 
@@ -134,7 +134,7 @@ export const AdminCustomerDetailPage: React.FC = () => {
           <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
             Average Order Value
           </span>
-          <p className="text-xl sm:text-2xl font-serif font-bold text-[var(--brand-gold)] mt-1">
+          <p className="text-xl sm:text-2xl font-sans font-bold tracking-tight tabular-nums text-[var(--brand-gold)] mt-1">
             {formatPrice(analytics.aov)}
           </p>
           <span className="text-[10px] text-[var(--text-muted)]">Net average per checkout</span>
@@ -144,7 +144,7 @@ export const AdminCustomerDetailPage: React.FC = () => {
           <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
             Last Order Date
           </span>
-          <p className="text-base sm:text-lg font-serif font-bold text-[var(--text)] mt-1">
+          <p className="text-base sm:text-lg font-sans font-bold text-[var(--text)] mt-1">
             {analytics.last_order_date
               ? new Date(analytics.last_order_date).toLocaleDateString('en-IN', {
                   day: 'numeric',
