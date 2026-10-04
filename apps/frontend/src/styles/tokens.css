@@ -96,3 +96,8 @@ html[data-theme='dark'] {
   }
 }
 
+/* ── Royal Dark Gradient Utilities ─────────────────────────────────────────── */
+.bg-royal-dark-gradient {
+  background: linear-gradient(135deg, #140D0A 0%, #261216 50%, #140D0A 100%);
+}
+

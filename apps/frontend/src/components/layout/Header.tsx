@@ -55,10 +55,10 @@ const DesktopNavLink: React.FC<{ item: NavItem }> = ({ item }) => (
         'relative text-sm font-semibold transition-colors duration-150 py-1 px-1 uppercase tracking-wider',
         'after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-brand-gold',
         'after:transition-[width] after:duration-300',
-        'hover:text-brand-crimson dark:hover:text-brand-gold hover:after:w-full',
+        'hover:text-brand-gold hover:after:w-full',
         isActive
-          ? 'text-brand-crimson dark:text-brand-gold font-bold after:w-full'
-          : 'text-text',
+          ? 'text-brand-gold font-bold after:w-full'
+          : 'text-[#F5E6D3]/90',
       ].join(' ')
     }
   >
@@ -88,17 +88,17 @@ const DesktopNavDropdown: React.FC<{ item: NavItem; categories: SubCategoryItem[
           'inline-flex items-center gap-1 text-sm font-semibold transition-colors duration-150 py-1 px-1 uppercase tracking-wider',
           'after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-brand-gold',
           'after:transition-[width] after:duration-300',
-          'hover:text-brand-crimson dark:hover:text-brand-gold hover:after:w-full',
+          'hover:text-brand-gold hover:after:w-full',
           isShopActive
-            ? 'text-brand-crimson dark:text-brand-gold font-bold after:w-full'
-            : 'text-text',
+            ? 'text-brand-gold font-bold after:w-full'
+            : 'text-[#F5E6D3]/90',
         ].join(' ')}
       >
         <span>{item.label}</span>
         <ChevronDown
           size={14}
           className={`transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-brand-crimson dark:text-brand-gold' : 'text-text-muted'
+            isOpen ? 'rotate-180 text-brand-gold' : 'text-[#A8998C]'
           }`}
         />
       </Link>
@@ -112,8 +112,8 @@ const DesktopNavDropdown: React.FC<{ item: NavItem; categories: SubCategoryItem[
             transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
             className="absolute left-0 top-full pt-2 z-50 w-64"
           >
-            <div className="rounded-xl bg-surface border border-border/80 shadow-2xl py-2 px-1 text-xs space-y-0.5 backdrop-blur-md">
-              <div className="px-3.5 py-1.5 border-b border-border/60 text-[10px] font-extrabold uppercase tracking-widest text-brand-gold">
+            <div className="rounded-xl bg-[#1A0F0A] border border-brand-gold/30 shadow-2xl py-2 px-1 text-xs space-y-0.5 backdrop-blur-md">
+              <div className="px-3.5 py-1.5 border-b border-brand-gold/20 text-[10px] font-extrabold uppercase tracking-widest text-brand-gold">
                 Shop By Category
               </div>
               {dropdownItems.map((cat) => (
@@ -121,7 +121,7 @@ const DesktopNavDropdown: React.FC<{ item: NavItem; categories: SubCategoryItem[
                   key={cat.label}
                   to={cat.to}
                   onClick={() => setIsOpen(false)}
-                  className="block px-3.5 py-2 rounded-lg font-semibold text-text hover:bg-surface-alt hover:text-brand-crimson dark:hover:text-brand-gold transition-colors tracking-wider uppercase text-[11px]"
+                  className="block px-3.5 py-2 rounded-lg font-semibold text-[#F5E6D3] hover:bg-white/10 hover:text-brand-gold transition-colors tracking-wider uppercase text-[11px]"
                 >
                   {cat.label}
                 </Link>
@@ -191,8 +191,8 @@ export const Header: React.FC = () => {
       <header
         className={[
           'sticky top-0 z-40 w-full',
-          'bg-surface border-b border-border transition-all duration-200',
-          scrolled ? 'shadow-xs' : '',
+          'bg-royal-dark-gradient border-b border-brand-gold/30 text-[#F5E6D3] transition-all duration-200',
+          scrolled ? 'shadow-lg' : '',
         ].join(' ')}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
@@ -200,10 +200,10 @@ export const Header: React.FC = () => {
           <Link
             to="/"
             id="site-wordmark"
-            className="flex items-center text-text focus:outline-none"
+            className="flex items-center text-[#F5E6D3] focus:outline-none"
             aria-label="Rajkanwari - House of Ethnic Wear"
           >
-            <BrandLogo variant="full" size="md" />
+            <BrandLogo variant="full" size="md" inverted />
           </Link>
 
           {/* ── Desktop Navigation ───────────────────────────────────────────── */}
@@ -225,7 +225,7 @@ export const Header: React.FC = () => {
                 id="admin-console-button"
                 aria-label="Admin Console"
                 title="Admin Console"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-crimson/10 text-brand-crimson dark:bg-brand-gold/15 dark:text-brand-gold text-xs font-semibold border border-brand-crimson/30 dark:border-brand-gold/40 hover:bg-brand-crimson hover:text-white dark:hover:bg-brand-gold dark:hover:text-black transition-all shadow-xs"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-gold/15 text-brand-gold text-xs font-semibold border border-brand-gold/40 hover:bg-brand-gold hover:text-black transition-all shadow-xs"
               >
                 <LayoutDashboard size={14} />
                 <span>Admin</span>
@@ -240,8 +240,8 @@ export const Header: React.FC = () => {
               title={user ? `Account (${user.first_name})` : 'Sign in / Register'}
               className={[
                 'relative hidden sm:flex h-9 w-9 items-center justify-center rounded-full',
-                'border border-border/80 bg-surface',
-                'text-text hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold hover:bg-surface-alt/60',
+                'border border-brand-gold/30 bg-white/10',
+                'text-[#F5E6D3] hover:text-brand-gold hover:border-brand-gold hover:bg-white/20',
                 'transition-colors duration-200 cursor-pointer shadow-2xs',
               ].join(' ')}
             >
@@ -259,8 +259,8 @@ export const Header: React.FC = () => {
               title="My Orders & Receipts"
               className={[
                 'relative hidden sm:flex h-9 w-9 items-center justify-center rounded-full',
-                'border border-border/80 bg-surface',
-                'text-text hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold hover:bg-surface-alt/60',
+                'border border-brand-gold/30 bg-white/10',
+                'text-[#F5E6D3] hover:text-brand-gold hover:border-brand-gold hover:bg-white/20',
                 'transition-colors duration-200 cursor-pointer shadow-2xs',
               ].join(' ')}
             >
@@ -275,8 +275,8 @@ export const Header: React.FC = () => {
               onClick={openDrawer}
               className={[
                 'relative flex h-9 w-9 items-center justify-center rounded-full',
-                'border border-border/80 bg-surface',
-                'text-text hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold hover:bg-surface-alt/60',
+                'border border-brand-gold/30 bg-white/10',
+                'text-[#F5E6D3] hover:text-brand-gold hover:border-brand-gold hover:bg-white/20',
                 'transition-colors duration-200 cursor-pointer shadow-2xs',
               ].join(' ')}
             >
@@ -302,8 +302,8 @@ export const Header: React.FC = () => {
               onClick={() => setMenuOpen((o) => !o)}
               className={[
                 'flex h-9 w-9 items-center justify-center rounded-full md:hidden',
-                'border border-border/80 bg-surface text-text',
-                'hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold hover:bg-surface-alt/60 transition-colors duration-200',
+                'border border-brand-gold/30 bg-white/10 text-[#F5E6D3]',
+                'hover:text-brand-gold hover:border-brand-gold hover:bg-white/20 transition-colors duration-200',
               ].join(' ')}
             >
               {menuOpen ? <X size={16} /> : <Menu size={16} />}
@@ -342,7 +342,7 @@ export const Header: React.FC = () => {
               aria-label="Mobile navigation"
               className={[
                 'fixed right-0 top-0 bottom-0 z-[101] w-72 md:hidden',
-                'bg-surface border-l border-border shadow-2xl',
+                'bg-[#1A0F0A] border-l border-brand-gold/30 shadow-2xl text-[#F5E6D3]',
                 'flex flex-col gap-1 px-6 pt-20 pb-8',
                 'overflow-y-auto focus:outline-none',
               ].join(' ')}
@@ -353,7 +353,7 @@ export const Header: React.FC = () => {
                 type="button"
                 onClick={() => setMenuOpen(false)}
                 aria-label="Close menu"
-                className="absolute right-4 top-4 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border-border text-text hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold transition-colors"
+                className="absolute right-4 top-4 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border-brand-gold/30 text-[#F5E6D3] hover:text-brand-gold hover:border-brand-gold transition-colors"
               >
                 <X size={18} />
               </button>
@@ -362,7 +362,7 @@ export const Header: React.FC = () => {
                 if (item.hasDropdown) {
                   return (
                     <div key={item.to} className="space-y-1">
-                      <div className="flex items-center justify-between px-3 py-2.5 rounded-md hover:bg-surface-alt font-semibold text-base text-text">
+                      <div className="flex items-center justify-between px-3 py-2.5 rounded-md hover:bg-white/5 font-semibold text-base text-[#F5E6D3]">
                         <NavLink
                           to={item.to}
                           className="flex-1 uppercase tracking-wider"
@@ -374,12 +374,12 @@ export const Header: React.FC = () => {
                           type="button"
                           onClick={() => setMobileShopOpen((o) => !o)}
                           aria-label="Toggle categories dropdown"
-                          className="p-1 text-text-muted hover:text-text"
+                          className="p-1 text-[#A8998C] hover:text-brand-gold"
                         >
                           <ChevronDown
                             size={18}
                             className={`transition-transform duration-200 ${
-                              mobileShopOpen ? 'rotate-180 text-brand-crimson dark:text-brand-gold' : ''
+                              mobileShopOpen ? 'rotate-180 text-brand-gold' : ''
                             }`}
                           />
                         </button>
@@ -398,7 +398,7 @@ export const Header: React.FC = () => {
                                 key={cat.label}
                                 to={cat.to}
                                 onClick={() => setMenuOpen(false)}
-                                className="block rounded-md px-3 py-2 font-medium text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold hover:bg-surface-alt tracking-wider uppercase text-[11px]"
+                                className="block rounded-md px-3 py-2 font-medium text-[#A8998C] hover:text-brand-gold hover:bg-white/5 tracking-wider uppercase text-[11px]"
                               >
                                 {cat.label}
                               </NavLink>
@@ -418,8 +418,8 @@ export const Header: React.FC = () => {
                       [
                         'rounded-md px-3 py-2.5 text-base font-semibold transition-colors duration-150 uppercase tracking-wider',
                         isActive
-                          ? 'bg-surface-alt text-brand-crimson dark:text-brand-gold font-bold'
-                          : 'text-text hover:bg-surface-alt hover:text-brand-crimson dark:hover:text-brand-gold',
+                          ? 'bg-white/10 text-brand-gold font-bold'
+                          : 'text-[#F5E6D3] hover:bg-white/5 hover:text-brand-gold',
                       ].join(' ')
                     }
                   >
@@ -428,12 +428,12 @@ export const Header: React.FC = () => {
                 );
               })}
 
-              <div className="mt-auto pt-6 border-t border-border space-y-1">
+              <div className="mt-auto pt-6 border-t border-brand-gold/20 space-y-1">
                 {user?.role === 'owner' && (
                   <NavLink
                     to="/admin"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-bold text-brand-crimson dark:text-brand-gold hover:bg-surface-alt transition-colors uppercase tracking-wider"
+                    className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-bold text-brand-gold hover:bg-white/5 transition-colors uppercase tracking-wider"
                   >
                     <LayoutDashboard size={16} />
                     <span>Admin Console</span>
@@ -442,14 +442,14 @@ export const Header: React.FC = () => {
                 <NavLink
                   to="/orders"
                   onClick={() => setMenuOpen(false)}
-                  className="block rounded-md px-3 py-2.5 text-sm font-semibold text-text hover:text-brand-crimson dark:hover:text-brand-gold hover:bg-surface-alt transition-colors"
+                  className="block rounded-md px-3 py-2.5 text-sm font-semibold text-[#F5E6D3] hover:text-brand-gold hover:bg-white/5 transition-colors"
                 >
                   My Orders & Receipts
                 </NavLink>
                 <NavLink
                   to="/auth"
                   onClick={() => setMenuOpen(false)}
-                  className="block rounded-md px-3 py-2.5 text-sm font-semibold text-text hover:text-brand-crimson dark:hover:text-brand-gold hover:bg-surface-alt transition-colors"
+                  className="block rounded-md px-3 py-2.5 text-sm font-semibold text-[#F5E6D3] hover:text-brand-gold hover:bg-white/5 transition-colors"
                 >
                   {user ? `Account (${user.first_name})` : 'Sign in / Register'}
                 </NavLink>

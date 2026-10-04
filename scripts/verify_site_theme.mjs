@@ -37,8 +37,10 @@ async function run() {
       brandSale: rootStyle.getPropertyValue('--brand-sale').trim(),
       border: rootStyle.getPropertyValue('--border').trim(),
       headerBg: headerStyle ? headerStyle.backgroundColor : null,
+      headerBackgroundImage: headerStyle ? headerStyle.backgroundImage : null,
       headerBorderBottom: headerStyle ? headerStyle.borderBottomColor : null,
       footerBg: footerStyle ? footerStyle.backgroundColor : null,
+      footerBackgroundImage: footerStyle ? footerStyle.backgroundImage : null,
       footerBorderTop: footerStyle ? footerStyle.borderTopColor : null,
     };
   });

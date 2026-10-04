@@ -5,11 +5,13 @@ interface BrandLogoProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   showSubText?: boolean;
+  inverted?: boolean;
 }
 
 export const BrandLogo: React.FC<BrandLogoProps> = ({
   size = 'md',
   className = '',
+  inverted = false,
 }) => {
   const logoHeights = {
     sm: 'h-8 sm:h-9',
@@ -22,7 +24,9 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       <img
         src="/images/rajkanwari_logo.jpeg"
         alt="Rajkanwari — House of Ethnic Wear"
-        className={`${logoHeights[size]} w-auto object-contain mix-blend-multiply dark:invert dark:brightness-150`}
+        className={`${logoHeights[size]} w-auto object-contain ${
+          inverted ? 'invert brightness-150' : 'mix-blend-multiply dark:invert dark:brightness-150'
+        }`}
       />
     </div>
   );
