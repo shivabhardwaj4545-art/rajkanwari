@@ -23,7 +23,7 @@ export const createOrderSchema = z.object({
 });
 
 export const updateOrderStatusSchema = z.object({
-  status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
+  status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'returned']),
 });
 
 export type ShippingAddress = z.infer<typeof shippingAddressSchema>;

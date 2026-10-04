@@ -138,6 +138,47 @@ describe('Admin Orders, CRM & Reports API Tests', () => {
       expect(orderRes.body.order.payment_status).toBe('refunded');
     });
 
+    it('processes order return, restocks inventory, and updates order_status to returned', async () => {
+      // ord_006 is placed, advance or return directly
+      const res = await request(app)
+        .post('/api/admin/orders/ord_006/return')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({
+          reason: 'Defective fabric on arrival',
+          notes: 'Customer provided photos, item verified',
+          restock: true,
+          refund: true,
+          refund_method: 'gateway',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.order_status).toBe('returned');
+      expect(res.body.refunded).toBe(true);
+
+      // Verify in order details
+      const orderRes = await request(app)
+        .get('/api/admin/orders/ord_006')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(orderRes.status).toBe(200);
+      expect(orderRes.body.order.order_status).toBe('returned');
+      expect(orderRes.body.order.payment_status).toBe('refunded');
+      const latestHistory = orderRes.body.order.history.find((h: any) => h.status === 'returned');
+      expect(latestHistory).toBeDefined();
+      expect(latestHistory.note).toContain('Defective fabric');
+    });
+
+    it('rejects return on cancelled order with 400', async () => {
+      const res = await request(app)
+        .post('/api/admin/orders/ord_007/return')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ reason: 'Customer returned' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('INVALID_RETURN_STATE');
+    });
+
     it('returns structured packing slip data', async () => {
       const res = await request(app)
         .get('/api/admin/orders/ord_002/packing-slip')

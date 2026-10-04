@@ -688,14 +688,42 @@ export const api = {
     });
   },
 
-  adminRefundOrder: (id: string, reason?: string | undefined) => {
-    return request<{ success: boolean; message: string; refund_id: string; refund_amount: number }>(
+  adminRefundOrder: (
+    id: string,
+    data?: string | { reason?: string | undefined; refund_method?: string | undefined; refund_type?: string | undefined } | undefined
+  ) => {
+    const payload = typeof data === 'string' ? { reason: data } : (data || {});
+    return request<{ success: boolean; message: string; refund_id: string; refund_amount: number; refund_method?: string }>(
       `/admin/orders/${id}/refund`,
       {
         method: 'POST',
-        body: JSON.stringify({ reason }),
+        body: JSON.stringify(payload),
       }
     );
+  },
+
+  adminReturnOrder: (
+    id: string,
+    data: {
+      reason: string;
+      notes?: string | undefined;
+      restock?: boolean | undefined;
+      refund?: boolean | undefined;
+      refund_method?: ('gateway' | 'manual' | 'store_credit') | undefined;
+    }
+  ) => {
+    return request<{
+      success: boolean;
+      message: string;
+      order_id: string;
+      order_status: string;
+      restocked_count: number;
+      refunded: boolean;
+      refund_id?: string | null;
+    }>(`/admin/orders/${id}/return`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
 
   adminGetPackingSlip: (id: string) => {
@@ -1072,7 +1100,7 @@ export interface AdminOrderItem {
   pickup_slot: string | null;
   payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
   payment_method: 'online' | 'cod';
-  order_status: 'placed' | 'confirmed' | 'ready_for_pickup' | 'out_for_delivery' | 'delivered' | 'picked_up' | 'cancelled';
+  order_status: 'placed' | 'confirmed' | 'ready_for_pickup' | 'out_for_delivery' | 'delivered' | 'picked_up' | 'cancelled' | 'returned';
   customer_notes: string | null;
   internal_notes: string | null;
   created_at: string;
@@ -1124,7 +1152,7 @@ export interface AdminOrderDetail {
   payment_method: 'online' | 'cod';
   razorpay_order_id: string | null;
   razorpay_payment_id: string | null;
-  order_status: 'placed' | 'confirmed' | 'ready_for_pickup' | 'out_for_delivery' | 'delivered' | 'picked_up' | 'cancelled';
+  order_status: 'placed' | 'confirmed' | 'ready_for_pickup' | 'out_for_delivery' | 'delivered' | 'picked_up' | 'cancelled' | 'returned';
   customer_notes: string | null;
   internal_notes: string | null;
   created_at: string;

@@ -1309,17 +1309,19 @@ adminRouter.delete('/banners/:id', async (req, res, next) => {
 
 const VALID_DELIVERY_TRANSITIONS: Record<string, string[]> = {
   placed: ['confirmed', 'cancelled'],
-  confirmed: ['out_for_delivery', 'cancelled'],
-  out_for_delivery: ['delivered', 'cancelled'],
-  delivered: [],
+  confirmed: ['out_for_delivery', 'cancelled', 'returned'],
+  out_for_delivery: ['delivered', 'cancelled', 'returned'],
+  delivered: ['returned'],
+  returned: [],
   cancelled: [],
 };
 
 const VALID_PICKUP_TRANSITIONS: Record<string, string[]> = {
   placed: ['confirmed', 'cancelled'],
-  confirmed: ['ready_for_pickup', 'cancelled'],
-  ready_for_pickup: ['picked_up', 'cancelled'],
-  picked_up: [],
+  confirmed: ['ready_for_pickup', 'cancelled', 'returned'],
+  ready_for_pickup: ['picked_up', 'cancelled', 'returned'],
+  picked_up: ['returned'],
+  returned: [],
   cancelled: [],
 };
 
@@ -1684,12 +1686,12 @@ adminRouter.patch('/orders/:id/notes', async (req, res, next) => {
 
 /**
  * POST /api/admin/orders/:id/refund
- * Refund a paid order via Razorpay API (with mock fallback in dev/test)
+ * Refund a paid order via Razorpay API or record a manual/COD refund
  */
 adminRouter.post('/orders/:id/refund', async (req, res, next) => {
   try {
     const db = getDb();
-    const { reason } = req.body;
+    const { reason, refund_method } = req.body;
 
     const order = await db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id) as any;
     if (!order) {
@@ -1697,11 +1699,26 @@ adminRouter.post('/orders/:id/refund', async (req, res, next) => {
       return;
     }
 
-    if (order.payment_status !== 'paid') {
+    if (order.payment_status === 'refunded') {
       res.status(400).json({
         error: {
           code: 'INVALID_REFUND_STATE',
-          message: `Cannot refund order with payment status '${order.payment_status}'. Only 'paid' orders are eligible for refund.`,
+          message: `Order ${order.order_number} is already marked as refunded.`,
+        },
+      });
+      return;
+    }
+
+    const isCod = order.payment_method === 'cod';
+    const isEligible =
+      order.payment_status === 'paid' ||
+      (isCod && (order.order_status === 'delivered' || order.order_status === 'returned' || req.body.refund_type === 'manual' || req.body.refund_method));
+
+    if (!isEligible) {
+      res.status(400).json({
+        error: {
+          code: 'INVALID_REFUND_STATE',
+          message: `Cannot refund order with payment status '${order.payment_status}'. Only 'paid' or completed COD orders are eligible for refund.`,
         },
       });
       return;
@@ -1709,8 +1726,8 @@ adminRouter.post('/orders/:id/refund', async (req, res, next) => {
 
     let refundId = `rfnd_${Date.now()}`;
 
-    // Razorpay refund call if client and payment_id exist
-    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET && order.razorpay_payment_id) {
+    // Razorpay refund call if online payment and client/payment_id exist
+    if (order.payment_method === 'online' && process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET && order.razorpay_payment_id) {
       try {
         const razorpay = new Razorpay({
           key_id: process.env.RAZORPAY_KEY_ID,
@@ -1725,9 +1742,10 @@ adminRouter.post('/orders/:id/refund', async (req, res, next) => {
         }
       } catch (err: any) {
         console.warn('Razorpay refund API call failed or in mock mode:', err.message);
-        // Continue in dev/test mock mode
       }
     }
+
+    const effectiveMethod = refund_method || (order.payment_method === 'online' ? 'gateway' : 'manual');
 
     await db.transaction(async () => {
       // 1. Update payment status to refunded
@@ -1736,7 +1754,20 @@ adminRouter.post('/orders/:id/refund', async (req, res, next) => {
         order.id
       );
 
-      // 2. Audit log
+      // 2. Add entry to order_status_history
+      const historyId = `osh_${uuidv4().replace(/-/g, '').slice(0, 10)}`;
+      await db.prepare(`
+        INSERT INTO order_status_history (id, order_id, status, note, changed_by, created_at)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).run(
+        historyId,
+        order.id,
+        order.order_status,
+        `Refund of ₹${(Number(order.total_amount) / 100).toFixed(2)} processed (${effectiveMethod}). Reason: ${reason || 'Store refund'}`,
+        req.user?.sub
+      );
+
+      // 3. Audit log
       const auditId = `aud_${uuidv4().replace(/-/g, '').slice(0, 10)}`;
       await db.prepare(`
         INSERT INTO audit_log (id, user_id, action, entity_type, entity_id, changes, ip_address, created_at)
@@ -1750,6 +1781,7 @@ adminRouter.post('/orders/:id/refund', async (req, res, next) => {
         JSON.stringify({
           refund_id: refundId,
           refund_amount: order.total_amount,
+          refund_method: effectiveMethod,
           razorpay_payment_id: order.razorpay_payment_id,
           reason: reason || 'Store refund',
         }),
@@ -1762,6 +1794,170 @@ adminRouter.post('/orders/:id/refund', async (req, res, next) => {
       message: `Order ${order.order_number} has been marked refunded.`,
       refund_id: refundId,
       refund_amount: order.total_amount,
+      refund_method: effectiveMethod,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/admin/orders/:id/return
+ * Process order return, update order_status to 'returned',
+ * optionally restock inventory items, and optionally initiate/record refund.
+ */
+adminRouter.post('/orders/:id/return', async (req, res, next) => {
+  try {
+    const db = getDb();
+    const { reason, notes, restock = true, refund = false, refund_method } = req.body;
+
+    const order = await db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id) as any;
+    if (!order) {
+      res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Order not found' } });
+      return;
+    }
+
+    if (order.order_status === 'returned') {
+      res.status(400).json({
+        error: {
+          code: 'ALREADY_RETURNED',
+          message: `Order ${order.order_number} is already marked as returned.`,
+        },
+      });
+      return;
+    }
+
+    if (order.order_status === 'cancelled') {
+      res.status(400).json({
+        error: {
+          code: 'INVALID_RETURN_STATE',
+          message: 'Cannot return a cancelled order.',
+        },
+      });
+      return;
+    }
+
+    // Fetch order items for restocking
+    const items = await db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(order.id) as any[];
+
+    let restockedCount = 0;
+    let refundId: string | null = null;
+
+    await db.transaction(async () => {
+      // 1. Update order status to 'returned'
+      let newPaymentStatus = order.payment_status;
+      if (refund) {
+        newPaymentStatus = 'refunded';
+      }
+
+      await db.prepare(`
+        UPDATE orders 
+        SET order_status = 'returned', payment_status = ?, updated_at = CURRENT_TIMESTAMP 
+        WHERE id = ?
+      `).run(newPaymentStatus, order.id);
+
+      // 2. Restock inventory if requested
+      if (restock && items.length > 0) {
+        for (const item of items) {
+          if (item.variant_id) {
+            await db.prepare(`
+              UPDATE product_variants 
+              SET stock = stock + ?, updated_at = CURRENT_TIMESTAMP 
+              WHERE id = ?
+            `).run(item.quantity, item.variant_id);
+            restockedCount += item.quantity;
+          }
+        }
+      }
+
+      // 3. Process refund if requested
+      if (refund) {
+        refundId = `rfnd_${Date.now()}`;
+        if (order.payment_method === 'online' && order.payment_status === 'paid' && process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET && order.razorpay_payment_id) {
+          try {
+            const razorpay = new Razorpay({
+              key_id: process.env.RAZORPAY_KEY_ID,
+              key_secret: process.env.RAZORPAY_KEY_SECRET,
+            });
+            const refundResponse: any = await razorpay.payments.refund(order.razorpay_payment_id, {
+              amount: order.total_amount,
+              notes: { reason: reason || 'Order return refund' },
+            });
+            if (refundResponse?.id) refundId = refundResponse.id;
+          } catch (err: any) {
+            console.warn('Razorpay refund in return flow warning/mock:', err.message);
+          }
+        }
+
+        const effectiveRefundMethod = refund_method || (order.payment_method === 'online' ? 'gateway' : 'manual');
+
+        // Audit log for refund
+        const refAuditId = `aud_${uuidv4().replace(/-/g, '').slice(0, 10)}`;
+        await db.prepare(`
+          INSERT INTO audit_log (id, user_id, action, entity_type, entity_id, changes, ip_address, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        `).run(
+          refAuditId,
+          req.user?.sub,
+          'ORDER_REFUND',
+          'order',
+          order.id,
+          JSON.stringify({
+            refund_id: refundId,
+            refund_amount: order.total_amount,
+            method: effectiveRefundMethod,
+            reason: reason || 'Return refund',
+          }),
+          req.ip || '127.0.0.1'
+        );
+      }
+
+      // 4. Record order_status_history
+      const historyId = `osh_${uuidv4().replace(/-/g, '').slice(0, 10)}`;
+      const noteDetails = [
+        `Return accepted: ${reason || 'Customer Return'}`,
+        notes ? `Note: ${notes}` : null,
+        restock ? `Restocked ${restockedCount} item(s) to store inventory.` : 'Inventory not restocked.',
+        refund ? `Refund recorded (${refund_method || (order.payment_method === 'online' ? 'Gateway' : 'Manual/Cash')}).` : null,
+      ].filter(Boolean).join(' | ');
+
+      await db.prepare(`
+        INSERT INTO order_status_history (id, order_id, status, note, changed_by, created_at)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).run(historyId, order.id, 'returned', noteDetails, req.user?.sub);
+
+      // 5. Audit log for return
+      const auditId = `aud_${uuidv4().replace(/-/g, '').slice(0, 10)}`;
+      await db.prepare(`
+        INSERT INTO audit_log (id, user_id, action, entity_type, entity_id, changes, ip_address, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).run(
+        auditId,
+        req.user?.sub,
+        'ORDER_RETURN',
+        'order',
+        order.id,
+        JSON.stringify({
+          from: order.order_status,
+          to: 'returned',
+          reason,
+          notes,
+          restocked_count: restockedCount,
+          refunded: refund,
+          refund_id: refundId,
+        }),
+        req.ip || '127.0.0.1'
+      );
+    });
+
+    res.json({
+      success: true,
+      message: `Order ${order.order_number} has been marked as returned.`,
+      order_id: order.id,
+      order_status: 'returned',
+      restocked_count: restockedCount,
+      refunded: refund,
+      refund_id: refundId,
     });
   } catch (err) {
     next(err);

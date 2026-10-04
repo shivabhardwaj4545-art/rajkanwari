@@ -5,6 +5,7 @@ import {
   Package,
   Printer,
   RefreshCw,
+  RotateCcw,
   Search,
   ShoppingBag,
   Truck,
@@ -121,6 +122,13 @@ export const AdminOrdersPage: React.FC = () => {
             Confirmed
           </span>
         );
+      case 'returned':
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+            <RotateCcw className="w-3 h-3 mr-1" />
+            Returned
+          </span>
+        );
       case 'cancelled':
         return (
           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20">
@@ -221,6 +229,7 @@ export const AdminOrdersPage: React.FC = () => {
               <option value="ready_for_pickup">Ready for Pickup</option>
               <option value="delivered">Delivered</option>
               <option value="picked_up">Picked Up</option>
+              <option value="returned">Returned</option>
               <option value="cancelled">Cancelled</option>
             </select>
 

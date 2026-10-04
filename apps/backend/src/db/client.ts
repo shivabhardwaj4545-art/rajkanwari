@@ -255,7 +255,7 @@ CREATE TABLE IF NOT EXISTS orders (
   payment_method            TEXT NOT NULL DEFAULT 'online' CHECK(payment_method IN ('online', 'cod')),
   razorpay_order_id         TEXT,
   razorpay_payment_id       TEXT,
-  order_status              TEXT NOT NULL DEFAULT 'placed' CHECK(order_status IN ('placed', 'confirmed', 'ready_for_pickup', 'out_for_delivery', 'delivered', 'picked_up', 'cancelled')),
+  order_status              TEXT NOT NULL DEFAULT 'placed' CHECK(order_status IN ('placed', 'confirmed', 'ready_for_pickup', 'out_for_delivery', 'delivered', 'picked_up', 'cancelled', 'returned')),
   customer_notes            TEXT,
   internal_notes            TEXT,
   created_at                TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

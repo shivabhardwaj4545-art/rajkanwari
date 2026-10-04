@@ -110,6 +110,12 @@ export const orderStatusSchema = z.enum([
   'shipped',
   'delivered',
   'cancelled',
+  'placed',
+  'confirmed',
+  'ready_for_pickup',
+  'out_for_delivery',
+  'picked_up',
+  'returned',
 ]);
 
 export const paymentStatusSchema = z.enum(['pending', 'paid', 'failed']);

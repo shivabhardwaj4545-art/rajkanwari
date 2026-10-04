@@ -41,8 +41,19 @@ export const AdminOrderDetailPage: React.FC = () => {
   // Refund state
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [refundReason, setRefundReason] = useState('');
+  const [refundMethod, setRefundMethod] = useState<'gateway' | 'manual' | 'store_credit'>('manual');
   const [refunding, setRefunding] = useState(false);
   const [refundError, setRefundError] = useState<string | null>(null);
+
+  // Return state
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [returnReason, setReturnReason] = useState('Size Mismatch / Fit Issue');
+  const [customReturnReason, setCustomReturnReason] = useState('');
+  const [returnNotes, setReturnNotes] = useState('');
+  const [restockInventory, setRestockInventory] = useState(true);
+  const [issueRefund, setIssueRefund] = useState(false);
+  const [returning, setReturning] = useState(false);
+  const [returnError, setReturnError] = useState<string | null>(null);
 
   // Packing slip modal state
   const [packingSlipData, setPackingSlipData] = useState<AdminPackingSlipData | null>(null);
@@ -56,6 +67,7 @@ export const AdminOrderDetailPage: React.FC = () => {
       const res = await api.adminGetOrderById(id);
       setOrder(res.order);
       setInternalNotes(res.order.internal_notes || '');
+      setRefundMethod(res.order.payment_method === 'online' && res.order.payment_status === 'paid' ? 'gateway' : 'manual');
       if (res.order.allowed_next_statuses.length > 0) {
         setSelectedNextStatus(res.order.allowed_next_statuses[0]);
       }
@@ -107,13 +119,39 @@ export const AdminOrderDetailPage: React.FC = () => {
     try {
       setRefunding(true);
       setRefundError(null);
-      await api.adminRefundOrder(id, refundReason.trim() || undefined);
+      await api.adminRefundOrder(id, {
+        reason: refundReason.trim() || undefined,
+        refund_method: refundMethod,
+        refund_type: refundMethod === 'gateway' ? 'gateway' : 'manual',
+      });
       setShowRefundModal(false);
       await fetchOrder();
     } catch (err: any) {
       setRefundError(err.message || 'Failed to process refund');
     } finally {
       setRefunding(false);
+    }
+  };
+
+  const handleReturn = async () => {
+    if (!id) return;
+    try {
+      setReturning(true);
+      setReturnError(null);
+      const effectiveReason = returnReason === 'Other' ? (customReturnReason.trim() || 'Other') : returnReason;
+      await api.adminReturnOrder(id, {
+        reason: effectiveReason,
+        notes: returnNotes.trim() || undefined,
+        restock: restockInventory,
+        refund: issueRefund,
+        refund_method: refundMethod,
+      });
+      setShowReturnModal(false);
+      await fetchOrder();
+    } catch (err: any) {
+      setReturnError(err.message || 'Failed to process return');
+    } finally {
+      setReturning(false);
     }
   };
 
@@ -208,11 +246,38 @@ export const AdminOrderDetailPage: React.FC = () => {
             <span>Print Invoice</span>
           </button>
 
-          {/* Refund Button: Only for Paid Orders */}
-          {order.payment_status === 'paid' && (
+          {/* Return Order Button: for any non-cancelled and non-returned order */}
+          {order.order_status !== 'returned' && order.order_status !== 'cancelled' && (
             <button
-              onClick={() => setShowRefundModal(true)}
-              className="px-3.5 py-2 text-xs font-semibold rounded-lg border border-purple-500/30 text-purple-600 dark:text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 transition flex items-center space-x-1.5"
+              onClick={() => {
+                setReturnReason('Size Mismatch / Fit Issue');
+                setCustomReturnReason('');
+                setReturnNotes('');
+                setRestockInventory(true);
+                setIssueRefund(order.payment_status === 'paid');
+                setRefundMethod(order.payment_method === 'online' && order.payment_status === 'paid' ? 'gateway' : 'manual');
+                setReturnError(null);
+                setShowReturnModal(true);
+              }}
+              className="px-3.5 py-2 text-xs font-semibold rounded-lg border border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 transition flex items-center space-x-1.5 shadow-sm"
+              title="Process Return & Restock items"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Return Order</span>
+            </button>
+          )}
+
+          {/* Refund Button: for Paid orders, or COD/returned orders */}
+          {order.payment_status !== 'refunded' && (order.payment_status === 'paid' || order.payment_method === 'cod' || order.order_status === 'returned') && (
+            <button
+              onClick={() => {
+                setRefundReason('');
+                setRefundMethod(order.payment_method === 'online' && order.payment_status === 'paid' ? 'gateway' : 'manual');
+                setRefundError(null);
+                setShowRefundModal(true);
+              }}
+              className="px-3.5 py-2 text-xs font-semibold rounded-lg border border-purple-500/30 text-purple-700 dark:text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 transition flex items-center space-x-1.5 shadow-sm"
+              title="Issue or record refund"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Refund Order</span>
@@ -220,6 +285,32 @@ export const AdminOrderDetailPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* ── Returned State Banner ────────────────────────────────────────── */}
+      {order.order_status === 'returned' && (
+        <div className="p-4 rounded-xl border border-purple-500/30 bg-purple-500/10 text-[var(--text)] flex items-start space-x-3 shadow-sm">
+          <div className="p-2 rounded-lg bg-purple-500/20 text-purple-700 dark:text-purple-300">
+            <RotateCcw className="w-5 h-5" />
+          </div>
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-sm font-bold text-purple-800 dark:text-purple-300">
+                Order Returned & Processed
+              </h3>
+              <span className={`px-2 py-0.5 text-[10px] font-semibold rounded ${
+                order.payment_status === 'refunded'
+                  ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                  : 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
+              }`}>
+                {order.payment_status === 'refunded' ? '● Refund Recorded' : 'Payment: ' + order.payment_status}
+              </span>
+            </div>
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              This order has been returned. View the Status History Timeline below for details on restocked inventory items and refund status.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── Status Advancement Strip ────────────────────────────────────── */}
       <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
@@ -487,10 +578,19 @@ export const AdminOrderDetailPage: React.FC = () => {
             <div className="space-y-4 text-xs">
               {order.history.map((h) => (
                 <div key={h.id} className="relative pl-6 border-l-2 border-[var(--brand-gold)]">
-                  <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-[var(--brand-crimson)]" />
+                  <div
+                    className={`absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full ${
+                      h.status === 'returned' ? 'bg-purple-600 ring-2 ring-purple-300' : 'bg-[var(--brand-crimson)]'
+                    }`}
+                  />
                   <div className="flex justify-between items-center">
-                    <span className="font-bold capitalize text-[var(--text)]">
-                      {h.status.replace(/_/g, ' ')}
+                    <span className="font-bold capitalize text-[var(--text)] flex items-center space-x-1.5">
+                      <span>{h.status.replace(/_/g, ' ')}</span>
+                      {h.status === 'returned' && (
+                        <span className="px-1.5 py-0.2 text-[9px] rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 uppercase font-mono">
+                          Returned
+                        </span>
+                      )}
                     </span>
                     <span className="text-[10px] text-[var(--text-muted)] font-mono">
                       {new Date(h.created_at).toLocaleTimeString('en-IN', {
@@ -510,6 +610,171 @@ export const AdminOrderDetailPage: React.FC = () => {
         </div>
       </div>
 
+      {/* ── Return Confirmation Modal ────────────────────────────────────── */}
+      {showReturnModal && (
+        <Portal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="w-full max-w-lg bg-[var(--surface)] text-[var(--text)] border border-[var(--border)] rounded-xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center space-x-2 text-amber-600 dark:text-amber-400">
+                <RotateCcw className="w-5 h-5" />
+                <h3 className="font-serif font-bold text-lg">Process Order Return</h3>
+              </div>
+              <p className="text-xs text-[var(--text-muted)]">
+                Mark order <strong>{order.order_number}</strong> as returned. You can automatically restock the items back into inventory and initiate or record a customer refund.
+              </p>
+
+              {/* Items Preview */}
+              <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--surface-alt)] space-y-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+                  Items to Return ({order.items.length})
+                </span>
+                <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                  {order.items.map((it) => (
+                    <div key={it.id} className="flex justify-between items-center text-xs">
+                      <div className="truncate pr-2">
+                        <span className="font-semibold text-[var(--text)]">{it.product_name}</span>
+                        <span className="text-[11px] text-[var(--text-muted)] ml-1">
+                          ({it.size} · {it.color})
+                        </span>
+                      </div>
+                      <span className="font-mono text-[var(--text-muted)] shrink-0">
+                        Qty: {it.quantity}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Reason Selector */}
+              <div>
+                <label className="text-xs font-semibold block mb-1">
+                  Return Reason <span className="text-[var(--brand-crimson)]">*</span>
+                </label>
+                <select
+                  value={returnReason}
+                  onChange={(e) => setReturnReason(e.target.value)}
+                  className="w-full p-2.5 text-xs rounded-lg border border-[var(--border)] bg-[var(--surface-alt)] text-[var(--text)] focus:outline-none focus:border-[var(--brand-crimson)]"
+                >
+                  <option value="Size Mismatch / Fit Issue">Size Mismatch / Fit Issue</option>
+                  <option value="Defective or Damaged Fabric">Defective or Damaged Fabric</option>
+                  <option value="Color or Style Dislike">Color or Style Dislike</option>
+                  <option value="Wrong Item Shipped">Wrong Item Shipped</option>
+                  <option value="Customer Rejected (Doorstep RTO)">Customer Rejected (Doorstep RTO)</option>
+                  <option value="Other">Other (Specify below)</option>
+                </select>
+              </div>
+
+              {returnReason === 'Other' && (
+                <div>
+                  <label className="text-xs font-semibold block mb-1">Specify Reason</label>
+                  <input
+                    type="text"
+                    value={customReturnReason}
+                    onChange={(e) => setCustomReturnReason(e.target.value)}
+                    placeholder="Enter reason for return..."
+                    className="w-full p-2.5 text-xs rounded-lg border border-[var(--border)] bg-[var(--surface-alt)] text-[var(--text)] focus:outline-none focus:border-[var(--brand-crimson)]"
+                  />
+                </div>
+              )}
+
+              {/* Internal Return Notes */}
+              <div>
+                <label className="text-xs font-semibold block mb-1">Return Notes / Comments</label>
+                <textarea
+                  rows={2}
+                  value={returnNotes}
+                  onChange={(e) => setReturnNotes(e.target.value)}
+                  placeholder="e.g. Courier tracking #, package condition, exchange notes..."
+                  className="w-full p-2.5 text-xs rounded-lg border border-[var(--border)] bg-[var(--surface-alt)] text-[var(--text)] focus:outline-none focus:border-[var(--brand-crimson)] resize-none"
+                />
+              </div>
+
+              {/* Restock Inventory Toggle */}
+              <label className="flex items-start space-x-2.5 p-3 rounded-lg border border-[var(--border)] bg-[var(--surface-alt)] cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={restockInventory}
+                  onChange={(e) => setRestockInventory(e.target.checked)}
+                  className="mt-0.5 rounded border-[var(--border)] text-[var(--brand-crimson)] focus:ring-0"
+                />
+                <div className="text-xs">
+                  <span className="font-semibold block text-[var(--text)]">
+                    Restock items back into store inventory
+                  </span>
+                  <span className="text-[var(--text-muted)] text-[11px]">
+                    Automatically increment the available quantity in product variants.
+                  </span>
+                </div>
+              </label>
+
+              {/* Refund Option */}
+              <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--surface-alt)] space-y-2">
+                <label className="flex items-start space-x-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={issueRefund}
+                    onChange={(e) => setIssueRefund(e.target.checked)}
+                    className="mt-0.5 rounded border-[var(--border)] text-purple-600 focus:ring-0"
+                  />
+                  <div className="text-xs">
+                    <span className="font-semibold block text-[var(--text)]">
+                      Process / Record Refund ({formatPrice(order.total_amount)})
+                    </span>
+                    <span className="text-[var(--text-muted)] text-[11px]">
+                      {order.payment_method === 'online'
+                        ? 'Initiate Razorpay gateway refund or record store credit.'
+                        : 'Record cash refund, UPI, or store credit for this COD order.'}
+                    </span>
+                  </div>
+                </label>
+
+                {issueRefund && (
+                  <div className="pt-2 border-t border-[var(--border)] space-y-1.5">
+                    <label className="text-[11px] font-semibold text-[var(--text-muted)] block">
+                      Refund Method
+                    </label>
+                    <select
+                      value={refundMethod}
+                      onChange={(e) => setRefundMethod(e.target.value as any)}
+                      className="w-full p-2 text-xs rounded border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] focus:outline-none focus:border-[var(--brand-crimson)]"
+                    >
+                      {order.payment_method === 'online' && order.payment_status === 'paid' && (
+                        <option value="gateway">Payment Gateway (Razorpay Online)</option>
+                      )}
+                      <option value="manual">Manual / Cash / Direct Bank Transfer</option>
+                      <option value="store_credit">Store Credit / Gift Voucher</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {returnError && (
+                <div className="p-2.5 rounded border border-rose-500/30 bg-rose-500/10 text-xs text-rose-600">
+                  {returnError}
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-2 pt-2">
+                <button
+                  onClick={() => setShowReturnModal(false)}
+                  className="px-4 py-2 text-xs font-semibold rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--surface-alt)]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleReturn}
+                  disabled={returning}
+                  className="px-4 py-2 text-xs font-semibold rounded-lg bg-amber-600 hover:bg-amber-700 text-white transition flex items-center space-x-1.5 shadow"
+                >
+                  {returning && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Confirm Return</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
+
       {/* ── Refund Confirmation Modal ────────────────────────────────────── */}
       {showRefundModal && (
         <Portal>
@@ -517,12 +782,33 @@ export const AdminOrderDetailPage: React.FC = () => {
             <div className="w-full max-w-md bg-[var(--surface)] text-[var(--text)] border border-[var(--border)] rounded-xl shadow-2xl p-6 space-y-4">
               <div className="flex items-center space-x-2 text-purple-600 dark:text-purple-400">
                 <RotateCcw className="w-5 h-5" />
-                <h3 className="font-serif font-bold text-lg">Confirm Refund</h3>
+                <h3 className="font-serif font-bold text-lg">Process Refund</h3>
               </div>
               <p className="text-xs text-[var(--text-muted)]">
-                Are you sure you want to refund order <strong>{order.order_number}</strong>?
-                This will refund <strong>{formatPrice(order.total_amount)}</strong> via the payment gateway and update the payment status to <em>refunded</em>.
+                Refund order <strong>{order.order_number}</strong> for total amount of{' '}
+                <strong className="text-[var(--text)]">{formatPrice(order.total_amount)}</strong>.
               </p>
+
+              {/* Refund Method selector */}
+              <div>
+                <label className="text-xs font-semibold block mb-1">Refund Method</label>
+                <select
+                  value={refundMethod}
+                  onChange={(e) => setRefundMethod(e.target.value as any)}
+                  className="w-full p-2.5 text-xs rounded-lg border border-[var(--border)] bg-[var(--surface-alt)] text-[var(--text)] focus:outline-none focus:border-[var(--brand-crimson)]"
+                >
+                  {order.payment_method === 'online' && order.payment_status === 'paid' && (
+                    <option value="gateway">Payment Gateway (Razorpay Online)</option>
+                  )}
+                  <option value="manual">Manual / Cash / Direct Bank Transfer</option>
+                  <option value="store_credit">Store Credit / Gift Voucher</option>
+                </select>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1 block">
+                  {refundMethod === 'gateway'
+                    ? 'Calls payment gateway to reverse customer charge.'
+                    : 'Records offline refund or store credit in order audit records.'}
+                </span>
+              </div>
 
               <div>
                 <label className="text-xs font-semibold block mb-1">Reason for Refund</label>
@@ -551,7 +837,7 @@ export const AdminOrderDetailPage: React.FC = () => {
                 <button
                   onClick={handleRefund}
                   disabled={refunding}
-                  className="px-4 py-2 text-xs font-semibold rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition flex items-center space-x-1.5"
+                  className="px-4 py-2 text-xs font-semibold rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition flex items-center space-x-1.5 shadow"
                 >
                   {refunding && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                   <span>Process Refund</span>
