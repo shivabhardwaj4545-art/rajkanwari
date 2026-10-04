@@ -163,51 +163,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
             }`}
           />
         </button>
-
-        {/* Action Buttons Overlay (View + Add to Bag) */}
-        <div className="absolute bottom-2.5 inset-x-2.5 z-10 flex gap-1.5 transition-all duration-300 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 max-md:opacity-100 max-md:translate-y-0">
-          {onQuickView && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onQuickView(product);
-              }}
-              className="flex-1 flex items-center justify-center gap-1 rounded-lg bg-surface/95 hover:bg-surface text-text text-xs font-semibold py-2 px-2 backdrop-blur-md border border-border/80 shadow-md hover:border-brand-gold hover:text-brand-crimson dark:hover:text-brand-gold transition-all cursor-pointer min-h-[38px]"
-              aria-label={`Quick view ${product.name}`}
-            >
-              <Eye size={13} className="text-brand-gold shrink-0" />
-              <span className="truncate">View</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            disabled={isOutOfStock || addingToCart}
-            onClick={handleDirectAddToCart}
-            className={`flex-1 flex items-center justify-center gap-1 rounded-lg text-xs font-semibold py-2 px-2 shadow-md transition-all cursor-pointer min-h-[38px] ${
-              isOutOfStock
-                ? 'bg-surface-alt/90 text-text-muted/60 border border-border/40 cursor-not-allowed'
-                : justAdded
-                ? 'bg-emerald-600 text-white'
-                : 'bg-brand-crimson hover:bg-brand-crimson/90 text-white dark:bg-brand-gold dark:text-black dark:hover:bg-brand-gold/90'
-            }`}
-            aria-label={`Add ${product.name} to bag`}
-          >
-            {justAdded ? (
-              <>
-                <Check size={13} className="shrink-0" />
-                <span className="truncate">Added</span>
-              </>
-            ) : (
-              <>
-                <ShoppingBag size={13} className="shrink-0" />
-                <span className="truncate">{isOutOfStock ? 'Sold Out' : 'Add to Bag'}</span>
-              </>
-            )}
-          </button>
-        </div>
       </div>
 
       {/* ── Details ──────────────────────────────────────────────────────── */}
@@ -233,7 +188,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
           </h3>
         </div>
 
-        {/* Price block & offer banner */}
+        {/* Price block, offer notice & direct action buttons */}
         <div className="mt-3 pt-2 border-t border-border/40 flex flex-col justify-end">
           <div className="flex items-baseline gap-2 flex-wrap min-h-[1.5rem]">
             {/* Final price in crimson (gold on dark) */}
@@ -262,6 +217,52 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
               ✨ {product.price.applied_offer.name}
             </p>
           )}
+
+          {/* ── Direct Action Buttons (Positioned below image and details, not covering photo) ── */}
+          <div className="mt-3 pt-2.5 border-t border-border/40 flex items-center gap-2">
+            {onQuickView && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onQuickView(product);
+                }}
+                className="flex items-center justify-center gap-1 rounded-lg border border-border bg-surface px-2.5 py-2 text-xs font-semibold text-text hover:border-brand-gold hover:text-brand-crimson dark:hover:text-brand-gold hover:bg-surface-alt transition-colors min-h-[40px] cursor-pointer"
+                aria-label={`Quick view ${product.name}`}
+                title="Quick View"
+              >
+                <Eye size={14} className="text-brand-gold shrink-0" />
+                <span className="text-xs">View</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              disabled={isOutOfStock || addingToCart}
+              onClick={handleDirectAddToCart}
+              className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-all min-h-[40px] cursor-pointer shadow-xs ${
+                isOutOfStock
+                  ? 'bg-surface-alt text-text-muted/60 border border-border/40 cursor-not-allowed'
+                  : justAdded
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-brand-crimson hover:bg-brand-crimson/90 text-white dark:bg-brand-gold dark:text-bg dark:hover:bg-brand-gold/90 active:scale-[0.98]'
+              }`}
+              aria-label={`Add ${product.name} to bag`}
+            >
+              {justAdded ? (
+                <>
+                  <Check size={14} className="shrink-0" />
+                  <span>Added</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingBag size={14} className="shrink-0" />
+                  <span className="truncate">{isOutOfStock ? 'Sold Out' : 'Add to Bag'}</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </article>
