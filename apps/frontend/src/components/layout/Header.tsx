@@ -191,8 +191,8 @@ export const Header: React.FC = () => {
       <header
         className={[
           'sticky top-0 z-40 w-full',
-          'bg-surface border-b border-border/40 transition-all duration-200',
-          scrolled ? 'shadow-sm' : '',
+          'bg-surface border-b border-border transition-all duration-200',
+          scrolled ? 'shadow-xs' : '',
         ].join(' ')}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">

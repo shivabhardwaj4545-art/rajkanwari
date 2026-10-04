@@ -8,24 +8,24 @@
    ============================================================================= */
 
 :root {
-  /* ── Brand Palette ─────────────────────────────────────────────────────────── */
-  --brand-primary: #4F5437;
-  --brand-gold: #D4AF37;
-  --brand-crimson: #9B1B30;
-  --brand-sale: #9B1B30;
+  /* ── User-Specified Brand Palette ───────────────────────────────────────────── */
+  --brand-primary: #4F5437;   /* PRIMARY */
+  --brand-gold: #B89A5A;      /* ACCENT */
+  --brand-crimson: #8E2731;   /* SALE / FESTIVE */
+  --brand-sale: #8E2731;      /* SALE / FESTIVE */
 
   /* ── Semantic ─────────────────────────────────────────────────────────────── */
   --success: #2D6A4F;
-  --warning: #F4A261;
-  --danger: #E76F51;
+  --warning: #B89A5A;
+  --danger: #8E2731;
 
-  /* ── Light Theme Tokens ───────────────────────────────────────────────────── */
-  --bg: #FEFBF8;
-  --surface: #FFFFFF;
-  --surface-alt: #FEFBF8;
-  --text: #2C1810;
-  --text-muted: #7A6A5F;
-  --border: #E8D4A0;
+  /* ── Light Theme Tokens (User Specified) ─────────────────────────────────── */
+  --bg: #F7F2E8;              /* BACKGROUND */
+  --surface: #FBF8F0;         /* NAVBAR / SURFACE */
+  --surface-alt: #FBF8F0;     /* SECTION SURFACES */
+  --text: #2D2A24;            /* TEXT */
+  --text-muted: #756D60;      /* MUTED TEXT */
+  --border: #D8C9A9;          /* BORDER */
 
   /* ── Typography ──────────────────────────────────────────────────────────── */
   --font-serif: 'Cormorant Garamond', Georgia, serif;
@@ -41,18 +41,18 @@
 /* ── Global Theme Settings ─────────────────────────────────────────────────── */
 [data-theme='light'] {
   --brand-primary: #4F5437;
-  --brand-gold: #D4AF37;
-  --brand-crimson: #9B1B30;
-  --brand-sale: #9B1B30;
-  --bg: #FEFBF8;
-  --surface: #FFFFFF;
-  --surface-alt: #FEFBF8;
-  --text: #2C1810;
-  --text-muted: #7A6A5F;
-  --border: #E8D4A0;
+  --brand-gold: #B89A5A;
+  --brand-crimson: #8E2731;
+  --brand-sale: #8E2731;
+  --bg: #F7F2E8;
+  --surface: #FBF8F0;
+  --surface-alt: #FBF8F0;
+  --text: #2D2A24;
+  --text-muted: #756D60;
+  --border: #D8C9A9;
   --success: #2D6A4F;
-  --warning: #F4A261;
-  --danger: #E76F51;
+  --warning: #B89A5A;
+  --danger: #8E2731;
 }
 
 [data-theme='dark'] {
