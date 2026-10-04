@@ -38,6 +38,7 @@ export { NotFoundPage } from './NotFoundPage';
 export { ServerErrorPage } from './ServerErrorPage';
 export { AuthPage } from './AuthPage';
 export { PoliciesPage } from './PoliciesPage';
+export { WishlistPage } from './WishlistPage';
 export const AdminDashboard = makePlaceholderPage('Admin Dashboard', 'Sales overview and quick actions.');
 export const AdminProducts = makePlaceholderPage('Admin — Products', 'Manage products and inventory.');
 export const AdminOrders = makePlaceholderPage('Admin — Orders', 'Manage and update order status.');

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, LayoutDashboard, Menu, Package, ShoppingBag, User, X } from 'lucide-react';
+import { ChevronDown, Heart, LayoutDashboard, Menu, Package, ShoppingBag, User, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 
@@ -10,6 +10,7 @@ import { Portal } from '@/components/ui/Portal';
 import { useFocusTrap } from '@/lib/useFocusTrap';
 import { useAuthStore } from '@/stores/auth.store';
 import { useCartStore } from '@/stores/cart.store';
+import { useWishlistStore } from '@/stores/wishlist.store';
 
 // ─── Types & Data ─────────────────────────────────────────────────────────────
 
@@ -153,6 +154,8 @@ export const Header: React.FC = () => {
   const openDrawer = useCartStore((s) => s.openDrawer);
   const pulseBadge = useCartStore((s) => s.pulseBadge);
   const user = useAuthStore((s) => s.user);
+  const wishlistItems = useWishlistStore((s) => s.totalItems);
+  const wishlistPulse = useWishlistStore((s) => s.pulseBadge);
 
   // Load categories from API for navigation dropdown
   useEffect(() => {
@@ -265,6 +268,32 @@ export const Header: React.FC = () => {
               ].join(' ')}
             >
               <Package size={16} aria-hidden />
+            </Link>
+
+            {/* Wishlist Button */}
+            <Link
+              to="/wishlist"
+              id="wishlist-button"
+              aria-label={`Wishlist, ${wishlistItems} items`}
+              title="My Wishlist"
+              className={[
+                'relative flex h-9 w-9 items-center justify-center rounded-full',
+                'border border-border/80 bg-surface/80',
+                'text-text hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold hover:bg-surface',
+                'transition-colors duration-200 cursor-pointer shadow-2xs',
+              ].join(' ')}
+            >
+              <Heart size={16} aria-hidden className={wishlistItems > 0 ? 'text-brand-crimson dark:text-brand-gold fill-brand-crimson/20 dark:fill-brand-gold/20' : ''} />
+              {wishlistItems > 0 && (
+                <motion.span
+                  key={wishlistItems}
+                  animate={wishlistPulse ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute -top-1 -right-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-brand-crimson px-1 text-[10px] font-bold text-white shadow"
+                >
+                  {wishlistItems > 99 ? '99+' : wishlistItems}
+                </motion.span>
+              )}
             </Link>
 
             {/* Cart Button */}
@@ -439,6 +468,21 @@ export const Header: React.FC = () => {
                     <span>Admin Console</span>
                   </NavLink>
                 )}
+                <NavLink
+                  to="/wishlist"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-between rounded-md px-3 py-2.5 text-sm font-semibold text-text hover:text-brand-crimson dark:hover:text-brand-gold hover:bg-surface-alt transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Heart size={16} />
+                    <span>My Wishlist</span>
+                  </span>
+                  {wishlistItems > 0 && (
+                    <span className="rounded-full bg-brand-crimson px-2 py-0.5 text-[10px] font-bold text-white">
+                      {wishlistItems}
+                    </span>
+                  )}
+                </NavLink>
                 <NavLink
                   to="/orders"
                   onClick={() => setMenuOpen(false)}

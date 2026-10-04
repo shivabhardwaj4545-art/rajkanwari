@@ -1,10 +1,12 @@
-import { Eye } from 'lucide-react';
+import { Check, Eye, Heart, ShoppingBag } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import type { ProductItem } from '@/lib/api';
 import { formatDiscount, formatPrice } from '@/lib/format';
+import { useCartStore } from '@/stores/cart.store';
+import { useWishlistStore } from '@/stores/wishlist.store';
 
 interface ProductCardProps {
   product: ProductItem;
@@ -13,6 +15,14 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
+
+  const addToCart = useCartStore((s) => s.addItem);
+  const openDrawer = useCartStore((s) => s.openDrawer);
+  const isInWishlist = useWishlistStore((s) => s.isInWishlist(product.id));
+  const toggleWishlist = useWishlistStore((s) => s.toggleWishlist);
+
   const DEFAULT_ETHNIC_IMAGE = 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80';
   const primaryImg = product.images?.[0] || DEFAULT_ETHNIC_IMAGE;
   const secondaryImg = product.images?.[1];
@@ -23,6 +33,41 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
   const isLowStock = totalStock > 0 && totalStock <= 5;
 
   const hasDiscount = product.price.effective_discount_percent > 0;
+
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product);
+  };
+
+  const handleDirectAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isOutOfStock) return;
+
+    // If multiple size variants exist with stock, prompt user with Quick View for accurate fit
+    const availableVariants = product.variants.filter((v) => v.stock > 0);
+    if (availableVariants.length > 1 && onQuickView) {
+      onQuickView(product);
+      return;
+    }
+
+    const targetVariant = availableVariants[0] || product.variants[0];
+    if (!targetVariant) return;
+
+    try {
+      setAddingToCart(true);
+      await addToCart(targetVariant.id, 1);
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 1800);
+      openDrawer();
+    } catch (err) {
+      console.error('Failed to add to cart:', err);
+    } finally {
+      setAddingToCart(false);
+    }
+  };
 
   return (
     <article
@@ -63,29 +108,29 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
         </Link>
 
         {/* Refined Luxury Badges in top-left */}
-        <div className="absolute top-2.5 left-2.5 z-10 flex flex-wrap gap-1.5 items-center">
-          {product.price.applied_offer?.offer_category && (
-            <span className="inline-flex items-center rounded-full bg-brand-gold text-text px-2.5 py-0.5 text-[9px] font-extrabold tracking-wider uppercase shadow-xs">
-              {product.price.applied_offer.offer_category === 'Clearance Sale' ? 'Clearance' :
-               product.price.applied_offer.offer_category === 'Flash Deal' ? 'Flash Deal' :
-               product.price.applied_offer.offer_category === 'Exclusive Offer' ? 'VIP Deal' :
-               product.price.applied_offer.offer_category === 'Free Shipping' ? 'Free Ship' :
-               product.price.applied_offer.offer_category === 'Festive Offer' ? 'Festive' :
-               product.price.applied_offer.offer_category.toUpperCase()}
-            </span>
-          )}
-          {hasDiscount && (
-            <span className="inline-flex items-center rounded-full bg-brand-crimson px-2 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase shadow-xs">
-              {formatDiscount(product.price.effective_discount_percent)}
-            </span>
-          )}
-        </div>
+        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start">
+          <div className="flex flex-wrap gap-1.5 items-center">
+            {product.price.applied_offer?.offer_category && (
+              <span className="inline-flex items-center rounded-full bg-brand-gold text-text px-2.5 py-0.5 text-[9px] font-extrabold tracking-wider uppercase shadow-xs">
+                {product.price.applied_offer.offer_category === 'Clearance Sale' ? 'Clearance' :
+                 product.price.applied_offer.offer_category === 'Flash Deal' ? 'Flash Deal' :
+                 product.price.applied_offer.offer_category === 'Exclusive Offer' ? 'VIP Deal' :
+                 product.price.applied_offer.offer_category === 'Free Shipping' ? 'Free Ship' :
+                 product.price.applied_offer.offer_category === 'Festive Offer' ? 'Festive' :
+                 product.price.applied_offer.offer_category.toUpperCase()}
+              </span>
+            )}
+            {hasDiscount && (
+              <span className="inline-flex items-center rounded-full bg-brand-crimson px-2 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase shadow-xs">
+                {formatDiscount(product.price.effective_discount_percent)}
+              </span>
+            )}
+          </div>
 
-        {/* Stock warning ONLY if low stock or out of stock (Never clutter with In Stock) */}
-        {(isOutOfStock || isLowStock) && (
-          <div className="absolute top-2.5 right-2.5 z-10">
+          {/* Stock warning pill below promotional tags */}
+          {(isOutOfStock || isLowStock) && (
             <span
-              className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium tracking-tight backdrop-blur-md ${
+              className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium tracking-tight backdrop-blur-md shadow-xs ${
                 isOutOfStock
                   ? 'bg-danger/20 text-danger border-danger/40'
                   : 'bg-warning/20 text-warning border-warning/40'
@@ -98,26 +143,71 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
               />
               {isOutOfStock ? 'Out of Stock' : `Only ${totalStock} left`}
             </span>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Floating Glassmorphic Quick View Button */}
-        {onQuickView && (
-          <div className="absolute bottom-3 inset-x-3 z-10 transition-all duration-300 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 max-md:opacity-100 max-md:translate-y-0">
+        {/* Top-Right Floating Wishlist Button */}
+        <button
+          type="button"
+          onClick={handleToggleWishlist}
+          title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+          aria-label={isInWishlist ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+          className="absolute top-2.5 right-2.5 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-surface/90 hover:bg-surface text-text backdrop-blur-md border border-border/70 shadow-sm transition-transform duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+        >
+          <Heart
+            size={16}
+            className={`transition-colors duration-200 ${
+              isInWishlist
+                ? 'fill-brand-crimson text-brand-crimson dark:fill-brand-gold dark:text-brand-gold'
+                : 'text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold'
+            }`}
+          />
+        </button>
+
+        {/* Action Buttons Overlay (View + Add to Bag) */}
+        <div className="absolute bottom-2.5 inset-x-2.5 z-10 flex gap-1.5 transition-all duration-300 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 max-md:opacity-100 max-md:translate-y-0">
+          {onQuickView && (
             <button
               type="button"
               onClick={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 onQuickView(product);
               }}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-surface/95 hover:bg-surface text-text text-xs font-semibold py-2 px-3 backdrop-blur-md border border-border/80 shadow-md hover:border-brand-gold hover:text-brand-crimson dark:hover:text-brand-gold transition-all cursor-pointer"
+              className="flex-1 flex items-center justify-center gap-1 rounded-lg bg-surface/95 hover:bg-surface text-text text-xs font-semibold py-2 px-2 backdrop-blur-md border border-border/80 shadow-md hover:border-brand-gold hover:text-brand-crimson dark:hover:text-brand-gold transition-all cursor-pointer min-h-[38px]"
               aria-label={`Quick view ${product.name}`}
             >
-              <Eye size={13} className="text-brand-gold" />
-              <span>Quick View</span>
+              <Eye size={13} className="text-brand-gold shrink-0" />
+              <span className="truncate">View</span>
             </button>
-          </div>
-        )}
+          )}
+
+          <button
+            type="button"
+            disabled={isOutOfStock || addingToCart}
+            onClick={handleDirectAddToCart}
+            className={`flex-1 flex items-center justify-center gap-1 rounded-lg text-xs font-semibold py-2 px-2 shadow-md transition-all cursor-pointer min-h-[38px] ${
+              isOutOfStock
+                ? 'bg-surface-alt/90 text-text-muted/60 border border-border/40 cursor-not-allowed'
+                : justAdded
+                ? 'bg-emerald-600 text-white'
+                : 'bg-brand-crimson hover:bg-brand-crimson/90 text-white dark:bg-brand-gold dark:text-black dark:hover:bg-brand-gold/90'
+            }`}
+            aria-label={`Add ${product.name} to bag`}
+          >
+            {justAdded ? (
+              <>
+                <Check size={13} className="shrink-0" />
+                <span className="truncate">Added</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBag size={13} className="shrink-0" />
+                <span className="truncate">{isOutOfStock ? 'Sold Out' : 'Add to Bag'}</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* ── Details ──────────────────────────────────────────────────────── */}

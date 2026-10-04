@@ -15,6 +15,7 @@ import {
   PoliciesPage,
   ProductDetailPage,
   ServerErrorPage,
+  WishlistPage,
 } from '@/pages/index';
 
 const AdminRoutes = React.lazy(() => import('@/pages/admin/AdminRoutes'));
@@ -75,6 +76,14 @@ const App: React.FC = () => {
             element={
               <PageTransition>
                 <ProductDetailPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/wishlist"
+            element={
+              <PageTransition>
+                <WishlistPage />
               </PageTransition>
             }
           />

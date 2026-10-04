@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronRight, X } from 'lucide-react';
+import { Check, ChevronRight, Heart, RefreshCw, ShoppingBag, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -8,6 +8,8 @@ import { formatDiscount, formatPrice } from '@/lib/format';
 import { fadeIn, scaleIn } from '@/lib/motion';
 import { useFocusTrap } from '@/lib/useFocusTrap';
 import { Portal } from '@/components/ui/Portal';
+import { useCartStore } from '@/stores/cart.store';
+import { useWishlistStore } from '@/stores/wishlist.store';
 
 interface QuickViewModalProps {
   product: ProductItem | null;
@@ -18,6 +20,13 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [activeImgIndex, setActiveImgIndex] = useState(0);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
+
+  const addToCart = useCartStore((s) => s.addItem);
+  const openDrawer = useCartStore((s) => s.openDrawer);
+  const isInWishlist = useWishlistStore((s) => (product ? s.isInWishlist(product.id) : false));
+  const toggleWishlist = useWishlistStore((s) => s.toggleWishlist);
 
   const modalRef = useFocusTrap<HTMLDivElement>({
     isOpen: !!product,
@@ -48,6 +57,26 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
 
   const isCurrentInStock = currentVariant ? currentVariant.stock > 0 : false;
   const currentStock = currentVariant?.stock ?? 0;
+
+  const handleAddToCart = async () => {
+    if (!currentVariant || !isCurrentInStock || addingToCart) return;
+    setAddingToCart(true);
+    try {
+      await addToCart(currentVariant.id, 1);
+      setJustAdded(true);
+      setTimeout(() => {
+        setJustAdded(false);
+      }, 1800);
+      openDrawer();
+    } finally {
+      setAddingToCart(false);
+    }
+  };
+
+  const handleToggleWishlist = () => {
+    if (!product) return;
+    toggleWishlist(product);
+  };
 
   return (
     <AnimatePresence>
@@ -242,24 +271,75 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
                 </div>
               </div>
 
-              {/* View Full Product link */}
-              <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
-                <Link
-                  to={`/products/${product.slug}`}
-                  onClick={onClose}
-                  className="inline-flex items-center gap-1 text-sm font-medium text-brand-crimson dark:text-brand-gold hover:underline"
-                >
-                  <span>View complete specifications</span>
-                  <ChevronRight size={16} />
-                </Link>
+              {/* Action Buttons */}
+              <div className="mt-6 pt-4 border-t border-border space-y-3">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleAddToCart}
+                    disabled={!isCurrentInStock || addingToCart}
+                    className={`flex-1 min-h-[48px] px-6 py-3 rounded-lg text-sm font-semibold tracking-wide uppercase transition-all duration-200 flex items-center justify-center gap-2 shadow-sm ${
+                      justAdded
+                        ? 'bg-success text-white'
+                        : isCurrentInStock
+                        ? 'bg-brand-crimson hover:bg-brand-crimson/90 text-white dark:bg-brand-gold dark:text-bg dark:hover:bg-brand-gold/90 active:scale-[0.99]'
+                        : 'bg-surface-alt text-text-muted cursor-not-allowed opacity-60'
+                    }`}
+                  >
+                    {addingToCart ? (
+                      <>
+                        <RefreshCw size={18} className="animate-spin" />
+                        <span>Adding...</span>
+                      </>
+                    ) : justAdded ? (
+                      <>
+                        <Check size={18} className="animate-in zoom-in-50 duration-200" />
+                        <span>Added to Bag</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingBag size={18} />
+                        <span>{isCurrentInStock ? 'Add to Shopping Bag' : 'Out of Stock'}</span>
+                      </>
+                    )}
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 text-xs font-medium text-text-muted hover:text-text"
-                >
-                  Close
-                </button>
+                  <button
+                    type="button"
+                    onClick={handleToggleWishlist}
+                    aria-label={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                    className={`min-h-[48px] min-w-[48px] rounded-lg border flex items-center justify-center transition-all duration-200 ${
+                      isInWishlist
+                        ? 'border-brand-crimson bg-brand-crimson/10 text-brand-crimson dark:border-brand-gold dark:bg-brand-gold/15 dark:text-brand-gold'
+                        : 'border-border bg-surface text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold hover:border-brand-gold'
+                    }`}
+                    title={isInWishlist ? 'Remove from Wishlist' : 'Save to Wishlist'}
+                  >
+                    <Heart
+                      size={20}
+                      className={isInWishlist ? 'fill-brand-crimson dark:fill-brand-gold text-brand-crimson dark:text-brand-gold' : ''}
+                    />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <Link
+                    to={`/products/${product.slug}`}
+                    onClick={onClose}
+                    className="group inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-text-muted hover:text-brand-crimson dark:hover:text-brand-gold transition-colors py-1.5"
+                  >
+                    <span>View complete specifications & styling</span>
+                    <ChevronRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="min-h-[36px] px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text rounded-md hover:bg-surface-alt transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
           </div>

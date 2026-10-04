@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { api, type ProductDetail, type ProductVariant } from '@/lib/api';
 import { formatDiscount, formatPrice } from '@/lib/format';
 import { useCartStore } from '@/stores/cart.store';
+import { useWishlistStore } from '@/stores/wishlist.store';
 
 export const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -27,6 +28,9 @@ export const ProductDetailPage: React.FC = () => {
 
   const addItem = useCartStore((s) => s.addItem);
   const cartLoading = useCartStore((s) => s.loading);
+
+  const isWishlisted = useWishlistStore((s) => (product ? s.isInWishlist(product.id) : false));
+  const toggleWishlist = useWishlistStore((s) => s.toggleWishlist);
 
   // Variant selection
   const [selectedSize, setSelectedSize] = useState<string>('');
@@ -404,10 +408,20 @@ export const ProductDetailPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-surface py-2.5 px-4 text-xs font-medium text-text hover:border-brand-gold hover:text-brand-crimson dark:hover:text-brand-gold transition-colors"
+                  id="wishlist-detail-btn"
+                  onClick={() => product && toggleWishlist(product)}
+                  aria-label={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                  className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 px-4 text-xs font-medium transition-all ${
+                    isWishlisted
+                      ? 'border-brand-crimson bg-brand-crimson/10 text-brand-crimson dark:border-brand-gold dark:bg-brand-gold/15 dark:text-brand-gold font-semibold shadow-sm'
+                      : 'border-border bg-surface text-text hover:border-brand-gold hover:text-brand-crimson dark:hover:text-brand-gold'
+                  }`}
                 >
-                  <Heart size={15} />
-                  <span>Wishlist</span>
+                  <Heart
+                    size={16}
+                    className={isWishlisted ? 'fill-brand-crimson dark:fill-brand-gold text-brand-crimson dark:text-brand-gold scale-110 transition-transform' : 'transition-transform'}
+                  />
+                  <span>{isWishlisted ? 'Wishlisted' : 'Wishlist'}</span>
                 </button>
                 <button
                   type="button"
