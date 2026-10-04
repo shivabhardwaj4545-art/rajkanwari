@@ -2,6 +2,7 @@ import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 
 import app from '../index.js';
+import { getDb } from '../db/client.js';
 import { generateAccessToken } from '../middleware/auth.js';
 
 describe('Orders API & Security Verification', () => {
@@ -137,6 +138,74 @@ describe('Orders API & Security Verification', () => {
       // Valid PDF starts with "%PDF-"
       const header = res.body.subarray(0, 5).toString();
       expect(header).toBe('%PDF-');
+    });
+  });
+
+  describe('POST /api/orders/:id/return-request — Customer Return Self-Service', () => {
+    it('returns 401 Unauthenticated without token', async () => {
+      const res = await request(app)
+        .post('/api/orders/ord_001/return-request')
+        .send({ reason: 'Size too tight' });
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 404 (not 403) when customer tries to return an order belonging to another customer', async () => {
+      // ord_002 belongs to Customer B; Customer A must not even know it exists
+      const res = await request(app)
+        .post('/api/orders/ord_002/return-request')
+        .set('Authorization', `Bearer ${tokenCustomerA}`)
+        .send({ reason: 'Size too tight' });
+
+      expect(res.status).toBe(404);
+      expect(res.body.error.code).toBe('ORDER_NOT_FOUND');
+    });
+
+    it('returns 400 when attempting to return an order that is not delivered or picked up', async () => {
+      // Set ord_001 temporarily to placed
+      const db = getDb();
+      await db.prepare("UPDATE orders SET order_status = 'placed' WHERE id = 'ord_001'").run();
+
+      const res = await request(app)
+        .post('/api/orders/ord_001/return-request')
+        .set('Authorization', `Bearer ${tokenCustomerA}`)
+        .send({ reason: 'Changed mind' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('ORDER_NOT_DELIVERED');
+
+      // Reset back to delivered
+      await db.prepare("UPDATE orders SET order_status = 'delivered' WHERE id = 'ord_001'").run();
+    });
+
+    it('successfully processes return request on delivered order, updating status to returned', async () => {
+      const db = getDb();
+      await db.prepare("UPDATE orders SET order_status = 'delivered' WHERE id = 'ord_001'").run();
+
+      const res = await request(app)
+        .post('/api/orders/ord_001/return-request')
+        .set('Authorization', `Bearer ${tokenCustomerA}`)
+        .send({
+          reason: 'Size too small / tight',
+          comments: 'Exchanging for a larger size if possible.',
+          refund_preference: 'store_credit',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.order_status).toBe('returned');
+
+      // Verify db order status is updated
+      const row = (await db.prepare('SELECT order_status FROM orders WHERE id = ?').get('ord_001')) as any;
+      expect(row.order_status).toBe('returned');
+
+      // Verify timeline history was logged
+      const history = (await db.prepare('SELECT * FROM order_status_history WHERE order_id = ? ORDER BY created_at DESC').all('ord_001')) as any[];
+      const returnedEntry = history.find((h) => h.status === 'returned');
+      expect(returnedEntry).toBeDefined();
+      expect(returnedEntry.note).toContain('Customer Return Requested');
+
+      // Reset ord_001 back to delivered for subsequent tests
+      await db.prepare("UPDATE orders SET order_status = 'delivered' WHERE id = 'ord_001'").run();
     });
   });
 });

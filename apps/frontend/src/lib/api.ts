@@ -391,6 +391,23 @@ export const api = {
     });
   },
 
+  customerRequestReturn: (
+    id: string,
+    data: {
+      reason: string;
+      comments?: string | undefined;
+      refund_preference?: string | undefined;
+    }
+  ) => {
+    return request<{ success: boolean; message: string; order_id: string; order_status: string }>(
+      `/orders/${id}/return-request`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+  },
+
   // Auth
   login: (email: string, password: string = 'Customer123!') => {
     return request<{
@@ -726,6 +743,19 @@ export const api = {
     });
   },
 
+  adminConfirmPayment: (
+    id: string,
+    data?: { reference?: string | undefined; note?: string | undefined } | undefined
+  ) => {
+    return request<{ success: boolean; message: string; order_id: string; payment_status: string }>(
+      `/admin/orders/${id}/confirm-payment`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data || {}),
+      }
+    );
+  },
+
   adminGetPackingSlip: (id: string) => {
     return request<AdminPackingSlipData>(`/admin/orders/${id}/packing-slip`);
   },
@@ -874,7 +904,8 @@ export interface OrderDetail {
     | 'out_for_delivery'
     | 'delivered'
     | 'picked_up'
-    | 'cancelled';
+    | 'cancelled'
+    | 'returned';
   subtotal: number;
   discount_amount: number;
   shipping_cost: number;

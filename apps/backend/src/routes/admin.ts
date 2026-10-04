@@ -1685,6 +1685,80 @@ adminRouter.patch('/orders/:id/notes', async (req, res, next) => {
 });
 
 /**
+ * POST /api/admin/orders/:id/confirm-payment
+ * Mark payment as paid for an order (e.g. COD collected by courier, manual UPI/bank transfer verification)
+ */
+adminRouter.post('/orders/:id/confirm-payment', async (req, res, next) => {
+  try {
+    const db = getDb();
+    const { reference, note } = req.body;
+
+    const order = (await db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id)) as any;
+    if (!order) {
+      res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Order not found' } });
+      return;
+    }
+
+    if (order.payment_status === 'paid') {
+      res.status(400).json({
+        error: {
+          code: 'ALREADY_PAID',
+          message: `Order ${order.order_number} payment is already confirmed as paid.`,
+        },
+      });
+      return;
+    }
+
+    await db.transaction(async () => {
+      // 1. Update payment status to paid
+      await db.prepare('UPDATE orders SET payment_status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(
+        'paid',
+        order.id
+      );
+
+      // 2. Insert into order_status_history
+      const historyId = `osh_${uuidv4().replace(/-/g, '').slice(0, 10)}`;
+      const noteDetails = `Payment confirmed by boutique owner (${order.payment_method.toUpperCase()}). ${reference ? `Ref: ${reference}` : ''}${note ? ` | Note: ${note}` : ''}`.trim();
+      await db.prepare(`
+        INSERT INTO order_status_history (id, order_id, status, note, changed_by, created_at)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).run(historyId, order.id, order.order_status, noteDetails, req.user?.sub);
+
+      // 3. Write to audit_log
+      const auditId = `aud_${uuidv4().replace(/-/g, '').slice(0, 10)}`;
+      await db.prepare(`
+        INSERT INTO audit_log (id, user_id, action, entity_type, entity_id, changes, ip_address, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).run(
+        auditId,
+        req.user?.sub,
+        'ORDER_PAYMENT_CONFIRMED',
+        'order',
+        order.id,
+        JSON.stringify({
+          from_status: order.payment_status,
+          to_status: 'paid',
+          amount: order.total_amount,
+          method: order.payment_method,
+          reference,
+          note,
+        }),
+        req.ip || '127.0.0.1'
+      );
+    });
+
+    res.json({
+      success: true,
+      message: `Payment confirmed for order ${order.order_number}.`,
+      order_id: order.id,
+      payment_status: 'paid',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * POST /api/admin/orders/:id/refund
  * Refund a paid order via Razorpay API or record a manual/COD refund
  */

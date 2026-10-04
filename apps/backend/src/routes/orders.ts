@@ -347,6 +347,111 @@ ordersRouter.post('/:id/pay', verifyJWT, async (req, res, next) => {
   }
 });
 
+/**
+ * POST /api/orders/:id/return-request
+ * Customer requests a return for a delivered or picked up order
+ */
+ordersRouter.post('/:id/return-request', verifyJWT, async (req, res, next) => {
+  try {
+    const db = getDb();
+    const userId = req.user?.sub;
+    const orderId = req.params.id;
+
+    if (!userId) {
+      res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+      return;
+    }
+
+    const { reason, comments, refund_preference } = req.body;
+
+    if (!reason || typeof reason !== 'string') {
+      res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'Return reason is required' } });
+      return;
+    }
+
+    // Only allow customer to access their own order. Return 404 if not found (per AGENTS.md rules).
+    const order = (await db
+      .prepare('SELECT * FROM orders WHERE id = ? AND user_id = ?')
+      .get(orderId, userId)) as any;
+
+    if (!order) {
+      res.status(404).json({ error: { code: 'ORDER_NOT_FOUND', message: 'Order not found' } });
+      return;
+    }
+
+    if (order.order_status === 'returned') {
+      res.status(400).json({
+        error: { code: 'ALREADY_RETURNED', message: 'Return has already been requested for this order' },
+      });
+      return;
+    }
+
+    if (order.order_status === 'cancelled') {
+      res.status(400).json({
+        error: { code: 'INVALID_RETURN_STATE', message: 'Cannot return a cancelled order' },
+      });
+      return;
+    }
+
+    const returnableStatuses = ['delivered', 'picked_up'];
+    if (!returnableStatuses.includes(order.order_status)) {
+      res.status(400).json({
+        error: {
+          code: 'ORDER_NOT_DELIVERED',
+          message: `Order must be delivered before initiating a return. Current status: '${order.order_status}'.`,
+        },
+      });
+      return;
+    }
+
+    await db.transaction(async () => {
+      // 1. Update order status to 'returned'
+      await db.prepare('UPDATE orders SET order_status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(
+        'returned',
+        order.id
+      );
+
+      // 2. Insert into order_status_history
+      const historyId = `osh_${uuidv4().replace(/-/g, '').slice(0, 10)}`;
+      const note = `Customer Return Requested: ${reason}. Preference: ${refund_preference || 'Original payment mode'}.${comments ? ` Notes: ${comments}` : ''}`;
+      await db.prepare(`
+        INSERT INTO order_status_history (id, order_id, status, note, changed_by, created_at)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).run(historyId, order.id, 'returned', note, userId);
+
+      // 3. Insert into audit_log
+      const auditId = `aud_${uuidv4().replace(/-/g, '').slice(0, 10)}`;
+      await db.prepare(`
+        INSERT INTO audit_log (id, user_id, action, entity_type, entity_id, changes, ip_address, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).run(
+        auditId,
+        userId,
+        'CUSTOMER_RETURN_REQUEST',
+        'order',
+        order.id,
+        JSON.stringify({
+          from: order.order_status,
+          to: 'returned',
+          reason,
+          comments,
+          refund_preference,
+        }),
+        req.ip || '127.0.0.1'
+      );
+    });
+
+    res.json({
+      success: true,
+      message: 'Return request submitted successfully. Our boutique concierge will reach out to arrange pickup.',
+      order_id: order.id,
+      order_status: 'returned',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ─── POST /api/orders/verify-payment — Server-side Razorpay payment verification ──
 const verifyPaymentSchema = z.object({
   razorpay_order_id: z.string().min(1),

@@ -7,6 +7,7 @@ import {
   CreditCard,
   Download,
   Printer,
+  RefreshCw,
   RotateCcw,
   Store,
   Truck,
@@ -15,6 +16,7 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
+import { Portal } from '@/components/ui/Portal';
 import { api, type OrderDetail } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
 import { useAuthStore } from '@/stores/auth.store';
@@ -92,6 +94,16 @@ export const OrderTrackingPage: React.FC = () => {
     outOfStockNames: string[];
   } | null>(null);
 
+  // Customer Return state
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [returnReason, setReturnReason] = useState('Size too small / tight');
+  const [customReturnReason, setCustomReturnReason] = useState('');
+  const [returnComments, setReturnComments] = useState('');
+  const [refundPreference, setRefundPreference] = useState('original_payment');
+  const [submittingReturn, setSubmittingReturn] = useState(false);
+  const [returnError, setReturnError] = useState<string | null>(null);
+  const [returnSuccessMessage, setReturnSuccessMessage] = useState<string | null>(null);
+
   useEffect(() => {
     initAuth();
   }, [initAuth]);
@@ -119,8 +131,16 @@ export const OrderTrackingPage: React.FC = () => {
       });
   }, [id, user, initialized]);
 
-  // Determine timeline steps
+  // Determine timeline steps and states
   const isCancelled = order?.order_status === 'cancelled';
+  const isReturned = order?.order_status === 'returned';
+  const isReturnEligible = Boolean(
+    order &&
+      (order.order_status === 'delivered' || order.order_status === 'picked_up') &&
+      !isReturned &&
+      !isCancelled
+  );
+
   const steps = useMemo(() => {
     if (!order) return [];
     if (order.fulfillment_type === 'pickup') {
@@ -132,9 +152,40 @@ export const OrderTrackingPage: React.FC = () => {
   // Index of active step
   const currentStepIndex = useMemo(() => {
     if (!order || isCancelled) return -1;
+    if (isReturned) return steps.length - 1;
     const idx = steps.findIndex((s) => s.key === order.order_status);
     return idx >= 0 ? idx : 0;
-  }, [order, steps, isCancelled]);
+  }, [order, steps, isCancelled, isReturned]);
+
+  // Handle Customer Return Submission
+  const handleCustomerReturn = async () => {
+    if (!order) return;
+    try {
+      setSubmittingReturn(true);
+      setReturnError(null);
+      const effectiveReason =
+        returnReason === 'Other'
+          ? customReturnReason.trim() || 'Other reason'
+          : returnReason;
+
+      await api.customerRequestReturn(order.id, {
+        reason: effectiveReason,
+        comments: returnComments.trim() || undefined,
+        refund_preference: refundPreference,
+      });
+
+      setShowReturnModal(false);
+      setReturnSuccessMessage(
+        'Return request submitted successfully. Our boutique concierge will reach out to schedule reverse pickup.'
+      );
+      const refreshed = await api.getOrderById(order.id);
+      setOrder(refreshed.order);
+    } catch (err: any) {
+      setReturnError(err.message || 'Failed to submit return request.');
+    } finally {
+      setSubmittingReturn(false);
+    }
+  };
 
   // Handle Online settlement for pending COD order
   const handlePayNow = async () => {
@@ -331,6 +382,25 @@ export const OrderTrackingPage: React.FC = () => {
                 </button>
               )}
 
+              {/* Request Return Button (Delivered or Picked Up orders) */}
+              {isReturnEligible && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReturnReason('Size too small / tight');
+                    setCustomReturnReason('');
+                    setReturnComments('');
+                    setRefundPreference(order.payment_method === 'online' ? 'original_payment' : 'store_credit');
+                    setReturnError(null);
+                    setShowReturnModal(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 px-3.5 py-2 text-xs font-semibold text-amber-800 dark:text-amber-300 transition-colors cursor-pointer shadow-sm"
+                >
+                  <RotateCcw size={14} />
+                  <span>Request Return</span>
+                </button>
+              )}
+
               {/* Reorder Button */}
               <button
                 type="button"
@@ -367,6 +437,21 @@ export const OrderTrackingPage: React.FC = () => {
           </div>
 
           {/* Feedback Banners */}
+          {returnSuccessMessage && (
+            <div className="no-print mb-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-between shadow-sm">
+              <div className="flex items-center gap-2">
+                <Check size={16} />
+                <span>{returnSuccessMessage}</span>
+              </div>
+              <button
+                onClick={() => setReturnSuccessMessage(null)}
+                className="text-emerald-800 dark:text-emerald-300 font-bold ml-4 cursor-pointer"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
           {payError && (
             <div className="no-print mb-6 rounded-lg border border-danger/30 bg-danger/10 p-4 text-xs text-danger flex items-center gap-2">
               <AlertCircle size={16} />
@@ -401,6 +486,11 @@ export const OrderTrackingPage: React.FC = () => {
                   <span className="inline-flex items-center gap-1 rounded-full bg-danger/15 px-2.5 py-1 text-xs font-bold text-danger border border-danger/30">
                     <XCircle size={13} />
                     <span>CANCELLED</span>
+                  </span>
+                ) : isReturned ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/15 px-2.5 py-1 text-xs font-bold text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                    <RotateCcw size={13} />
+                    <span>RETURNED</span>
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 capitalize">
@@ -493,6 +583,25 @@ export const OrderTrackingPage: React.FC = () => {
                       </motion.div>
                     );
                   })}
+                </div>
+              )}
+
+              {/* Return Status Card (if returned) */}
+              {isReturned && (
+                <div className="mt-6 rounded-xl border border-purple-500/30 bg-purple-500/10 p-4 space-y-2">
+                  <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300 font-semibold text-xs">
+                    <RotateCcw size={15} />
+                    <span>Return Registered & In Progress</span>
+                  </div>
+                  <p className="text-xs text-text-muted leading-relaxed">
+                    Your return request has been recorded. Our concierge team is coordinating reverse pickup from your address with our courier partner.
+                  </p>
+                  <div className="pt-2 border-t border-purple-500/20 flex justify-between items-center text-[11px]">
+                    <span className="text-text-muted">Refund Status:</span>
+                    <span className="font-semibold text-purple-700 dark:text-purple-300 capitalize">
+                      {order.payment_status === 'refunded' ? '✓ Refund Processed' : 'Pending Pickup Verification'}
+                    </span>
+                  </div>
                 </div>
               )}
 
@@ -657,6 +766,163 @@ export const OrderTrackingPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* ── Customer Return Request Modal ──────────────────────────────────── */}
+      {showReturnModal && (
+        <Portal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="w-full max-w-lg bg-surface text-text border border-border rounded-xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center space-x-2 text-brand-crimson dark:text-brand-gold">
+                <RotateCcw className="w-5 h-5" />
+                <h3 className="font-serif font-bold text-lg">Request Return or Exchange</h3>
+              </div>
+              <p className="text-xs text-text-muted">
+                Order <strong>#{order.order_number}</strong>. Select your return reason below. Our boutique courier partner will pick up the package from your doorstep.
+              </p>
+
+              {/* Items Summary */}
+              <div className="p-3 rounded-lg border border-border bg-surface-alt space-y-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted block">
+                  Items In This Order ({order.items.length})
+                </span>
+                <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                  {order.items.map((it) => (
+                    <div key={it.id} className="flex items-center justify-between gap-3 text-xs py-1 border-b border-border/40 last:border-0">
+                      <div className="truncate flex-1">
+                        <span className="font-semibold block truncate text-text">{it.product_name}</span>
+                        <span className="text-[11px] text-text-muted">
+                          Size: {it.size} • Color: {it.color} • Qty: {it.quantity}
+                        </span>
+                      </div>
+                      <span className="font-semibold text-text shrink-0">
+                        {formatPrice((it.price_at_purchase - it.discount_at_purchase) * it.quantity)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Return Reason Selector */}
+              <div>
+                <label className="text-xs font-semibold block mb-1">
+                  Why are you returning this? <span className="text-brand-crimson">*</span>
+                </label>
+                <select
+                  value={returnReason}
+                  onChange={(e) => setReturnReason(e.target.value)}
+                  className="w-full p-2.5 text-xs rounded-lg border border-border bg-surface-alt text-text focus:outline-none focus:border-brand-crimson"
+                >
+                  <option value="Size too small / tight">Size too small / tight</option>
+                  <option value="Size too large / loose">Size too large / loose</option>
+                  <option value="Fabric or embroidery quality mismatch">Fabric or embroidery quality not as expected</option>
+                  <option value="Defective or damaged piece received">Defective or damaged piece received</option>
+                  <option value="Received wrong style or color">Received wrong style or color</option>
+                  <option value="Changed mind / no longer needed">Changed mind / no longer needed</option>
+                  <option value="Other">Other reason (Specify below)</option>
+                </select>
+              </div>
+
+              {returnReason === 'Other' && (
+                <div>
+                  <label className="text-xs font-semibold block mb-1">Specify Reason</label>
+                  <input
+                    type="text"
+                    value={customReturnReason}
+                    onChange={(e) => setCustomReturnReason(e.target.value)}
+                    placeholder="Enter details..."
+                    className="w-full p-2.5 text-xs rounded-lg border border-border bg-surface-alt text-text focus:outline-none focus:border-brand-crimson"
+                  />
+                </div>
+              )}
+
+              {/* Remarks */}
+              <div>
+                <label className="text-xs font-semibold block mb-1">Additional Comments (Optional)</label>
+                <textarea
+                  rows={2}
+                  value={returnComments}
+                  onChange={(e) => setReturnComments(e.target.value)}
+                  placeholder="Share details on fit, condition, or exchange preferences..."
+                  className="w-full p-2.5 text-xs rounded-lg border border-border bg-surface-alt text-text focus:outline-none focus:border-brand-crimson resize-none"
+                />
+              </div>
+
+              {/* Preferred Refund Destination */}
+              <div>
+                <label className="text-xs font-semibold block mb-1.5">Preferred Refund Mode</label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border bg-surface-alt cursor-pointer text-xs">
+                    <input
+                      type="radio"
+                      name="refundPreference"
+                      value="original_payment"
+                      checked={refundPreference === 'original_payment'}
+                      onChange={(e) => setRefundPreference(e.target.value)}
+                      className="text-brand-crimson focus:ring-0"
+                    />
+                    <div>
+                      <span className="font-semibold block">Original Payment Method</span>
+                      <span className="text-[11px] text-text-muted">
+                        {order.payment_method === 'online'
+                          ? 'Credited back to your bank card/UPI in 3-5 working days.'
+                          : 'Our courier will disburse cash/UPI at doorstep upon pickup.'}
+                      </span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border bg-surface-alt cursor-pointer text-xs">
+                    <input
+                      type="radio"
+                      name="refundPreference"
+                      value="store_credit"
+                      checked={refundPreference === 'store_credit'}
+                      onChange={(e) => setRefundPreference(e.target.value)}
+                      className="text-brand-crimson focus:ring-0"
+                    />
+                    <div>
+                      <span className="font-semibold block text-brand-gold">Instant Boutique Store Credit (Instant)</span>
+                      <span className="text-[11px] text-text-muted">
+                        Receive instant digital coupon to shop immediately with zero wait time.
+                      </span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Boutique Policy Notice */}
+              <div className="p-2.5 rounded-lg bg-surface-alt/70 border border-border/80 text-[11px] text-text-muted">
+                <p className="font-semibold text-text mb-0.5">Boutique Return Guidelines:</p>
+                <p>Ensure the garment is unworn, unwashed with original handcrafted tags intact. Pickups are attempted within 24-48 hours.</p>
+              </div>
+
+              {returnError && (
+                <div className="p-2.5 rounded border border-danger/30 bg-danger/10 text-xs text-danger">
+                  {returnError}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-3 pb-1 border-t border-border/40 sticky bottom-0 bg-surface/95 backdrop-blur-sm -mx-6 px-6">
+                <button
+                  type="button"
+                  onClick={() => setShowReturnModal(false)}
+                  className="px-4 py-2 text-xs font-semibold rounded-lg border border-border text-text-muted hover:bg-surface-alt cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCustomerReturn}
+                  disabled={submittingReturn}
+                  className="px-4 py-2 text-xs font-semibold rounded-lg bg-brand-crimson hover:bg-brand-crimson/90 text-white transition flex items-center gap-1.5 shadow cursor-pointer"
+                >
+                  {submittingReturn && <RefreshCw size={13} className="animate-spin" />}
+                  <span>Submit Return Request</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
     </>
   );
 };

@@ -138,6 +138,46 @@ describe('Admin Orders, CRM & Reports API Tests', () => {
       expect(orderRes.body.order.payment_status).toBe('refunded');
     });
 
+    it('allows owner to confirm payment for pending / COD orders and rejects customer', async () => {
+      // Ensure customer cannot call confirm-payment (role isolation)
+      const custRes = await request(app)
+        .post('/api/admin/orders/ord_006/confirm-payment')
+        .set('Authorization', `Bearer ${customerToken}`)
+        .send({ reference: 'CASH-001' });
+
+      expect(custRes.status).toBe(403);
+
+      // Reset ord_006 payment_status to pending
+      const db = getDb();
+      await db.prepare("UPDATE orders SET payment_status = 'pending' WHERE id = 'ord_006'").run();
+
+      // Owner confirms payment
+      const res = await request(app)
+        .post('/api/admin/orders/ord_006/confirm-payment')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({
+          reference: 'POS-REC-8921',
+          note: 'Cash payment confirmed at delivery/boutique',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.payment_status).toBe('paid');
+
+      // Verify db
+      const row = (await db.prepare('SELECT payment_status FROM orders WHERE id = ?').get('ord_006')) as any;
+      expect(row.payment_status).toBe('paid');
+
+      // Attempting to confirm already-paid order returns 400
+      const duplicateRes = await request(app)
+        .post('/api/admin/orders/ord_006/confirm-payment')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({});
+
+      expect(duplicateRes.status).toBe(400);
+      expect(duplicateRes.body.error.code).toBe('ALREADY_PAID');
+    });
+
     it('processes order return, restocks inventory, and updates order_status to returned', async () => {
       // ord_006 is placed, advance or return directly
       const res = await request(app)
