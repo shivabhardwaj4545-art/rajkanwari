@@ -15,14 +15,13 @@ interface ThemeState {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function resolveTheme(pref: ThemePreference): ResolvedTheme {
-  if (pref === 'dark') return 'dark';
+function resolveTheme(_pref?: ThemePreference): ResolvedTheme {
   return 'light';
 }
 
-function applyTheme(theme: ResolvedTheme): void {
+function applyTheme(_theme?: ResolvedTheme): void {
   if (typeof document !== 'undefined') {
-    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-theme', 'light');
   }
 }
 
@@ -61,23 +60,11 @@ export const useThemeStore = create<ThemeState>()(
   ),
 );
 
-// Synchronize theme on startup
+// Synchronize theme on startup - strictly light
 if (typeof window !== 'undefined') {
-  let stored: ThemePreference = 'light';
   try {
-    const raw = localStorage.getItem('shikkis-theme');
-    if (raw === 'dark') {
-      stored = 'dark';
-    } else {
-      stored = 'light';
-      localStorage.setItem('shikkis-theme', 'light');
-    }
+    localStorage.setItem('shikkis-theme', 'light');
   } catch {}
 
-  const initialResolved = resolveTheme(stored);
-  applyTheme(initialResolved);
-
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    useThemeStore.getState()._resolveFromSystem();
-  });
+  applyTheme('light');
 }
