@@ -172,8 +172,14 @@ async function request<T>(endpoint: string, options?: RequestInit, isRetry = fal
   });
 
   if (!res.ok) {
-    // Attempt automatic silent token refresh on 401
-    if (res.status === 401 && !isRetry && !endpoint.startsWith('/auth/login') && !endpoint.startsWith('/auth/refresh')) {
+    // Attempt automatic silent token refresh on 401 or on 403 when hitting admin endpoints
+    const shouldRefresh =
+      ((res.status === 401) || (res.status === 403 && endpoint.startsWith('/admin'))) &&
+      !isRetry &&
+      !endpoint.startsWith('/auth/login') &&
+      !endpoint.startsWith('/auth/refresh');
+
+    if (shouldRefresh) {
       const refreshToken = getRefreshToken();
       if (refreshToken) {
         if (!isRefreshing) {
@@ -191,13 +197,17 @@ async function request<T>(endpoint: string, options?: RequestInit, isRetry = fal
               isRefreshing = false;
               onRefreshed(data.accessToken);
               return request<T>(endpoint, options, true);
-            } else {
+            } else if (refreshRes.status === 401 || refreshRes.status === 403) {
+              // Only clear tokens if refresh token is explicitly rejected as invalid/expired
               clearAuthTokens();
+              isRefreshing = false;
+              refreshSubscribers = [];
+            } else {
               isRefreshing = false;
               refreshSubscribers = [];
             }
           } catch {
-            clearAuthTokens();
+            // Transient network failure: keep tokens safe, do not log user out
             isRefreshing = false;
             refreshSubscribers = [];
           }

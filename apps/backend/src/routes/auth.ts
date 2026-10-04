@@ -139,6 +139,12 @@ authRouter.post('/register', validate(registerSchema, 'body'), async (req, res, 
     const tokenPayload = { sub: userId, email: email.toLowerCase(), role: 'customer' as const };
     const accessToken = generateAccessToken(tokenPayload);
     const refreshToken = generateRefreshToken({ sub: userId, role: 'customer' as const });
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    await db.prepare(
+      `INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at)
+       VALUES (?, ?, ?, ?)`
+    ).run(`rt_${Date.now()}`, userId, refreshToken, expiresAt);
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
@@ -313,8 +319,9 @@ authRouter.post('/refresh', async (req, res, next) => {
       return;
     }
 
+    let decodedToken: any = null;
     try {
-      jwt.verify(refreshToken, JWT_SECRET);
+      decodedToken = jwt.verify(refreshToken, JWT_SECRET);
     } catch {
       res.status(401).json({
         error: {
@@ -326,11 +333,13 @@ authRouter.post('/refresh', async (req, res, next) => {
     }
 
     const db = getDb();
-    const tokenRecord = (await db
-      .prepare('SELECT user_id, expires_at FROM refresh_tokens WHERE token_hash = ?')
+    let tokenRecord = (await db
+      .prepare('SELECT user_id, expires_at, revoked_at FROM refresh_tokens WHERE token_hash = ?')
       .get(refreshToken)) as any;
 
-    if (!tokenRecord) {
+    let userId = tokenRecord?.user_id || decodedToken?.sub;
+
+    if (!userId) {
       res.status(401).json({
         error: {
           code: 'REFRESH_TOKEN_NOT_FOUND',
@@ -340,7 +349,8 @@ authRouter.post('/refresh', async (req, res, next) => {
       return;
     }
 
-    if (new Date(tokenRecord.expires_at) < new Date()) {
+    // Check expiration if recorded in DB
+    if (tokenRecord?.expires_at && new Date(tokenRecord.expires_at) < new Date()) {
       res.status(401).json({
         error: {
           code: 'REFRESH_TOKEN_EXPIRED',
@@ -350,9 +360,24 @@ authRouter.post('/refresh', async (req, res, next) => {
       return;
     }
 
+    // If revoked, allow a 60-second grace window to handle concurrent requests/race conditions smoothly
+    if (tokenRecord?.revoked_at) {
+      const revokedTime = new Date(tokenRecord.revoked_at).getTime();
+      const now = Date.now();
+      if (now - revokedTime > 60 * 1000) {
+        res.status(401).json({
+          error: {
+            code: 'REFRESH_TOKEN_REVOKED',
+            message: 'Refresh token has been revoked',
+          },
+        });
+        return;
+      }
+    }
+
     const user = (await db
       .prepare('SELECT id, email, first_name, last_name, phone, role, is_active FROM users WHERE id = ?')
-      .get(tokenRecord.user_id)) as any;
+      .get(userId)) as any;
 
     if (!user || !user.is_active) {
       res.status(401).json({
@@ -374,7 +399,8 @@ authRouter.post('/refresh', async (req, res, next) => {
     const newRefreshToken = generateRefreshToken({ sub: user.id, role: user.role });
     const newExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    await db.prepare('DELETE FROM refresh_tokens WHERE token_hash = ?').run(refreshToken);
+    // Mark previous token as revoked with timestamp rather than immediate hard-delete (avoids auto-logout race conditions)
+    await db.prepare('UPDATE refresh_tokens SET revoked_at = CURRENT_TIMESTAMP WHERE token_hash = ?').run(refreshToken);
     await db.prepare(
       `INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at)
        VALUES (?, ?, ?, ?)`

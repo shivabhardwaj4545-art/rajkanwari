@@ -40,9 +40,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Check current user session
       try {
         const res = await api.getMe();
+        // Ensure access token carries up-to-date role claims (e.g. newly granted owner role)
+        const refreshToken = getRefreshToken();
+        if (res.user?.role === 'owner' && refreshToken) {
+          try {
+            const refreshRes = await api.refreshToken(refreshToken);
+            setAuthTokens(refreshRes.accessToken, refreshRes.refreshToken);
+            set({ user: refreshRes.user, initialized: true });
+            return;
+          } catch {
+            // Keep existing valid user session
+          }
+        }
         set({ user: res.user, initialized: true });
         return;
-      } catch {
+      } catch (err: any) {
         // Try silent refresh if refresh token is available
         const refreshToken = getRefreshToken();
         if (refreshToken) {
@@ -51,12 +63,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             setAuthTokens(refreshRes.accessToken, refreshRes.refreshToken);
             set({ user: refreshRes.user, initialized: true });
             return;
-          } catch {
-            // refresh token expired or invalid
+          } catch (refreshErr: any) {
+            if (refreshErr?.status === 401 || refreshErr?.status === 403) {
+              clearAuthTokens();
+              set({ user: null, initialized: true });
+              return;
+            }
           }
+        } else if (err?.status === 401) {
+          clearAuthTokens();
+          set({ user: null, initialized: true });
+          return;
         }
-        clearAuthTokens();
-        set({ user: null, initialized: true });
+        set({ initialized: true });
       }
     } finally {
       set({ loading: false });
