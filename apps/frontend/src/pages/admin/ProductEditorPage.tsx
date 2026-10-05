@@ -10,8 +10,11 @@ import {
   Package,
   Palette,
   Plus,
+  Power,
   Save,
+  Sparkles,
   Star,
+  Tag,
   Trash2,
   UploadCloud,
   X,
@@ -21,6 +24,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import {
   api,
+  type AdminOfferItem,
   type AdminVariantItem,
   type CategoryItem,
 } from '@/lib/api';
@@ -195,6 +199,140 @@ export const ProductEditorPage: React.FC = () => {
         setLoading(false);
       });
   }, [id]);
+
+  // Special Offers State
+  const [productOffers, setProductOffers] = useState<AdminOfferItem[]>([]);
+  const [loadingOffers, setLoadingOffers] = useState(false);
+  const [togglingOfferId, setTogglingOfferId] = useState<string | null>(null);
+  const [showCreateOfferModal, setShowCreateOfferModal] = useState(false);
+
+  // Quick Create Offer Form State
+  const [newOfferName, setNewOfferName] = useState('');
+  const [newOfferCode, setNewOfferCode] = useState('');
+  const [newOfferCategory, setNewOfferCategory] = useState('Festive Offer');
+  const [newOfferType, setNewOfferType] = useState<'percent' | 'flat'>('percent');
+  const [newOfferValue, setNewOfferValue] = useState<number>(15);
+  const [newOfferMaxDiscount, setNewOfferMaxDiscount] = useState<number | ''>(1000);
+  const [newOfferMinCart, setNewOfferMinCart] = useState<number>(0);
+  const [newOfferStartsAt, setNewOfferStartsAt] = useState(() => new Date().toISOString().slice(0, 16));
+  const [newOfferEndsAt, setNewOfferEndsAt] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 30);
+    return d.toISOString().slice(0, 16);
+  });
+  const [newOfferIsActive, setNewOfferIsActive] = useState(true);
+  const [creatingOffer, setCreatingOffer] = useState(false);
+  const [createOfferError, setCreateOfferError] = useState<string | null>(null);
+
+  const fetchProductOffers = async (prodId: string) => {
+    try {
+      setLoadingOffers(true);
+      const res = await api.adminGetProductOffers(prodId);
+      setProductOffers(res.data);
+    } catch (err) {
+      console.error('Failed to load product offers:', err);
+    } finally {
+      setLoadingOffers(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      fetchProductOffers(id);
+    } else {
+      api.adminGetOffers().then((res) => setProductOffers(res.data)).catch(console.error);
+    }
+  }, [id]);
+
+  const handleToggleOfferLink = async (offer: AdminOfferItem) => {
+    if (!id) return;
+    try {
+      setTogglingOfferId(offer.id);
+      const currentlyApplied = offer.is_applied_to_product;
+      const res = await api.adminToggleProductOffer(id, offer.id, !currentlyApplied);
+      if (res.success) {
+        setProductOffers((prev) =>
+          prev.map((o) =>
+            o.id === offer.id
+              ? {
+                  ...o,
+                  is_applied_to_product: res.is_applied,
+                  is_direct_product_scope: res.scope === 'product',
+                  scope: res.scope,
+                  scope_ids: res.scope_ids,
+                }
+              : o
+          )
+        );
+      }
+    } catch (err: any) {
+      console.error('Failed to toggle offer link:', err);
+    } finally {
+      setTogglingOfferId(null);
+    }
+  };
+
+  const handleToggleOfferActive = async (offer: AdminOfferItem) => {
+    try {
+      setTogglingOfferId(offer.id);
+      const res = await api.adminToggleOffer(offer.id);
+      if (res.success) {
+        setProductOffers((prev) =>
+          prev.map((o) => (o.id === offer.id ? { ...o, is_active: res.is_active } : o))
+        );
+      }
+    } catch (err) {
+      console.error('Failed to toggle offer active state:', err);
+    } finally {
+      setTogglingOfferId(null);
+    }
+  };
+
+  const handleCreateOfferForProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newOfferName.trim()) {
+      setCreateOfferError('Please provide an offer name');
+      return;
+    }
+    setCreatingOffer(true);
+    setCreateOfferError(null);
+    try {
+      const payload: any = {
+        name: newOfferName.trim(),
+        code: newOfferCode.trim() ? newOfferCode.trim().toUpperCase() : null,
+        offer_category: newOfferCategory,
+        type: newOfferType,
+        value: Number(newOfferValue),
+        max_discount: newOfferMaxDiscount ? Math.round(Number(newOfferMaxDiscount) * 100) : null,
+        min_cart_value: newOfferMinCart ? Math.round(Number(newOfferMinCart) * 100) : 0,
+        starts_at: new Date(newOfferStartsAt).toISOString(),
+        ends_at: new Date(newOfferEndsAt).toISOString(),
+        is_active: newOfferIsActive,
+        stackable: false,
+        scope: 'product',
+        scope_ids: id ? [id] : [],
+        priority: 15,
+        per_user_limit: 1,
+      };
+
+      const res = await api.adminCreateOffer(payload);
+      if (res.offer_id) {
+        setShowCreateOfferModal(false);
+        setNewOfferName('');
+        setNewOfferCode('');
+        if (id) {
+          await fetchProductOffers(id);
+        } else {
+          const allOffers = await api.adminGetOffers();
+          setProductOffers(allOffers.data);
+        }
+      }
+    } catch (err: any) {
+      setCreateOfferError(err.message || 'Failed to create offer');
+    } finally {
+      setCreatingOffer(false);
+    }
+  };
 
   // Unsaved-changes guard
   useEffect(() => {
@@ -427,6 +565,31 @@ export const ProductEditorPage: React.FC = () => {
     const mrpPaise = mrpInr * 100;
     return Math.round(mrpPaise * (1 - discountPercent / 100));
   }, [mrpInr, discountPercent]);
+
+  // Find active offer applicable to this product for live preview
+  const previewAppliedOffer = useMemo(() => {
+    const active = productOffers.filter(
+      (o) => o.is_active && o.is_applied_to_product && o.derived_status === 'running'
+    );
+    return active[0] || null;
+  }, [productOffers]);
+
+  const previewOfferDiscountPaise = useMemo(() => {
+    if (!previewAppliedOffer) return 0;
+    if (previewAppliedOffer.code) return 0; // Coupon code requires code entry at cart
+    if (previewAppliedOffer.type === 'percent') {
+      const disc = Math.round((sellingPricePaise * previewAppliedOffer.value) / 100);
+      const maxDisc = previewAppliedOffer.max_discount;
+      return maxDisc !== null ? Math.min(disc, maxDisc) : disc;
+    } else if (previewAppliedOffer.type === 'flat') {
+      const disc = previewAppliedOffer.value;
+      const maxDisc = previewAppliedOffer.max_discount;
+      return Math.min(maxDisc !== null ? Math.min(disc, maxDisc) : disc, sellingPricePaise);
+    }
+    return 0;
+  }, [previewAppliedOffer, sellingPricePaise]);
+
+  const previewFinalPricePaise = Math.max(0, sellingPricePaise - previewOfferDiscountPaise);
 
   const categoryName = useMemo(() => {
     return categories.find((c) => c.id === categoryId)?.name || 'Ethnic Wear';
@@ -669,6 +832,184 @@ export const ProductEditorPage: React.FC = () => {
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Section 2B: Special Promotional Offers */}
+          <div id="special-offers-section" className="p-6 rounded-xl bg-surface border border-border space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex items-center gap-2">
+                <Sparkles size={17} className="text-brand-gold" />
+                <h2 className="font-serif text-lg font-semibold text-text">Special Offers & Promotions</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setNewOfferName(name ? `${name} Special Deal` : 'Diwali Flash Offer');
+                  setShowCreateOfferModal(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-gold/15 text-xs font-semibold text-text border border-brand-gold/40 hover:bg-brand-gold/25 transition-colors cursor-pointer"
+              >
+                <Plus size={14} className="text-brand-gold" />
+                <span>Create Offer for Product</span>
+              </button>
+            </div>
+
+            <p className="text-xs text-text-muted leading-relaxed">
+              Link this creation to active promotional campaigns, clearance events, or flash deals created in the store.
+              Offers can be automatic (applied directly) or redeemed with a promo code.
+            </p>
+
+            {loadingOffers ? (
+              <div className="py-6 text-center text-xs text-text-muted">Loading special offers...</div>
+            ) : productOffers.length === 0 ? (
+              <div className="p-4 rounded-lg bg-surface-alt/40 border border-dashed border-border text-center space-y-2">
+                <Sparkles size={24} className="text-brand-gold/60 mx-auto" />
+                <p className="text-xs text-text font-medium">No Special Offers Created Yet</p>
+                <p className="text-[11px] text-text-muted">Create a special promotional discount or flash deal for this garment.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewOfferName(name ? `${name} Special Deal` : 'Diwali Flash Offer');
+                    setShowCreateOfferModal(true);
+                  }}
+                  className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-brand-crimson text-white text-xs font-semibold hover:bg-brand-crimson/90 cursor-pointer"
+                >
+                  <Plus size={13} />
+                  <span>Create First Special Offer</span>
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1 divide-y divide-border/40">
+                {productOffers.map((off) => {
+                  const isLinked = off.is_applied_to_product;
+                  const isToggling = togglingOfferId === off.id;
+                  const isProductScope = off.scope === 'product';
+                  const isStorewide = off.scope === 'all';
+                  const isCategoryScope = off.scope === 'category';
+
+                  // Calculate how much this offer discounts on this product
+                  let calculatedOfferSavings = 0;
+                  if (off.type === 'percent') {
+                    calculatedOfferSavings = Math.round((sellingPricePaise * off.value) / 100);
+                    if (off.max_discount !== null && calculatedOfferSavings > off.max_discount) {
+                      calculatedOfferSavings = off.max_discount;
+                    }
+                  } else if (off.type === 'flat') {
+                    calculatedOfferSavings = Math.min(off.value, sellingPricePaise);
+                    if (off.max_discount !== null && calculatedOfferSavings > off.max_discount) {
+                      calculatedOfferSavings = off.max_discount;
+                    }
+                  }
+
+                  return (
+                    <div
+                      key={off.id}
+                      className={`pt-2.5 first:pt-0 p-3 rounded-lg border transition-all ${
+                        isLinked && off.is_active
+                          ? 'bg-brand-gold/5 border-brand-gold/60 shadow-xs'
+                          : 'bg-surface-alt/25 border-border opacity-90 hover:opacity-100'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-semibold text-text truncate max-w-[220px]">
+                              {off.name}
+                            </span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-gold/20 text-text uppercase">
+                              {off.offer_category || 'Special Offer'}
+                            </span>
+                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-brand-crimson/15 text-brand-crimson dark:text-brand-gold">
+                              {off.type === 'percent' ? `${off.value}% OFF` : `₹${Math.round(off.value / 100)} Flat OFF`}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-3 text-[11px] text-text-muted flex-wrap">
+                            {off.code ? (
+                              <span className="inline-flex items-center gap-1 font-mono font-bold text-text">
+                                <Tag size={11} className="text-brand-gold" />
+                                Code: {off.code}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                                <Sparkles size={11} />
+                                Auto-Applied at Checkout
+                              </span>
+                            )}
+
+                            <span>
+                              Scope:{' '}
+                              <strong>
+                                {isStorewide
+                                  ? 'All Products'
+                                  : isCategoryScope
+                                  ? 'Category Wide'
+                                  : 'Product Specific'}
+                              </strong>
+                            </span>
+
+                            {calculatedOfferSavings > 0 && isLinked && off.is_active && (
+                              <span className="text-emerald-600 font-semibold">
+                                Slashes {formatPrice(calculatedOfferSavings)} on this garment
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action Buttons: Status Toggle & Link Toggle */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          {/* Active Toggle Switch */}
+                          <button
+                            type="button"
+                            disabled={isToggling}
+                            onClick={() => handleToggleOfferActive(off)}
+                            title={off.is_active ? 'Click to deactivate offer' : 'Click to activate offer'}
+                            className={`px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
+                              off.is_active
+                                ? 'bg-emerald-600/15 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-600/25'
+                                : 'bg-surface-alt text-text-muted hover:text-text'
+                            }`}
+                          >
+                            <Power size={11} />
+                            <span>{off.is_active ? 'Active' : 'Inactive'}</span>
+                          </button>
+
+                          {/* Link/Apply to Product Button */}
+                          {id ? (
+                            isProductScope ? (
+                              <button
+                                type="button"
+                                disabled={isToggling}
+                                onClick={() => handleToggleOfferLink(off)}
+                                className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all cursor-pointer ${
+                                  isLinked
+                                    ? 'bg-brand-crimson text-white hover:bg-brand-crimson/90 shadow-xs'
+                                    : 'bg-surface border border-border text-text hover:border-brand-gold'
+                                }`}
+                              >
+                                {isLinked ? '✓ Linked' : '+ Link to Product'}
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled={isToggling}
+                                onClick={() => handleToggleOfferLink(off)}
+                                title="Click to convert and lock this offer specifically to this product"
+                                className="px-2 py-1 rounded text-[10px] font-medium bg-surface border border-border text-text-muted hover:text-text hover:border-brand-gold cursor-pointer"
+                              >
+                                {isLinked ? '✓ Auto-Applies' : '+ Target Product'}
+                              </button>
+                            )
+                          ) : (
+                            <span className="text-[10px] text-text-muted italic">Save product to link</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Section 3: Media Upload (Multer) */}
@@ -1148,12 +1489,23 @@ export const ProductEditorPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Discount Badge */}
-                {discountPercent > 0 && (
+                {/* Special Offer or Product Discount Badge */}
+                {previewAppliedOffer ? (
+                  <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start max-w-[80%]">
+                    <span className="inline-flex items-center rounded-full bg-brand-gold text-text px-2 py-0.5 text-[9px] font-extrabold uppercase shadow-xs">
+                      {previewAppliedOffer.offer_category || 'Special Offer'}
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-brand-crimson px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
+                      {previewAppliedOffer.type === 'percent'
+                        ? `${previewAppliedOffer.value}% OFF`
+                        : `₹${Math.round(previewAppliedOffer.value / 100)} OFF`}
+                    </span>
+                  </div>
+                ) : discountPercent > 0 ? (
                   <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-brand-crimson text-white text-[10px] font-bold shadow-sm">
                     {discountPercent}% OFF
                   </div>
-                )}
+                ) : null}
 
                 {/* Curated Style Brand Tag */}
                 <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur-xs text-white text-[9px] font-serif tracking-widest uppercase">
@@ -1171,16 +1523,27 @@ export const ProductEditorPage: React.FC = () => {
                   {name || 'Product Title Appears Here'}
                 </h3>
 
-                <div className="flex items-baseline gap-2 pt-0.5">
+                <div className="flex items-baseline gap-2 pt-0.5 flex-wrap">
                   <span className="price font-sans text-base font-bold text-brand-crimson tabular-nums">
-                    {formatPrice(sellingPricePaise)}
+                    {formatPrice(previewFinalPricePaise)}
                   </span>
-                  {discountPercent > 0 && (
+                  {(discountPercent > 0 || previewOfferDiscountPaise > 0) && (
                     <span className="price font-sans text-xs text-text-muted line-through tabular-nums">
                       {formatPrice(mrpInr * 100)}
                     </span>
                   )}
+                  {previewAppliedOffer && (
+                    <span className="text-[10px] font-bold text-brand-gold">
+                      (Special Offer)
+                    </span>
+                  )}
                 </div>
+
+                {previewAppliedOffer && (
+                  <p className="text-[10px] font-medium text-brand-gold truncate" title={previewAppliedOffer.name}>
+                    ✨ {previewAppliedOffer.name} {previewAppliedOffer.code ? `(Use Code: ${previewAppliedOffer.code})` : ''}
+                  </p>
+                )}
 
                 {/* Available Sizes preview */}
                 <div className="pt-2 flex items-center gap-1 border-t border-border/60">
@@ -1262,6 +1625,215 @@ export const ProductEditorPage: React.FC = () => {
                     Delete Image
                   </button>
                 </div>
+              </motion.div>
+            </div>
+          </Portal>
+        )}
+
+        {/* Quick Create Special Offer for Product Modal */}
+        {showCreateOfferModal && (
+          <Portal>
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="max-w-lg w-full bg-surface border border-border rounded-xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
+              >
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={18} className="text-brand-gold" />
+                    <h3 className="font-serif text-lg font-bold text-text">Create Special Offer for this Garment</h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateOfferModal(false)}
+                    className="p-1 rounded-full text-text-muted hover:text-text cursor-pointer"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                {createOfferError && (
+                  <div className="p-3 rounded-lg bg-danger/10 border border-danger/30 text-xs text-danger flex items-center gap-2">
+                    <AlertCircle size={15} />
+                    <span>{createOfferError}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleCreateOfferForProduct} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-text mb-1">
+                      Offer Title <span className="text-brand-crimson">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newOfferName}
+                      onChange={(e) => setNewOfferName(e.target.value)}
+                      placeholder="e.g. Royal Diwali Flash Deal"
+                      className="w-full px-3 py-2 rounded-lg bg-bg border border-border text-xs text-text focus:outline-hidden focus:border-brand-gold"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-text mb-1">
+                        Offer Category <span className="text-brand-crimson">*</span>
+                      </label>
+                      <select
+                        value={newOfferCategory}
+                        onChange={(e) => setNewOfferCategory(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg bg-bg border border-border text-xs text-text focus:outline-hidden focus:border-brand-gold"
+                      >
+                        <option value="Festive Offer">🪔 Festive Offer</option>
+                        <option value="Flash Deal">⚡ Flash Deal</option>
+                        <option value="Clearance Sale">🔥 Clearance Sale</option>
+                        <option value="Exclusive Offer">💎 VIP Exclusive</option>
+                        <option value="Special Offer">✨ Special Offer</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-text mb-1">
+                        Discount Type <span className="text-brand-crimson">*</span>
+                      </label>
+                      <select
+                        value={newOfferType}
+                        onChange={(e) => setNewOfferType(e.target.value as any)}
+                        className="w-full px-3 py-2 rounded-lg bg-bg border border-border text-xs text-text focus:outline-hidden focus:border-brand-gold"
+                      >
+                        <option value="percent">Percentage (% OFF)</option>
+                        <option value="flat">Flat Amount (₹ OFF)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-text mb-1">
+                        Discount Value ({newOfferType === 'percent' ? '% OFF' : '₹ OFF'}) <span className="text-brand-crimson">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={newOfferType === 'percent' ? 90 : mrpInr}
+                        required
+                        value={newOfferValue}
+                        onChange={(e) => setNewOfferValue(Math.max(1, parseInt(e.target.value) || 0))}
+                        className="w-full px-3 py-2 rounded-lg bg-bg border border-border text-xs font-semibold text-text focus:outline-hidden focus:border-brand-gold"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-text mb-1">
+                        Promo Code (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={newOfferCode}
+                        onChange={(e) => setNewOfferCode(e.target.value.toUpperCase())}
+                        placeholder="Leave empty for Auto-Apply"
+                        className="w-full px-3 py-2 rounded-lg bg-bg border border-border font-mono text-xs text-text uppercase placeholder:normal-case placeholder:text-text-muted focus:outline-hidden focus:border-brand-gold"
+                      />
+                      <span className="text-[10px] text-text-muted block mt-0.5">
+                        Empty = automatically applies to this product!
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-text mb-1">
+                        Min. Cart Value (₹)
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={newOfferMinCart}
+                        onChange={(e) => setNewOfferMinCart(Math.max(0, parseInt(e.target.value) || 0))}
+                        placeholder="0 (no minimum)"
+                        className="w-full px-3 py-2 rounded-lg bg-bg border border-border text-xs text-text focus:outline-hidden focus:border-brand-gold"
+                      />
+                    </div>
+
+                    {newOfferType === 'percent' ? (
+                      <div>
+                        <label className="block text-xs font-medium text-text mb-1">
+                          Max Discount Cap (₹)
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={newOfferMaxDiscount}
+                          onChange={(e) => setNewOfferMaxDiscount(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))}
+                          placeholder="Optional cap"
+                          className="w-full px-3 py-2 rounded-lg bg-bg border border-border text-xs text-text focus:outline-hidden focus:border-brand-gold"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex items-center text-[11px] text-text-muted pt-5">
+                        Flat discount applied directly per qualifying order.
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-text mb-1">Valid From</label>
+                      <input
+                        type="datetime-local"
+                        value={newOfferStartsAt}
+                        onChange={(e) => setNewOfferStartsAt(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg bg-bg border border-border text-xs text-text focus:outline-hidden focus:border-brand-gold"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-text mb-1">Valid Until</label>
+                      <input
+                        type="datetime-local"
+                        value={newOfferEndsAt}
+                        onChange={(e) => setNewOfferEndsAt(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg bg-bg border border-border text-xs text-text focus:outline-hidden focus:border-brand-gold"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Active Toggle Switch */}
+                  <div className="p-3 rounded-lg bg-surface-alt/40 border border-border flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-semibold text-text block">Activate Immediately</span>
+                      <span className="text-[11px] text-text-muted">Special offer goes live on the storefront upon creation</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={newOfferIsActive}
+                        onChange={(e) => setNewOfferIsActive(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-crimson"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-2 border-t border-border">
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateOfferModal(false)}
+                      className="flex-1 py-2.5 rounded-lg border border-border text-xs font-medium text-text hover:bg-surface-alt cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={creatingOffer}
+                      className="flex-1 py-2.5 rounded-lg bg-brand-crimson text-white text-xs font-semibold shadow hover:bg-brand-crimson/90 disabled:opacity-50 cursor-pointer"
+                    >
+                      {creatingOffer ? 'Creating...' : 'Create & Link Offer'}
+                    </button>
+                  </div>
+                </form>
               </motion.div>
             </div>
           </Portal>

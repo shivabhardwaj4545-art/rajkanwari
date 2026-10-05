@@ -133,7 +133,7 @@ describe('Offer & Pricing Engine (calculateCart)', () => {
       ) VALUES (
         'ofr_test_auto_nostack', 'Auto Heritage 10%', NULL, 'percent', 10,
         '2020-01-01', '2099-01-01', 1, 0, 100
-      ) ON CONFLICT (id) DO UPDATE SET stackable = 0, is_active = 1
+      ) ON CONFLICT (id) DO UPDATE SET stackable = 0, is_active = 1, scope = 'all', scope_ids = '[]', code = NULL
     `).run();
 
     await testDb.prepare(`

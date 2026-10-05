@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   ShoppingBag,
   Sparkles,
+  Tag,
   Truck,
 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -25,6 +26,7 @@ export const ProductDetailPage: React.FC = () => {
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const addItem = useCartStore((s) => s.addItem);
   const cartLoading = useCartStore((s) => s.loading);
@@ -244,6 +246,62 @@ export const ProductDetailPage: React.FC = () => {
                     </span>{' '}
                     off)
                   </span>
+                </div>
+              )}
+
+              {/* ── Available Special Offers & Deals ─────────────────────── */}
+              {product.applicable_offers && product.applicable_offers.length > 0 && (
+                <div id="available-offers-section" className="mt-4 p-3.5 rounded-lg bg-surface border border-brand-gold/40 shadow-xs space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-text">
+                    <Sparkles size={14} className="text-brand-gold" />
+                    <span>Special Offers & Deals on this Creation</span>
+                  </div>
+                  <div className="space-y-2 pt-1">
+                    {product.applicable_offers.map((off) => (
+                      <div
+                        key={off.id}
+                        className="flex items-center justify-between gap-3 p-2.5 rounded-md bg-surface-alt/40 border border-border/60 text-xs"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-semibold text-brand-crimson dark:text-brand-gold">
+                              {off.name}
+                            </span>
+                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-brand-gold/20 text-text font-bold uppercase">
+                              {off.offer_category}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-text-muted mt-0.5">
+                            <strong>{off.type === 'percent' ? `${off.value}% OFF` : `₹${Math.round(off.value / 100)} OFF`}</strong>
+                            {off.min_cart_value > 0 ? ` on orders above ₹${Math.round(off.min_cart_value / 100)}` : ''}
+                            {off.is_auto ? ' • Automatically applied in bag' : ''}
+                          </p>
+                        </div>
+
+                        {off.code ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (off.code) {
+                                navigator.clipboard.writeText(off.code);
+                                setCopiedCode(off.code);
+                                setTimeout(() => setCopiedCode(null), 2000);
+                              }
+                            }}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-brand-gold bg-surface text-xs font-mono font-bold text-brand-crimson dark:text-brand-gold hover:bg-brand-gold/15 transition-colors shrink-0 cursor-pointer"
+                            title="Click to copy code"
+                          >
+                            <Tag size={11} />
+                            <span>{copiedCode === off.code ? 'COPIED!' : off.code}</span>
+                          </button>
+                        ) : (
+                          <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
+                            Auto Applied
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

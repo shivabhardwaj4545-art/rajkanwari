@@ -596,6 +596,45 @@ productsRouter.get('/:slug', async (req, res) => {
   const discPct = Number(product.discount_percent);
   const priceInfo = computePrices(mrp, discPct, product.id, product.category_id, activeOffers);
 
+  // Fetch all active promotional offers applicable to this product (auto-offers and coupon deals)
+  const nowIso = new Date().toISOString();
+  const allActiveOffers = (await db.prepare(`
+    SELECT id, name, code, COALESCE(offer_category, 'Special Offer') as offer_category,
+           type, value, max_discount, min_cart_value, scope, scope_ids
+    FROM offers
+    WHERE is_active = 1
+      AND (starts_at IS NULL OR starts_at <= ?)
+      AND (ends_at IS NULL OR ends_at >= ?)
+    ORDER BY priority DESC, created_at DESC
+  `).all(nowIso, nowIso)) as OfferRow[];
+
+  const applicableOffers = allActiveOffers.filter((o) => {
+    if (o.scope === 'all') return true;
+    if (o.scope === 'category') {
+      try {
+        const catIds = typeof o.scope_ids === 'string' ? JSON.parse(o.scope_ids || '[]') : o.scope_ids || [];
+        return catIds.includes(product.category_id);
+      } catch { return false; }
+    }
+    if (o.scope === 'product') {
+      try {
+        const prdIds = typeof o.scope_ids === 'string' ? JSON.parse(o.scope_ids || '[]') : o.scope_ids || [];
+        return prdIds.includes(product.id);
+      } catch { return false; }
+    }
+    return false;
+  }).map((o) => ({
+    id: o.id,
+    name: o.name,
+    code: o.code || null,
+    offer_category: o.offer_category || 'Special Offer',
+    type: o.type,
+    value: Number(o.value),
+    max_discount: o.max_discount !== null ? Number(o.max_discount) : null,
+    min_cart_value: Number(o.min_cart_value || 0),
+    is_auto: !o.code || o.code.trim() === '',
+  }));
+
   // 4 related products from same category
   const relatedRows = (await db
     .prepare(`
@@ -637,6 +676,7 @@ productsRouter.get('/:slug', async (req, res) => {
       discount_percent: discPct,
       images,
       price: priceInfo,
+      applicable_offers: applicableOffers,
       variants,
       related_products: relatedProducts,
     },

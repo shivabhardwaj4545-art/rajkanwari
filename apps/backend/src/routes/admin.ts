@@ -1117,6 +1117,235 @@ adminRouter.delete('/offers/:id', async (req, res, next) => {
   }
 });
 
+/**
+ * PUT /api/admin/offers/:id
+ * Update an existing offer
+ */
+adminRouter.put('/offers/:id', async (req, res, next) => {
+  try {
+    const db = getDb();
+    const existing = (await db.prepare('SELECT * FROM offers WHERE id = ?').get(req.params.id)) as any;
+    if (!existing) {
+      res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Offer not found' } });
+      return;
+    }
+
+    const {
+      name,
+      code,
+      offer_category,
+      type,
+      value,
+      max_discount,
+      min_cart_value,
+      starts_at,
+      ends_at,
+      is_active,
+      stackable,
+      scope,
+      scope_ids,
+      priority,
+    } = req.body;
+
+    const cleanCode = code ? String(code).trim().toUpperCase() : null;
+    const finalScopeIds = Array.isArray(scope_ids) ? JSON.stringify(scope_ids) : (typeof scope_ids === 'string' ? scope_ids : '[]');
+
+    await db.prepare(`
+      UPDATE offers
+      SET name = COALESCE(?, name),
+          code = ?,
+          offer_category = COALESCE(?, offer_category),
+          type = COALESCE(?, type),
+          value = COALESCE(?, value),
+          max_discount = ?,
+          min_cart_value = COALESCE(?, min_cart_value),
+          starts_at = COALESCE(?, starts_at),
+          ends_at = COALESCE(?, ends_at),
+          is_active = COALESCE(?, is_active),
+          stackable = COALESCE(?, stackable),
+          scope = COALESCE(?, scope),
+          scope_ids = ?,
+          priority = COALESCE(?, priority),
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(
+      name,
+      cleanCode,
+      offer_category,
+      type,
+      value !== undefined ? Number(value) : undefined,
+      max_discount !== undefined ? (max_discount === null ? null : Number(max_discount)) : existing.max_discount,
+      min_cart_value !== undefined ? Number(min_cart_value) : undefined,
+      starts_at,
+      ends_at,
+      is_active !== undefined ? (is_active ? 1 : 0) : undefined,
+      stackable !== undefined ? (stackable ? 1 : 0) : undefined,
+      scope,
+      finalScopeIds,
+      priority !== undefined ? Number(priority) : undefined,
+      req.params.id
+    );
+
+    res.json({ success: true, message: 'Offer updated successfully' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/admin/products/:id/offers
+ * Get all store offers with status indicating whether each applies to this specific product
+ */
+adminRouter.get('/products/:id/offers', async (req, res, next) => {
+  try {
+    const db = getDb();
+    const productId = req.params.id;
+
+    // Fetch target product
+    const product = (await db.prepare('SELECT id, name, category_id, mrp, discount_percent FROM products WHERE id = ?').get(productId)) as any;
+    if (!product) {
+      res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Product not found' } });
+      return;
+    }
+
+    const offers = (await db.prepare(`
+      SELECT o.*,
+             COUNT(DISTINCT r.id) as redemption_count
+      FROM offers o
+      LEFT JOIN offer_redemptions r ON o.id = r.offer_id
+      GROUP BY o.id
+      ORDER BY o.priority DESC, o.created_at DESC
+    `).all()) as any[];
+
+    const now = new Date();
+
+    const formatted = offers.map((o) => {
+      const starts = new Date(o.starts_at);
+      const ends = new Date(o.ends_at);
+
+      let derivedStatus: 'scheduled' | 'running' | 'expired' = 'running';
+      if (now < starts) {
+        derivedStatus = 'scheduled';
+      } else if (now > ends) {
+        derivedStatus = 'expired';
+      }
+
+      let parsedScopeIds: string[] = [];
+      try {
+        parsedScopeIds = typeof o.scope_ids === 'string' ? JSON.parse(o.scope_ids || '[]') : o.scope_ids || [];
+      } catch {
+        parsedScopeIds = [];
+      }
+
+      let isApplied = false;
+      let isDirectScope = false;
+
+      if (o.scope === 'all') {
+        isApplied = true;
+      } else if (o.scope === 'category') {
+        isApplied = parsedScopeIds.includes(product.category_id);
+      } else if (o.scope === 'product') {
+        isApplied = parsedScopeIds.includes(product.id);
+        isDirectScope = isApplied;
+      }
+
+      return {
+        ...o,
+        scope_ids: parsedScopeIds,
+        is_active: Boolean(o.is_active),
+        stackable: Boolean(o.stackable),
+        derived_status: derivedStatus,
+        is_applied_to_product: isApplied,
+        is_direct_product_scope: isDirectScope,
+      };
+    });
+
+    res.json({
+      data: formatted,
+      product: {
+        id: product.id,
+        name: product.name,
+        category_id: product.category_id,
+        mrp: Number(product.mrp),
+        discount_percent: Number(product.discount_percent),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/admin/products/:id/offers/toggle
+ * Attach/detach this product to/from an offer's scope_ids
+ */
+adminRouter.post('/products/:id/offers/toggle', async (req, res, next) => {
+  try {
+    const db = getDb();
+    const productId = req.params.id;
+    const { offer_id, apply } = req.body;
+
+    if (!offer_id) {
+      res.status(400).json({ error: { code: 'MISSING_PARAM', message: 'offer_id is required' } });
+      return;
+    }
+
+    const offer = (await db.prepare('SELECT * FROM offers WHERE id = ?').get(offer_id)) as any;
+    if (!offer) {
+      res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Offer not found' } });
+      return;
+    }
+
+    let parsedScopeIds: string[] = [];
+    try {
+      parsedScopeIds = typeof offer.scope_ids === 'string' ? JSON.parse(offer.scope_ids || '[]') : offer.scope_ids || [];
+    } catch {
+      parsedScopeIds = [];
+    }
+
+    const currentlyIncludes = parsedScopeIds.includes(productId);
+    const shouldApply = apply !== undefined ? Boolean(apply) : !currentlyIncludes;
+
+    let updatedScope = offer.scope;
+    let newScopeIds = [...parsedScopeIds];
+
+    // If offer was not product-scoped and user wants to link this specific product,
+    // convert scope to 'product' and add this product
+    if (offer.scope !== 'product') {
+      if (shouldApply) {
+        updatedScope = 'product';
+        newScopeIds = [productId];
+      }
+    } else {
+      if (shouldApply) {
+        if (!newScopeIds.includes(productId)) {
+          newScopeIds.push(productId);
+        }
+      } else {
+        newScopeIds = newScopeIds.filter((pid) => pid !== productId);
+      }
+    }
+
+    await db.prepare(`
+      UPDATE offers
+      SET scope = ?, scope_ids = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(updatedScope, JSON.stringify(newScopeIds), offer_id);
+
+    res.json({
+      success: true,
+      is_applied: shouldApply,
+      scope: updatedScope,
+      scope_ids: newScopeIds,
+      message: shouldApply
+        ? `Offer '${offer.name}' linked to this product successfully.`
+        : `Offer '${offer.name}' unlinked from this product.`,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ─── Banners Management ───────────────────────────────────────────────────────
 
 /**

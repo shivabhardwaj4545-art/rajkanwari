@@ -46,6 +46,17 @@ export interface ProductItem {
 }
 
 export interface ProductDetail extends ProductItem {
+  applicable_offers?: Array<{
+    id: string;
+    name: string;
+    code: string | null;
+    offer_category: string;
+    type: string;
+    value: number;
+    max_discount: number | null;
+    min_cart_value: number;
+    is_auto: boolean;
+  }>;
   related_products: Array<{
     id: string;
     name: string;
@@ -624,6 +635,33 @@ export const api = {
     });
   },
 
+  adminUpdateOffer: (id: string, data: any) => {
+    return request<{ success: boolean; message: string }>(`/admin/offers/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  adminGetProductOffers: (productId: string) => {
+    return request<{ data: AdminOfferItem[]; product: any }>(`/admin/products/${productId}/offers`);
+  },
+
+  adminToggleProductOffer: (productId: string, offerId: string, apply?: boolean) => {
+    return request<{
+      success: boolean;
+      is_applied: boolean;
+      scope: 'all' | 'category' | 'product';
+      scope_ids: string[];
+      message: string;
+    }>(
+      `/admin/products/${productId}/offers/toggle`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ offer_id: offerId, apply }),
+      }
+    );
+  },
+
   adminGetBanners: () => {
     return request<{ data: AdminBannerItem[] }>('/admin/banners');
   },
@@ -1098,6 +1136,8 @@ export interface AdminOfferItem {
   redemption_count: number;
   total_discount_disbursed: number;
   derived_status: 'scheduled' | 'running' | 'expired';
+  is_applied_to_product?: boolean;
+  is_direct_product_scope?: boolean;
 }
 
 export interface AdminBannerItem {
