@@ -48,9 +48,6 @@ function computePrices(
   categoryId: string,
   activeOffers: OfferRow[]
 ) {
-  const baseDiscountPaise = Math.round((mrpPaise * discountPercent) / 100);
-  const basePricePaise = mrpPaise - baseDiscountPaise;
-
   let offerDiscountPaise = 0;
   let appliedOffer: {
     id: string;
@@ -61,15 +58,14 @@ function computePrices(
   } | null = null;
 
   for (const offer of activeOffers) {
-    if (offer.code && offer.code.trim().length > 0) {
+    const minCartValue = Number(offer.min_cart_value || 0);
+    if (minCartValue > 0 && mrpPaise < minCartValue) {
       continue;
     }
 
-    const minCartValue = Number(offer.min_cart_value || 0);
-    if (minCartValue > 0 && basePricePaise < minCartValue) {
-      continue;
-    }
     let scopeMatches = false;
+    let isDirectProductScope = false;
+
     if (offer.scope === 'all') {
       scopeMatches = true;
     } else if (offer.scope === 'category') {
@@ -82,17 +78,25 @@ function computePrices(
     } else if (offer.scope === 'product') {
       try {
         const prdIds = typeof offer.scope_ids === 'string' ? JSON.parse(offer.scope_ids || '[]') : offer.scope_ids || [];
-        if (prdIds.includes(productId)) scopeMatches = true;
+        if (prdIds.includes(productId)) {
+          scopeMatches = true;
+          isDirectProductScope = true;
+        }
       } catch {
         // ignore
       }
+    }
+
+    // Direct product-linked offers apply; general offers require no code (auto-apply)
+    if (offer.code && offer.code.trim().length > 0 && !isDirectProductScope) {
+      continue;
     }
 
     if (scopeMatches) {
       const offerVal = Number(offer.value);
       const maxDisc = offer.max_discount !== null ? Number(offer.max_discount) : null;
       if (offer.type === 'percent') {
-        let disc = Math.round((basePricePaise * offerVal) / 100);
+        let disc = Math.round((mrpPaise * offerVal) / 100);
         if (maxDisc !== null && disc > maxDisc) {
           disc = maxDisc;
         }
@@ -110,7 +114,7 @@ function computePrices(
         if (maxDisc !== null && disc > maxDisc) {
           disc = maxDisc;
         }
-        offerDiscountPaise = Math.min(disc, basePricePaise);
+        offerDiscountPaise = Math.min(disc, mrpPaise);
         appliedOffer = {
           id: offer.id,
           name: offer.name,
@@ -123,9 +127,25 @@ function computePrices(
     }
   }
 
-  const finalPricePaise = Math.max(0, basePricePaise - offerDiscountPaise);
-  const effectiveDiscountPercent =
-    mrpPaise > 0 ? Math.round(((mrpPaise - finalPricePaise) / mrpPaise) * 100) : 0;
+  // Single Offer Rule: Exactly one offer applies to the product
+  let finalPricePaise: number;
+  let effectiveDiscountPercent: number;
+  let basePricePaise: number;
+
+  if (appliedOffer && offerDiscountPaise > 0) {
+    // Special promotional offer applied by admin or auto-promotion
+    finalPricePaise = Math.max(0, mrpPaise - offerDiscountPaise);
+    effectiveDiscountPercent =
+      mrpPaise > 0 ? Math.round(((mrpPaise - finalPricePaise) / mrpPaise) * 100) : 0;
+    basePricePaise = finalPricePaise;
+  } else {
+    // Standard catalog discount
+    const baseDiscountPaise = Math.round((mrpPaise * discountPercent) / 100);
+    finalPricePaise = Math.max(0, mrpPaise - baseDiscountPaise);
+    effectiveDiscountPercent = discountPercent;
+    basePricePaise = finalPricePaise;
+    offerDiscountPaise = 0;
+  }
 
   return {
     mrp_paise: mrpPaise,

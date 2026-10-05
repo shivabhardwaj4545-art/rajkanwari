@@ -188,9 +188,9 @@ export async function calculateCart(
   const discounts: NamedDiscount[] = [];
   let nonStackableAutoApplied = false;
 
-  // 4. Apply auto-offers (code IS NULL or empty) matching scope
+  // 4. Apply auto-offers (code IS NULL or empty, or directly product-scoped) matching scope
   const autoOffers = activeOffers.filter(
-    (o) => o.code === null || o.code === '' || (o.scope === 'product' && !o.code)
+    (o) => o.code === null || o.code === '' || o.scope === 'product'
   );
 
   for (const offer of autoOffers) {
@@ -199,7 +199,7 @@ export async function calculateCart(
     const maxDiscount = offer.max_discount !== null ? Number(offer.max_discount) : null;
 
     // Check minimum cart value
-    if (minCartValue > 0 && subtotalBase < minCartValue) {
+    if (minCartValue > 0 && subtotalMrp < minCartValue) {
       continue;
     }
 
@@ -218,21 +218,21 @@ export async function calculateCart(
       }
     }
 
-    // Determine matching line items by scope
+    // Determine matching line items by scope (Single Offer Rule: exclude items that already have an offer applied)
     let matchingItems: CartLineItem[] = [];
     if (offer.scope === 'all') {
-      matchingItems = lineItems;
+      matchingItems = lineItems.filter((it) => !it.applied_auto_offer);
     } else if (offer.scope === 'category') {
       try {
         const catIds: string[] = typeof offer.scope_ids === 'string' ? JSON.parse(offer.scope_ids || '[]') : offer.scope_ids || [];
-        matchingItems = lineItems.filter((it) => catIds.includes(it.category_id));
+        matchingItems = lineItems.filter((it) => !it.applied_auto_offer && catIds.includes(it.category_id));
       } catch {
         matchingItems = [];
       }
     } else if (offer.scope === 'product') {
       try {
         const prdIds: string[] = typeof offer.scope_ids === 'string' ? JSON.parse(offer.scope_ids || '[]') : offer.scope_ids || [];
-        matchingItems = lineItems.filter((it) => prdIds.includes(it.product_id));
+        matchingItems = lineItems.filter((it) => !it.applied_auto_offer && prdIds.includes(it.product_id));
       } catch {
         matchingItems = [];
       }
@@ -242,17 +242,18 @@ export async function calculateCart(
 
     let offerTotalDiscount = 0;
 
+    // Single Offer Rule: Calculate promotional offer directly against line MRP (no compounding on top of catalog discount)
     if (offer.type === 'percent') {
       for (const it of matchingItems) {
-        const lineDiscount = Math.round((it.line_subtotal_paise * offerValue) / 100);
+        const lineDiscount = Math.round((it.line_mrp_paise * offerValue) / 100);
         offerTotalDiscount += lineDiscount;
       }
       if (maxDiscount !== null && offerTotalDiscount > maxDiscount) {
         offerTotalDiscount = maxDiscount;
       }
     } else if (offer.type === 'flat') {
-      const matchingSubtotal = matchingItems.reduce((acc, it) => acc + it.line_subtotal_paise, 0);
-      offerTotalDiscount = Math.min(offerValue, matchingSubtotal);
+      const matchingMrp = matchingItems.reduce((acc, it) => acc + it.line_mrp_paise, 0);
+      offerTotalDiscount = Math.min(offerValue, matchingMrp);
       if (maxDiscount !== null && offerTotalDiscount > maxDiscount) {
         offerTotalDiscount = maxDiscount;
       }
@@ -260,7 +261,7 @@ export async function calculateCart(
 
     if (offerTotalDiscount > 0) {
       // Distribute discount across matching lines
-      const matchingSubtotal = matchingItems.reduce((acc, it) => acc + it.line_subtotal_paise, 0);
+      const matchingMrp = matchingItems.reduce((acc, it) => acc + it.line_mrp_paise, 0);
       let distributedSoFar = 0;
 
       for (let i = 0; i < matchingItems.length; i++) {
@@ -269,13 +270,15 @@ export async function calculateCart(
         if (i === matchingItems.length - 1) {
           lineShare = offerTotalDiscount - distributedSoFar;
         } else {
-          lineShare = Math.round((it.line_subtotal_paise / matchingSubtotal) * offerTotalDiscount);
+          lineShare = Math.round((it.line_mrp_paise / (matchingMrp || 1)) * offerTotalDiscount);
           distributedSoFar += lineShare;
         }
 
         const unitShare = Math.round(lineShare / it.quantity);
-        it.unit_auto_discount_paise += unitShare;
-        it.unit_final_price_paise = Math.max(0, it.unit_base_price_paise - it.unit_auto_discount_paise);
+        it.unit_auto_discount_paise = unitShare;
+        it.unit_final_price_paise = Math.max(0, it.unit_mrp_paise - unitShare);
+        it.unit_base_price_paise = it.unit_final_price_paise;
+        it.line_subtotal_paise = it.unit_final_price_paise * it.quantity;
         it.applied_auto_offer = {
           id: offer.id,
           name: offer.name,
@@ -306,9 +309,8 @@ export async function calculateCart(
     }
   }
 
-  // Subtotal after auto discounts
-  const autoDiscountTotal = discounts.reduce((acc, d) => acc + d.discount_paise, 0);
-  let currentSubtotal = Math.max(0, subtotalBase - autoDiscountTotal);
+  // Subtotal after single-offer line discounts
+  let currentSubtotal = lineItems.reduce((acc, it) => acc + it.line_subtotal_paise, 0);
 
   // 5. Apply Coupon if supplied
   let couponResult: { code: string; name: string; discount_paise: number } | undefined;
@@ -410,7 +412,10 @@ export async function calculateCart(
 
   // 8. Total Amount
   const totalPaise = currentSubtotal + shippingPaise + taxPaise;
-  const catalogDiscountPaise = Math.max(0, subtotalMrp - subtotalBase);
+  const catalogDiscountPaise = lineItems.reduce((acc, it) => {
+    if (it.applied_auto_offer) return acc;
+    return acc + (it.line_mrp_paise - it.line_subtotal_paise);
+  }, 0);
   const totalDiscountPaise = catalogDiscountPaise + discounts.reduce((acc, d) => acc + d.discount_paise, 0);
 
   return {
