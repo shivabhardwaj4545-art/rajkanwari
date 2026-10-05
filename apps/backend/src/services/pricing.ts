@@ -188,9 +188,9 @@ export async function calculateCart(
   const discounts: NamedDiscount[] = [];
   let nonStackableAutoApplied = false;
 
-  // 4. Apply auto-offers (code IS NULL or empty, or directly product-scoped) matching scope
+  // 4. Apply auto-offers (strictly offers with NO coupon code) matching scope
   const autoOffers = activeOffers.filter(
-    (o) => o.code === null || o.code === '' || o.scope === 'product'
+    (o) => !o.code || o.code.trim() === ''
   );
 
   for (const offer of autoOffers) {

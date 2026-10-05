@@ -910,10 +910,10 @@ export const ProductEditorPage: React.FC = () => {
                           : 'bg-surface-alt/25 border-border opacity-90 hover:opacity-100'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
                         <div className="space-y-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-semibold text-text truncate max-w-[220px]">
+                            <span className="text-xs font-semibold text-text">
                               {off.name}
                             </span>
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-gold/20 text-text uppercase">
@@ -926,10 +926,15 @@ export const ProductEditorPage: React.FC = () => {
 
                           <div className="flex items-center gap-3 text-[11px] text-text-muted flex-wrap">
                             {off.code ? (
-                              <span className="inline-flex items-center gap-1 font-mono font-bold text-text">
-                                <Tag size={11} className="text-brand-gold" />
-                                Code: {off.code}
-                              </span>
+                              <div className="flex items-center gap-1.5">
+                                <span className="inline-flex items-center gap-1 font-mono font-bold text-text bg-surface px-2 py-0.5 rounded border border-border">
+                                  <Tag size={11} className="text-brand-gold" />
+                                  Code: {off.code}
+                                </span>
+                                <span className="text-[10px] text-text-muted font-medium italic">
+                                  (Coupon — Code Required)
+                                </span>
+                              </div>
                             ) : (
                               <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
                                 <Sparkles size={11} />
@@ -950,13 +955,15 @@ export const ProductEditorPage: React.FC = () => {
 
                             {calculatedOfferSavings > 0 && isLinked && off.is_active && (
                               <span className="text-emerald-600 font-semibold">
-                                Slashes {formatPrice(calculatedOfferSavings)} on this garment
+                                {off.code
+                                  ? `Save ${formatPrice(calculatedOfferSavings)} with code ${off.code}`
+                                  : `Slashes ${formatPrice(calculatedOfferSavings)} on this garment`}
                               </span>
                             )}
                           </div>
                         </div>
 
-                        {/* Action Buttons: Status Toggle & Link Toggle */}
+                        {/* Action Buttons: Status Toggle & Link / Scope Badge */}
                         <div className="flex items-center gap-2 shrink-0">
                           {/* Active Toggle Switch */}
                           <button
@@ -974,7 +981,7 @@ export const ProductEditorPage: React.FC = () => {
                             <span>{off.is_active ? 'Active' : 'Inactive'}</span>
                           </button>
 
-                          {/* Link/Apply to Product Button */}
+                          {/* Link/Apply to Product Button or Accurate Scope Badge */}
                           {id ? (
                             isProductScope ? (
                               <button
@@ -983,22 +990,35 @@ export const ProductEditorPage: React.FC = () => {
                                 onClick={() => handleToggleOfferLink(off)}
                                 className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all cursor-pointer ${
                                   isLinked
-                                    ? 'bg-brand-crimson text-white hover:bg-brand-crimson/90 shadow-xs'
+                                    ? off.code
+                                      ? 'bg-brand-crimson text-white hover:bg-brand-crimson/90 shadow-xs'
+                                      : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs'
                                     : 'bg-surface border border-border text-text hover:border-brand-gold'
                                 }`}
                               >
-                                {isLinked ? '✓ Linked' : '+ Link to Product'}
+                                {isLinked
+                                  ? off.code
+                                    ? '✓ Product Coupon'
+                                    : '✓ Auto-Applies'
+                                  : off.code
+                                  ? '+ Link Coupon'
+                                  : '+ Apply to Product'}
                               </button>
-                            ) : (
-                              <button
-                                type="button"
-                                disabled={isToggling}
-                                onClick={() => handleToggleOfferLink(off)}
-                                title="Click to convert and lock this offer specifically to this product"
-                                className="px-2 py-1 rounded text-[10px] font-medium bg-surface border border-border text-text-muted hover:text-text hover:border-brand-gold cursor-pointer"
+                            ) : off.code ? (
+                              <span
+                                className="px-2.5 py-1 rounded text-[10px] font-semibold bg-surface border border-border text-text-muted"
+                                title="This coupon code applies across store products when entered at checkout"
                               >
-                                {isLinked ? '✓ Auto-Applies' : '+ Target Product'}
-                              </button>
+                                {isStorewide ? 'Storewide Coupon' : 'Category Coupon'}
+                              </span>
+                            ) : (
+                              <span
+                                className="px-2.5 py-1 rounded text-[10px] font-bold bg-emerald-600/10 border border-emerald-600/30 text-emerald-700 dark:text-emerald-400 flex items-center gap-1"
+                                title="This automatic discount applies across store products"
+                              >
+                                <Sparkles size={10} />
+                                {isStorewide ? 'Auto-Applies Storewide' : 'Auto-Applies Category'}
+                              </span>
                             )
                           ) : (
                             <span className="text-[10px] text-text-muted italic">Save product to link</span>
