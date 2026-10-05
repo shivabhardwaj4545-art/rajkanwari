@@ -11,6 +11,7 @@ import {
   Menu,
   Package,
   PlusCircle,
+  RefreshCw,
   ShieldAlert,
   ShoppingBag,
   Tag,
@@ -24,6 +25,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { pageTransition, useMotionSafe } from '@/lib/motion';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { Portal } from '@/components/ui/Portal';
+import { getRefreshToken } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
 
 interface NavItem {
@@ -53,6 +55,8 @@ export const AdminLayout: React.FC = () => {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
 
   useEffect(() => {
     initAuth();
@@ -60,6 +64,37 @@ export const AdminLayout: React.FC = () => {
       document.documentElement.setAttribute('data-theme', 'light');
     }
   }, [initAuth]);
+
+  // Automatic wake-from-sleep / reconnect auto-refresh listener
+  useEffect(() => {
+    const handleWakeAndReconnect = async () => {
+      const token = getRefreshToken();
+      if (token && (!user || user.role !== 'owner')) {
+        setIsRestoring(true);
+        try {
+          await initAuth();
+        } finally {
+          setIsRestoring(false);
+        }
+      }
+    };
+
+    window.addEventListener('focus', handleWakeAndReconnect);
+    window.addEventListener('online', handleWakeAndReconnect);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        handleWakeAndReconnect();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      window.removeEventListener('focus', handleWakeAndReconnect);
+      window.removeEventListener('online', handleWakeAndReconnect);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [user, initAuth]);
 
   // Close mobile drawer on route change
   useEffect(() => {
@@ -78,6 +113,20 @@ export const AdminLayout: React.FC = () => {
 
   // Guard: Role MUST be owner
   const isOwner = user?.role === 'owner';
+  const hasRefreshToken = typeof window !== 'undefined' ? Boolean(getRefreshToken()) : false;
+
+  // While initializing or silently restoring after computer sleep, show a smooth branded loading state
+  if ((!initialized && hasRefreshToken) || isRestoring) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center p-4">
+        <div className="text-center space-y-3">
+          <div className="h-10 w-10 mx-auto rounded-full border-2 border-brand-gold border-t-transparent animate-spin" />
+          <p className="text-sm font-serif text-text">Restoring Store Owner Session...</p>
+          <p className="text-[11px] text-text-muted">Rajkanwari — Curated Style</p>
+        </div>
+      </div>
+    );
+  }
 
   if (initialized && !isOwner) {
     return (
@@ -88,23 +137,35 @@ export const AdminLayout: React.FC = () => {
           </div>
           <h1 className="font-serif text-2xl font-semibold text-text mb-2">403 — Owner Access Required</h1>
           <p className="text-xs text-text-muted mb-6 leading-relaxed">
-            The Shikkis Admin Console is strictly restricted to store owners. You are currently logged in as{' '}
+            The Rajkanwari Admin Console is strictly restricted to store owners. You are currently logged in as{' '}
             <span className="font-semibold text-text">{user?.email || 'Guest'}</span> ({user?.role || 'none'}).
           </p>
 
           <div className="space-y-3">
             <button
+              disabled={signingIn}
               onClick={async () => {
-                const ok = await login('owner@rajkanwari.in', '123456');
-                if (ok) {
-                  window.location.reload();
-                } else {
+                setSigningIn(true);
+                try {
+                  const ok = await login('owner@rajkanwari.in', '123456');
+                  if (ok) {
+                    window.location.reload();
+                    return;
+                  }
+                  const ok2 = await login('owner@shikkis.com', '123456');
+                  if (ok2) {
+                    window.location.reload();
+                    return;
+                  }
                   alert('Unable to sign in as Store Owner. Please verify network connection or server status.');
+                } finally {
+                  setSigningIn(false);
                 }
               }}
-              className="w-full py-2.5 rounded-lg bg-brand-crimson text-white font-medium text-xs shadow hover:bg-brand-crimson/90 transition-colors cursor-pointer"
+              className="w-full py-2.5 rounded-lg bg-brand-crimson text-white font-medium text-xs shadow hover:bg-brand-crimson/90 transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              Sign In as Store Owner (Vikram Singhania)
+              {signingIn && <RefreshCw size={13} className="animate-spin" />}
+              <span>Sign In as Store Owner (Vikram Singhania)</span>
             </button>
             <Link
               to="/"

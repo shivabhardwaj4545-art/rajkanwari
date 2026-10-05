@@ -360,11 +360,13 @@ authRouter.post('/refresh', async (req, res, next) => {
       return;
     }
 
-    // If revoked, allow a 60-second grace window to handle concurrent requests/race conditions smoothly
+    // If revoked, allow a 5-minute grace window to handle concurrent requests and sleep/wake race conditions smoothly
     if (tokenRecord?.revoked_at) {
-      const revokedTime = new Date(tokenRecord.revoked_at).getTime();
+      const revokedTime = tokenRecord.revoked_at instanceof Date
+        ? tokenRecord.revoked_at.getTime()
+        : new Date(tokenRecord.revoked_at).getTime();
       const now = Date.now();
-      if (now - revokedTime > 60 * 1000) {
+      if (!isNaN(revokedTime) && (now - revokedTime > 5 * 60 * 1000)) {
         res.status(401).json({
           error: {
             code: 'REFRESH_TOKEN_REVOKED',
@@ -400,7 +402,9 @@ authRouter.post('/refresh', async (req, res, next) => {
     const newExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
     // Mark previous token as revoked with timestamp rather than immediate hard-delete (avoids auto-logout race conditions)
-    await db.prepare('UPDATE refresh_tokens SET revoked_at = CURRENT_TIMESTAMP WHERE token_hash = ?').run(refreshToken);
+    if (tokenRecord) {
+      await db.prepare('UPDATE refresh_tokens SET revoked_at = CURRENT_TIMESTAMP WHERE token_hash = ?').run(refreshToken);
+    }
     await db.prepare(
       `INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at)
        VALUES (?, ?, ?, ?)`

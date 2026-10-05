@@ -161,6 +161,26 @@ export function clearAuthTokens(): void {
 let isRefreshing = false;
 let refreshSubscribers: Array<(token: string) => void> = [];
 
+export type AuthSessionListener = (user: UserProfile, accessToken: string, refreshToken?: string) => void;
+let sessionListeners: AuthSessionListener[] = [];
+
+export function onAuthSessionRefreshed(listener: AuthSessionListener): () => void {
+  sessionListeners.push(listener);
+  return () => {
+    sessionListeners = sessionListeners.filter((l) => l !== listener);
+  };
+}
+
+function notifySessionRefreshed(user: UserProfile, accessToken: string, refreshToken?: string) {
+  sessionListeners.forEach((l) => {
+    try {
+      l(user, accessToken, refreshToken);
+    } catch (e) {
+      console.error('Error in auth session listener:', e);
+    }
+  });
+}
+
 function subscribeTokenRefresh(cb: (token: string) => void) {
   refreshSubscribers.push(cb);
 }
@@ -205,6 +225,9 @@ async function request<T>(endpoint: string, options?: RequestInit, isRetry = fal
             if (refreshRes.ok) {
               const data = await refreshRes.json();
               setAuthTokens(data.accessToken, data.refreshToken);
+              if (data.user) {
+                notifySessionRefreshed(data.user, data.accessToken, data.refreshToken);
+              }
               isRefreshing = false;
               onRefreshed(data.accessToken);
               return request<T>(endpoint, options, true);

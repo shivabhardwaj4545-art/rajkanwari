@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { api, clearAuthTokens, getRefreshToken, setAuthTokens, type UserProfile } from '@/lib/api';
+import { api, clearAuthTokens, getRefreshToken, onAuthSessionRefreshed, setAuthTokens, type UserProfile } from '@/lib/api';
 
 interface AuthState {
   user: UserProfile | null;
@@ -40,18 +40,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Check current user session
       try {
         const res = await api.getMe();
-        // Ensure access token carries up-to-date role claims (e.g. newly granted owner role)
-        const refreshToken = getRefreshToken();
-        if (res.user?.role === 'owner' && refreshToken) {
-          try {
-            const refreshRes = await api.refreshToken(refreshToken);
-            setAuthTokens(refreshRes.accessToken, refreshRes.refreshToken);
-            set({ user: refreshRes.user, initialized: true });
-            return;
-          } catch {
-            // Keep existing valid user session
-          }
-        }
         set({ user: res.user, initialized: true });
         return;
       } catch (err: any) {
@@ -64,11 +52,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             set({ user: refreshRes.user, initialized: true });
             return;
           } catch (refreshErr: any) {
+            // Only clear tokens if the refresh token is explicitly rejected as invalid or revoked by the server
             if (refreshErr?.status === 401 || refreshErr?.status === 403) {
               clearAuthTokens();
               set({ user: null, initialized: true });
               return;
             }
+            // For network errors (e.g. system wake before WiFi reconnects), do NOT wipe stored tokens
+            set({ initialized: true });
+            return;
           }
         } else if (err?.status === 401) {
           clearAuthTokens();
@@ -113,3 +105,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     window.location.reload();
   },
 }));
+
+// Automatically sync store whenever api.ts performs a silent token refresh
+if (typeof window !== 'undefined') {
+  onAuthSessionRefreshed((user) => {
+    useAuthStore.setState({ user, initialized: true });
+  });
+}
+
