@@ -1058,8 +1058,8 @@ export const CheckoutPage: React.FC = () => {
                   <span className="price font-sans text-text tabular-nums">{formatPrice(breakdown.subtotal_mrp_paise)}</span>
                 </div>
 
-                {/* Product / Catalog discount (shown when no promotional offer/coupon applies) */}
-                {breakdown.discounts.length === 0 && (breakdown.catalog_discount_paise ?? Math.max(0, breakdown.subtotal_mrp_paise - (breakdown.subtotal_base_paise ?? breakdown.subtotal_paise))) > 0 && (
+                {/* Product / Catalog discount */}
+                {(breakdown.catalog_discount_paise ?? Math.max(0, breakdown.subtotal_mrp_paise - (breakdown.subtotal_base_paise ?? breakdown.subtotal_paise))) > 0 && (
                   <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
                     <span>Product Discount / Savings</span>
                     <span className="price font-sans tabular-nums">

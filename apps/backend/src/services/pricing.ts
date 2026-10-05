@@ -242,18 +242,18 @@ export async function calculateCart(
 
     let offerTotalDiscount = 0;
 
-    // Single Offer Rule: Calculate promotional offer directly against line MRP (no compounding on top of catalog discount)
+    // Calculate promotional offer against base selling price (preserving owner product discount)
     if (offer.type === 'percent') {
       for (const it of matchingItems) {
-        const lineDiscount = Math.round((it.line_mrp_paise * offerValue) / 100);
+        const lineDiscount = Math.round((it.line_subtotal_paise * offerValue) / 100);
         offerTotalDiscount += lineDiscount;
       }
       if (maxDiscount !== null && offerTotalDiscount > maxDiscount) {
         offerTotalDiscount = maxDiscount;
       }
     } else if (offer.type === 'flat') {
-      const matchingMrp = matchingItems.reduce((acc, it) => acc + it.line_mrp_paise, 0);
-      offerTotalDiscount = Math.min(offerValue, matchingMrp);
+      const matchingSubtotal = matchingItems.reduce((acc, it) => acc + it.line_subtotal_paise, 0);
+      offerTotalDiscount = Math.min(offerValue, matchingSubtotal);
       if (maxDiscount !== null && offerTotalDiscount > maxDiscount) {
         offerTotalDiscount = maxDiscount;
       }
@@ -261,7 +261,7 @@ export async function calculateCart(
 
     if (offerTotalDiscount > 0) {
       // Distribute discount across matching lines
-      const matchingMrp = matchingItems.reduce((acc, it) => acc + it.line_mrp_paise, 0);
+      const matchingSubtotal = matchingItems.reduce((acc, it) => acc + it.line_subtotal_paise, 0);
       let distributedSoFar = 0;
 
       for (let i = 0; i < matchingItems.length; i++) {
@@ -270,14 +270,13 @@ export async function calculateCart(
         if (i === matchingItems.length - 1) {
           lineShare = offerTotalDiscount - distributedSoFar;
         } else {
-          lineShare = Math.round((it.line_mrp_paise / (matchingMrp || 1)) * offerTotalDiscount);
+          lineShare = Math.round((it.line_subtotal_paise / (matchingSubtotal || 1)) * offerTotalDiscount);
           distributedSoFar += lineShare;
         }
 
         const unitShare = Math.round(lineShare / it.quantity);
         it.unit_auto_discount_paise = unitShare;
-        it.unit_final_price_paise = Math.max(0, it.unit_mrp_paise - unitShare);
-        it.unit_base_price_paise = it.unit_final_price_paise;
+        it.unit_final_price_paise = Math.max(0, it.unit_base_price_paise - unitShare);
         it.line_subtotal_paise = it.unit_final_price_paise * it.quantity;
         it.applied_auto_offer = {
           id: offer.id,
@@ -412,10 +411,7 @@ export async function calculateCart(
 
   // 8. Total Amount
   const totalPaise = currentSubtotal + shippingPaise + taxPaise;
-  const catalogDiscountPaise = lineItems.reduce((acc, it) => {
-    if (it.applied_auto_offer) return acc;
-    return acc + (it.line_mrp_paise - it.line_subtotal_paise);
-  }, 0);
+  const catalogDiscountPaise = Math.max(0, subtotalMrp - subtotalBase);
   const totalDiscountPaise = catalogDiscountPaise + discounts.reduce((acc, d) => acc + d.discount_paise, 0);
 
   return {

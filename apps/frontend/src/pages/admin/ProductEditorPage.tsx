@@ -591,6 +591,12 @@ export const ProductEditorPage: React.FC = () => {
 
   const previewFinalPricePaise = Math.max(0, sellingPricePaise - previewOfferDiscountPaise);
 
+  const previewEffectiveDiscountPercent = useMemo(() => {
+    const mrpPaise = mrpInr * 100;
+    if (mrpPaise <= 0) return 0;
+    return Math.round(((mrpPaise - previewFinalPricePaise) / mrpPaise) * 100);
+  }, [mrpInr, previewFinalPricePaise]);
+
   const categoryName = useMemo(() => {
     return categories.find((c) => c.id === categoryId)?.name || 'Ethnic Wear';
   }, [categories, categoryId]);
@@ -1521,11 +1527,11 @@ export const ProductEditorPage: React.FC = () => {
                     <span className="inline-flex items-center rounded-full bg-brand-gold text-text px-2 py-0.5 text-[9px] font-extrabold uppercase shadow-xs">
                       {previewAppliedOffer.offer_category || 'Special Offer'}
                     </span>
-                    <span className="inline-flex items-center rounded-full bg-brand-crimson px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
-                      {previewAppliedOffer.type === 'percent'
-                        ? `${previewAppliedOffer.value}% OFF`
-                        : `₹${Math.round(previewAppliedOffer.value / 100)} OFF`}
-                    </span>
+                    {previewEffectiveDiscountPercent > 0 && (
+                      <span className="inline-flex items-center rounded-full bg-brand-crimson px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
+                        {previewEffectiveDiscountPercent}% OFF
+                      </span>
+                    )}
                   </div>
                 ) : discountPercent > 0 ? (
                   <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-brand-crimson text-white text-[10px] font-bold shadow-sm">

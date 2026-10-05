@@ -161,25 +161,19 @@ describe('Orders API & Security Verification', () => {
     });
 
     it('returns 400 when attempting to return an order that is not delivered or picked up', async () => {
-      // Set ord_001 temporarily to placed
-      const db = getDb();
-      await db.prepare("UPDATE orders SET order_status = 'placed' WHERE id = 'ord_001'").run();
-
+      // ord_003 is 'ready_for_pickup' (not delivered/picked_up)
       const res = await request(app)
-        .post('/api/orders/ord_001/return-request')
+        .post('/api/orders/ord_003/return-request')
         .set('Authorization', `Bearer ${tokenCustomerA}`)
         .send({ reason: 'Changed mind' });
 
       expect(res.status).toBe(400);
       expect(res.body.error.code).toBe('ORDER_NOT_DELIVERED');
-
-      // Reset back to delivered
-      await db.prepare("UPDATE orders SET order_status = 'delivered' WHERE id = 'ord_001'").run();
     });
 
     it('successfully processes return request on delivered order, updating status to returned', async () => {
       const db = getDb();
-      await db.prepare("UPDATE orders SET order_status = 'delivered' WHERE id = 'ord_001'").run();
+      await db.prepare('UPDATE orders SET order_status = ? WHERE id = ?').run('delivered', 'ord_001');
 
       const res = await request(app)
         .post('/api/orders/ord_001/return-request')

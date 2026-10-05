@@ -48,6 +48,10 @@ function computePrices(
   categoryId: string,
   activeOffers: OfferRow[]
 ) {
+  // 1. Calculate base catalog price from MRP and discount_percent set by owner
+  const baseDiscountPaise = Math.round((mrpPaise * discountPercent) / 100);
+  const basePricePaise = Math.max(0, mrpPaise - baseDiscountPaise);
+
   let offerDiscountPaise = 0;
   let appliedOffer: {
     id: string;
@@ -96,7 +100,7 @@ function computePrices(
       const offerVal = Number(offer.value);
       const maxDisc = offer.max_discount !== null ? Number(offer.max_discount) : null;
       if (offer.type === 'percent') {
-        let disc = Math.round((mrpPaise * offerVal) / 100);
+        let disc = Math.round((basePricePaise * offerVal) / 100);
         if (maxDisc !== null && disc > maxDisc) {
           disc = maxDisc;
         }
@@ -114,7 +118,7 @@ function computePrices(
         if (maxDisc !== null && disc > maxDisc) {
           disc = maxDisc;
         }
-        offerDiscountPaise = Math.min(disc, mrpPaise);
+        offerDiscountPaise = Math.min(disc, basePricePaise);
         appliedOffer = {
           id: offer.id,
           name: offer.name,
@@ -127,25 +131,10 @@ function computePrices(
     }
   }
 
-  // Single Offer Rule: Exactly one offer applies to the product
-  let finalPricePaise: number;
-  let effectiveDiscountPercent: number;
-  let basePricePaise: number;
-
-  if (appliedOffer && offerDiscountPaise > 0) {
-    // Special promotional offer applied by admin or auto-promotion
-    finalPricePaise = Math.max(0, mrpPaise - offerDiscountPaise);
-    effectiveDiscountPercent =
-      mrpPaise > 0 ? Math.round(((mrpPaise - finalPricePaise) / mrpPaise) * 100) : 0;
-    basePricePaise = finalPricePaise;
-  } else {
-    // Standard catalog discount
-    const baseDiscountPaise = Math.round((mrpPaise * discountPercent) / 100);
-    finalPricePaise = Math.max(0, mrpPaise - baseDiscountPaise);
-    effectiveDiscountPercent = discountPercent;
-    basePricePaise = finalPricePaise;
-    offerDiscountPaise = 0;
-  }
+  // Final price after base catalog discount and promotional offer
+  const finalPricePaise = Math.max(0, basePricePaise - offerDiscountPaise);
+  const effectiveDiscountPercent =
+    mrpPaise > 0 ? Math.round(((mrpPaise - finalPricePaise) / mrpPaise) * 100) : 0;
 
   return {
     mrp_paise: mrpPaise,
