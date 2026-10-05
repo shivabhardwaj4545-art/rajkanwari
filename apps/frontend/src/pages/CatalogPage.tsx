@@ -10,6 +10,7 @@ import { QuickViewModal } from '@/components/catalog/QuickViewModal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { api, type CategoryItem, type ProductItem } from '@/lib/api';
+import { formatPrice } from '@/lib/format';
 import { staggerContainer, staggerItem } from '@/lib/motion';
 
 const SORT_OPTIONS = [
@@ -240,7 +241,11 @@ export const CatalogPage: React.FC = () => {
                 {activeOfferDetail.type === 'percent'
                   ? `${activeOfferDetail.value}% OFF Applied`
                   : activeOfferDetail.type === 'flat'
-                  ? `Flat ₹${activeOfferDetail.value / 100} OFF Applied`
+                  ? (
+                    <>
+                      Flat <span className="price font-sans tabular-nums font-bold">{formatPrice(activeOfferDetail.value)}</span> OFF Applied
+                    </>
+                  )
                   : 'Exclusive Offer Applied'}
               </span>
             </div>

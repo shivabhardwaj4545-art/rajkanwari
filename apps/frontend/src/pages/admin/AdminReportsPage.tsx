@@ -390,7 +390,7 @@ export const AdminReportsPage: React.FC = () => {
           {hoveredPoint && (
             <div className="absolute top-2 right-4 p-3 rounded-lg border border-[var(--border)] bg-[var(--surface-alt)] shadow-lg text-xs space-y-1">
               <p className="font-semibold text-[var(--text)]">{hoveredPoint.label}</p>
-              <p className="text-[var(--brand-crimson)] font-mono font-bold">
+              <p className="text-[var(--brand-crimson)] price font-sans font-bold tabular-nums">
                 {formatPrice(hoveredPoint.revenue)}
               </p>
               <p className="text-[10px] text-[var(--text-muted)]">
@@ -428,7 +428,7 @@ export const AdminReportsPage: React.FC = () => {
                         {p.product_name}
                       </span>
                     </div>
-                    <span className="font-mono font-bold text-[var(--brand-crimson)]">
+                    <span className="price font-sans font-bold text-[var(--brand-crimson)] tabular-nums">
                       {formatPrice(p.revenue)}
                     </span>
                   </div>
@@ -473,7 +473,7 @@ export const AdminReportsPage: React.FC = () => {
                 <div key={c.id} className="space-y-1">
                   <div className="flex justify-between text-xs font-semibold">
                     <span className="text-[var(--text)]">{c.name}</span>
-                    <span className="font-mono text-[var(--brand-gold)]">
+                    <span className="price font-sans font-semibold text-[var(--brand-gold)] tabular-nums">
                       {formatPrice(c.revenue)} ({c.units_sold} units)
                     </span>
                   </div>
@@ -564,7 +564,7 @@ export const AdminReportsPage: React.FC = () => {
                     {itm.size} / {itm.color}
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono font-bold">{itm.quantity}</td>
-                  <td className="py-2.5 px-3 text-right font-mono font-bold text-[var(--text)]">
+                  <td className="py-2.5 px-3 text-right price font-sans font-bold text-[var(--text)] tabular-nums">
                     {formatPrice(itm.net_total)}
                   </td>
                 </tr>

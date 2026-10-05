@@ -211,7 +211,7 @@ export const CheckoutPage: React.FC = () => {
                   <p className="font-bold text-text">{item.title}</p>
                   <p className="text-text-muted">Size: {item.size} x {item.quantity}</p>
                 </div>
-                <p className="font-serif font-bold text-text">
+                <p className="price font-sans font-bold text-text tabular-nums">
                   {(( (item.discountPricePaise || item.pricePaise) * item.quantity) / 100).toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}
                 </p>
               </div>
@@ -221,11 +221,11 @@ export const CheckoutPage: React.FC = () => {
           <div className="pt-16 border-t border-border space-y-8 text-xs">
             <div className="flex justify-between text-text-muted">
               <span>Subtotal</span>
-              <span className="font-bold text-text">{subtotalFormatted}</span>
+              <span className="price font-sans font-bold text-text tabular-nums">{subtotalFormatted}</span>
             </div>
             <div className="flex justify-between text-text-muted">
               <span>GST (5%)</span>
-              <span className="font-bold text-text">{taxFormatted}</span>
+              <span className="price font-sans font-bold text-text tabular-nums">{taxFormatted}</span>
             </div>
             <div className="flex justify-between text-text-muted">
               <span>Express Insured Shipping</span>
@@ -233,7 +233,7 @@ export const CheckoutPage: React.FC = () => {
             </div>
             <div className="flex justify-between text-base font-bold text-text pt-12 border-t border-border">
               <span>Grand Total</span>
-              <span className="font-serif text-20 text-brand-crimson dark:text-brand-gold">{grandTotalFormatted}</span>
+              <span className="price font-sans text-20 font-bold text-brand-crimson dark:text-brand-gold tabular-nums">{grandTotalFormatted}</span>
             </div>
           </div>
 

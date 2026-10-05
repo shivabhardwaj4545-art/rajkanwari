@@ -24,6 +24,7 @@ import {
   type OfferItem,
   type ProductItem,
 } from '@/lib/api';
+import { formatPrice } from '@/lib/format';
 
 export const HomePage: React.FC = () => {
   const [banners, setBanners] = useState<BannerItem[]>([]);
@@ -235,14 +236,14 @@ export const HomePage: React.FC = () => {
         if (o.type === 'percent') {
           discountText = `Enjoy ${o.value}% off`;
         } else if (o.type === 'flat') {
-          discountText = `Flat ₹${o.value / 100} discount`;
+          discountText = `Flat ${formatPrice(o.value)} discount`;
         } else if (o.type === 'free_shipping') {
           discountText = `Free express doorstep shipping`;
         } else {
           discountText = `Special promotional pricing`;
         }
 
-        const minCartText = o.min_cart_value > 0 ? ` on orders above ₹${(o.min_cart_value / 100).toLocaleString('en-IN')}` : '';
+        const minCartText = o.min_cart_value > 0 ? ` on orders above ${formatPrice(o.min_cart_value)}` : '';
 
         return {
           badge,

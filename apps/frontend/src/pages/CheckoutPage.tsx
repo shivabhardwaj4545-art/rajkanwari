@@ -1033,12 +1033,12 @@ export const CheckoutPage: React.FC = () => {
                       {item.color} • Size {item.size} • Qty {item.quantity}
                     </p>
                     <div className="flex items-baseline gap-1.5 mt-0.5">
-                      <span className="text-xs font-bold text-brand-crimson dark:text-brand-gold">
-                        {formatPrice(item.line_subtotal_paise)}
+                      <span className="price font-sans text-xs font-bold text-brand-crimson dark:text-brand-gold tabular-nums">
+                        {formatPrice(item.unit_final_price_paise * item.quantity)}
                       </span>
-                      {item.unit_mrp_paise > item.unit_final_price_paise && (
-                        <span className="text-[10px] text-text-muted line-through">
-                          {formatPrice(item.unit_mrp_paise * item.quantity)}
+                      {item.line_mrp_paise > item.unit_final_price_paise * item.quantity && (
+                        <span className="price font-sans text-[10px] text-text-muted line-through tabular-nums">
+                          {formatPrice(item.line_mrp_paise)}
                         </span>
                       )}
                     </div>
@@ -1051,47 +1051,50 @@ export const CheckoutPage: React.FC = () => {
             {breakdown && (
               <div className="mt-6 pt-4 border-t border-border space-y-2 text-xs">
                 <div className="flex justify-between text-text-muted">
-                  <span>Subtotal</span>
-                  <span className="text-text">{formatPrice(breakdown.subtotal_paise)}</span>
+                  <span>Subtotal (MRP)</span>
+                  <span className="price font-sans text-text tabular-nums">{formatPrice(breakdown.subtotal_mrp_paise)}</span>
                 </div>
 
-                {breakdown.discounts.map((disc) => (
-                  <div key={disc.offer_id} className="flex justify-between text-emerald-600 dark:text-emerald-400">
-                    <span className="flex items-center gap-1">
-                      <Sparkles size={12} />
-                      <span>{disc.name}</span>
+                {/* Product / Catalog discount */}
+                {(breakdown.catalog_discount_paise ?? Math.max(0, breakdown.subtotal_mrp_paise - (breakdown.subtotal_base_paise ?? breakdown.subtotal_paise))) > 0 && (
+                  <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
+                    <span>Product Discount / Savings</span>
+                    <span className="price font-sans tabular-nums">
+                      -{formatPrice(breakdown.catalog_discount_paise ?? Math.max(0, breakdown.subtotal_mrp_paise - (breakdown.subtotal_base_paise ?? breakdown.subtotal_paise)))}
                     </span>
-                    <span>-{formatPrice(disc.discount_paise)}</span>
-                  </div>
-                ))}
-
-                {breakdown.coupon && (
-                  <div className="flex justify-between text-brand-gold font-medium">
-                    <span className="flex items-center gap-1">
-                      <Tag size={12} />
-                      <span>Coupon ({breakdown.coupon.code})</span>
-                    </span>
-                    <span>-{formatPrice(breakdown.coupon.discount_paise)}</span>
                   </div>
                 )}
+
+                {/* Named auto offers and coupon discounts */}
+                {breakdown.discounts.map((disc) => (
+                  <div key={disc.offer_id} className="flex justify-between text-brand-crimson dark:text-brand-gold font-medium">
+                    <span className="flex items-center gap-1">
+                      {disc.code ? <Tag size={12} className="text-brand-gold" /> : <Sparkles size={12} className="text-brand-gold" />}
+                      <span>
+                        {disc.name} {disc.code ? `(${disc.code})` : ''}
+                      </span>
+                    </span>
+                    <span className="price font-sans tabular-nums">-{formatPrice(disc.discount_paise)}</span>
+                  </div>
+                ))}
 
                 <div className="flex justify-between text-text-muted">
                   <span>Estimated Shipping</span>
                   {breakdown.shipping_paise === 0 ? (
                     <span className="text-emerald-600 font-semibold">FREE</span>
                   ) : (
-                    <span>{formatPrice(breakdown.shipping_paise)}</span>
+                    <span className="price font-sans tabular-nums">{formatPrice(breakdown.shipping_paise)}</span>
                   )}
                 </div>
 
                 <div className="flex justify-between text-text-muted">
                   <span>GST (Included 5%)</span>
-                  <span>{formatPrice(breakdown.tax_paise)}</span>
+                  <span className="price font-sans tabular-nums">{formatPrice(breakdown.tax_paise)}</span>
                 </div>
 
                 <div className="pt-3 border-t border-border flex justify-between items-baseline">
                   <span className="font-sans text-base font-bold text-text">Total Amount</span>
-                  <span className="font-sans text-xl font-bold text-brand-crimson dark:text-brand-gold">
+                  <span className="price font-sans text-xl font-bold text-brand-crimson dark:text-brand-gold tabular-nums">
                     {formatPrice(breakdown.total_paise)}
                   </span>
                 </div>

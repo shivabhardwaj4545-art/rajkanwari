@@ -212,14 +212,14 @@ export const ProductDetailPage: React.FC = () => {
             <div className="mt-4 pb-5 border-b border-border">
               <div className="flex items-baseline gap-3">
                 {/* Final price in crimson (gold on dark) */}
-                <span className="font-sans text-3xl font-bold text-brand-crimson dark:text-brand-gold tracking-tight">
+                <span className="price font-sans text-3xl font-bold text-brand-crimson dark:text-brand-gold tracking-tight tabular-nums">
                   {formatPrice(product.price.final_price_paise)}
                 </span>
 
                 {/* Struck-through MRP */}
                 {product.price.effective_discount_percent > 0 && (
                   <>
-                    <span className="font-sans text-base text-text-muted line-through font-normal">
+                    <span className="price font-sans text-base text-text-muted line-through font-normal tabular-nums">
                       {formatPrice(product.price.mrp_paise)}
                     </span>
                     <span className="inline-flex items-center rounded-sm bg-brand-crimson/15 px-2 py-0.5 text-xs font-bold text-brand-crimson dark:text-brand-gold">
@@ -239,7 +239,10 @@ export const ProductDetailPage: React.FC = () => {
                   <Sparkles size={14} className="text-brand-gold" />
                   <span>
                     Special Offer Applied: {product.price.applied_offer.name} (
-                    {formatPrice(product.price.offer_discount_paise)} off)
+                    <span className="price font-sans font-bold tabular-nums">
+                      {formatPrice(product.price.offer_discount_paise)}
+                    </span>{' '}
+                    off)
                   </span>
                 </div>
               )}
@@ -614,11 +617,11 @@ export const ProductDetailPage: React.FC = () => {
                       </h3>
                     </div>
                     <div className="mt-3 pt-2 border-t border-border/40 flex items-baseline gap-2 min-h-[1.5rem]">
-                      <span className="font-sans text-sm font-bold text-brand-crimson dark:text-brand-gold tracking-tight">
+                      <span className="price font-sans text-sm font-bold text-brand-crimson dark:text-brand-gold tracking-tight tabular-nums">
                         {formatPrice(rp.price.final_price_paise)}
                       </span>
                       {rp.price.effective_discount_percent > 0 && (
-                        <span className="font-sans text-[11px] text-text-muted line-through font-medium">
+                        <span className="price font-sans text-[11px] text-text-muted line-through font-medium tabular-nums">
                           {formatPrice(rp.price.mrp_paise)}
                         </span>
                       )}
@@ -637,11 +640,11 @@ export const ProductDetailPage: React.FC = () => {
           <div className="flex-1 min-w-0">
             <h4 className="text-xs font-semibold text-text truncate">{product.name}</h4>
             <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="font-sans text-sm font-bold text-brand-crimson dark:text-brand-gold tracking-tight">
+              <span className="price font-sans text-sm font-bold text-brand-crimson dark:text-brand-gold tracking-tight tabular-nums">
                 {formatPrice(product.price.final_price_paise)}
               </span>
               {product.price.effective_discount_percent > 0 && (
-                <span className="text-[10px] text-text-muted line-through">
+                <span className="price font-sans text-[10px] text-text-muted line-through tabular-nums">
                   {formatPrice(product.price.mrp_paise)}
                 </span>
               )}

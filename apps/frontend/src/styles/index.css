@@ -17,6 +17,20 @@
 /* ── Design Tokens ─────────────────────────────────────────────────────────── */
 @import './tokens.css';
 
+/* ── Indian Rupee (₹, U+20B9) Font-Face Fallback Override ─────────────────────
+   Cormorant Garamond's native U+20B9 glyph is an undersized, elevated superscript.
+   By routing U+20B9 directly to Inter, all headings, cards, and banners rendering
+   ₹ will display Inter's clean, full-height, standard currency symbol.
+   ───────────────────────────────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: local('Inter'), local('system-ui'), local('sans-serif');
+  unicode-range: U+20B9;
+}
+
 /* ── Tailwind ──────────────────────────────────────────────────────────────── */
 @tailwind base;
 @tailwind components;
@@ -86,7 +100,7 @@
     background: transparent !important;
   }
 
-  /* Heading font */
+  /* Heading font with lining figures */
   h1,
   h2,
   h3,
@@ -96,12 +110,16 @@
     font-family: var(--font-serif);
     line-height: 1.2;
     font-weight: 600;
+    font-feature-settings: 'lnum' 1, 'pnum' 1;
   }
 
-  /* Price display — always Inter so ₹ renders consistently */
-  .price {
-    font-family: var(--font-sans);
-    font-variant-numeric: tabular-nums;
+  /* Price display — always Inter so ₹ renders consistently with clean tabular lining numbers */
+  .price,
+  [data-price],
+  .font-price {
+    font-family: var(--font-sans) !important;
+    font-variant-numeric: tabular-nums lining-nums !important;
+    font-feature-settings: 'lnum' 1, 'tnum' 1 !important;
   }
 }
 

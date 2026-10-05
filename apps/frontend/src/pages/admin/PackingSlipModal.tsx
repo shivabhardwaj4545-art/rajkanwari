@@ -145,7 +145,7 @@ export const PackingSlipModal: React.FC<PackingSlipModalProps> = ({ data, onClos
               </div>
             </div>
             {data.total_amount && (
-              <div className="text-right font-mono font-black text-lg">
+              <div className="text-right price font-sans font-black text-lg tabular-nums">
                 {formatPrice(data.total_amount)}
               </div>
             )}

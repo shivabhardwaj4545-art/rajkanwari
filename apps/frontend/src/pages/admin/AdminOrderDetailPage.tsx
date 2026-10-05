@@ -478,8 +478,8 @@ export const AdminOrderDetailPage: React.FC = () => {
                       {item.size} / {item.color}
                     </td>
                     <td className="py-3 text-right">{item.quantity}</td>
-                    <td className="py-3 text-right">{formatPrice(item.price_at_purchase)}</td>
-                    <td className="py-3 text-right font-bold text-[var(--text)]">
+                    <td className="py-3 text-right font-sans tabular-nums">{formatPrice(item.price_at_purchase)}</td>
+                    <td className="py-3 text-right font-bold font-sans tabular-nums text-[var(--text)]">
                       {formatPrice(item.price_at_purchase * item.quantity)}
                     </td>
                   </tr>
@@ -615,7 +615,7 @@ export const AdminOrderDetailPage: React.FC = () => {
                 Method: <span className="font-mono uppercase text-[var(--text)] font-semibold">{order.payment_method}</span>
               </p>
               <p className="text-[var(--text-muted)]">
-                Total: <span className="font-semibold text-[var(--text)]">{formatPrice(order.total_amount)}</span>
+                Total: <span className="font-semibold text-[var(--text)] font-sans tabular-nums">{formatPrice(order.total_amount)}</span>
               </p>
               {order.razorpay_payment_id && (
                 <p className="text-[10px] text-[var(--text-muted)] font-mono break-all">

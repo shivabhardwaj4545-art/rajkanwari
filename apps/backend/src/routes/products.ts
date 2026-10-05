@@ -28,6 +28,7 @@ async function getActiveAutoOffers(): Promise<OfferRow[]> {
              type, value, max_discount, min_cart_value, scope, scope_ids
       FROM offers
       WHERE is_active = 1
+        AND (code IS NULL OR code = '')
         AND (starts_at IS NULL OR starts_at <= ?)
         AND (ends_at IS NULL OR ends_at >= ?)
       ORDER BY (CASE WHEN scope = 'product' THEN 0 WHEN scope = 'category' THEN 1 ELSE 2 END),
@@ -60,6 +61,14 @@ function computePrices(
   } | null = null;
 
   for (const offer of activeOffers) {
+    if (offer.code && offer.code.trim().length > 0) {
+      continue;
+    }
+
+    const minCartValue = Number(offer.min_cart_value || 0);
+    if (minCartValue > 0 && basePricePaise < minCartValue) {
+      continue;
+    }
     let scopeMatches = false;
     if (offer.scope === 'all') {
       scopeMatches = true;

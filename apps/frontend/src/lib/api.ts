@@ -971,6 +971,8 @@ export interface NamedDiscount {
 export interface CartBreakdown {
   items: CartLineItem[];
   subtotal_mrp_paise: number;
+  subtotal_base_paise?: number;
+  catalog_discount_paise?: number;
   subtotal_paise: number;
   total_discount_paise: number;
   discounts: NamedDiscount[];

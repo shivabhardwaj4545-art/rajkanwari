@@ -284,7 +284,7 @@ export const CustomerOrdersPage: React.FC = () => {
 
                     <div className="text-left md:text-right">
                       <span className="text-[11px] text-text-muted block">Order Total</span>
-                      <span className="font-sans text-lg font-bold text-brand-crimson dark:text-brand-gold">
+                      <span className="price font-sans text-lg font-bold text-brand-crimson dark:text-brand-gold tabular-nums">
                         {formatPrice(ord.total_amount)}
                       </span>
                     </div>

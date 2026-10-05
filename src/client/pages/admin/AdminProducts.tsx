@@ -133,7 +133,7 @@ export const AdminProducts: React.FC = () => {
                 <span className="text-[10px] font-bold text-brand-gold uppercase">{p.categoryName}</span>
                 <h3 className="font-serif font-bold text-16 text-text line-clamp-1">{p.title}</h3>
                 <p className="text-xs text-text-muted line-clamp-1">{p.craft}</p>
-                <p className="font-serif font-bold text-brand-crimson dark:text-brand-gold mt-4">
+                <p className="price font-sans font-bold text-brand-crimson dark:text-brand-gold mt-4 tabular-nums">
                   {((p.pricePaise) / 100).toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}
                 </p>
               </div>

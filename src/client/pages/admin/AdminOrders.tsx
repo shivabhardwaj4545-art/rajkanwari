@@ -92,7 +92,7 @@ export const AdminOrders: React.FC = () => {
                   <p className="text-text-muted text-[10px]">{order.customerEmail}</p>
                 </td>
                 <td className="p-16 font-semibold">{order.items?.length || 0} items</td>
-                <td className="p-16 font-serif font-bold text-brand-crimson dark:text-brand-gold">
+                <td className="p-16 price font-sans font-bold text-brand-crimson dark:text-brand-gold tabular-nums">
                   {((order.totalPaise) / 100).toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}
                 </td>
                 <td className="p-16">

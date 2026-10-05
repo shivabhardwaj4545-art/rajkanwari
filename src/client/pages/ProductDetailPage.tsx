@@ -132,14 +132,14 @@ export const ProductDetailPage: React.FC = () => {
           <div className="flex items-baseline gap-12 pb-16 border-b border-border">
             {formattedDiscountPrice ? (
               <>
-                <span className="font-serif text-32 font-bold text-brand-crimson dark:text-brand-gold">
+                <span className="price font-sans text-32 font-bold text-brand-crimson dark:text-brand-gold tabular-nums">
                   {formattedDiscountPrice}
                 </span>
-                <span className="text-sm text-text-muted line-through">{formattedPrice}</span>
+                <span className="price font-sans text-sm text-text-muted line-through tabular-nums">{formattedPrice}</span>
                 <span className="text-xs text-success font-bold">(Inclusive of all taxes)</span>
               </>
             ) : (
-              <span className="font-serif text-32 font-bold text-text">{formattedPrice}</span>
+              <span className="price font-sans text-32 font-bold text-text tabular-nums">{formattedPrice}</span>
             )}
           </div>
 

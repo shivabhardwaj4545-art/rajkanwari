@@ -79,7 +79,7 @@ export const AdminDashboard: React.FC = () => {
             <span className="text-xs font-semibold uppercase">Total Revenue</span>
             <IndianRupee className="w-20 h-20 text-brand-gold" />
           </div>
-          <p className="font-serif text-28 font-bold text-brand-crimson dark:text-brand-gold">{formattedRevenue}</p>
+          <p className="price font-sans text-28 font-bold text-brand-crimson dark:text-brand-gold tabular-nums">{formattedRevenue}</p>
         </div>
 
         <div className="p-20 bg-surface border border-border rounded-md space-y-8">

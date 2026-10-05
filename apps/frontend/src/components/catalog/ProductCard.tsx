@@ -208,13 +208,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
         <div className="mt-3 pt-2 border-t border-border/40 flex flex-col justify-end">
           <div className="flex items-baseline gap-2 flex-wrap min-h-[1.5rem]">
             {/* Final price in crimson (gold on dark) */}
-            <span className="font-sans text-base font-bold text-brand-crimson dark:text-brand-gold tracking-tight">
+            <span className="price font-sans text-base font-bold text-brand-crimson dark:text-brand-gold tracking-tight tabular-nums">
               {formatPrice(product.price.final_price_paise)}
             </span>
 
             {/* Struck-through MRP */}
             {hasDiscount && (
-              <span className="font-sans text-xs text-text-muted line-through font-normal">
+              <span className="price font-sans text-xs text-text-muted line-through font-normal tabular-nums">
                 {formatPrice(product.price.mrp_paise)}
               </span>
             )}

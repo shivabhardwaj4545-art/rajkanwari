@@ -156,6 +156,10 @@ export const CartDrawer: React.FC = () => {
                           <img
                             src={item.image_url}
                             alt={item.product_name}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src =
+                                'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=300&q=80';
+                            }}
                             className="h-full w-full object-cover object-top"
                           />
                         </div>
@@ -181,6 +185,18 @@ export const CartDrawer: React.FC = () => {
                               Size: <strong className="text-text">{item.size}</strong> | Colour:{' '}
                               <strong className="text-text">{item.color}</strong>
                             </p>
+
+                            {/* Item-level Offer / Discount Badge */}
+                            {item.applied_auto_offer ? (
+                              <div className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-brand-gold bg-brand-gold/15 px-2 py-0.5 rounded border border-brand-gold/30">
+                                <Sparkles size={11} className="text-brand-gold shrink-0" />
+                                <span className="truncate max-w-[200px]">{item.applied_auto_offer.name}</span>
+                              </div>
+                            ) : item.unit_product_discount_percent > 0 ? (
+                              <div className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-brand-crimson dark:text-brand-gold bg-brand-crimson/10 dark:bg-brand-gold/15 px-2 py-0.5 rounded">
+                                <span>{item.unit_product_discount_percent}% OFF</span>
+                              </div>
+                            ) : null}
                           </div>
 
                           {/* Price & Quantity Stepper */}
@@ -212,11 +228,11 @@ export const CartDrawer: React.FC = () => {
 
                             {/* Line Total Price */}
                             <div className="text-right">
-                              <span className="font-serif text-sm font-semibold text-brand-crimson dark:text-brand-gold">
+                              <span className="price font-sans text-sm font-semibold text-brand-crimson dark:text-brand-gold tabular-nums">
                                 {formatPrice(item.unit_final_price_paise * item.quantity)}
                               </span>
                               {item.line_mrp_paise > item.unit_final_price_paise * item.quantity && (
-                                <span className="block text-[10px] text-text-muted line-through">
+                                <span className="price font-sans block text-[10px] text-text-muted line-through tabular-nums">
                                   {formatPrice(item.line_mrp_paise)}
                                 </span>
                               )}
@@ -281,8 +297,18 @@ export const CartDrawer: React.FC = () => {
                 <div className="space-y-2 text-xs pt-2 border-t border-border/60">
                   <div className="flex justify-between text-text-muted">
                     <span>Subtotal (MRP)</span>
-                    <span>{formatPrice(breakdown.subtotal_mrp_paise)}</span>
+                    <span className="price font-sans tabular-nums">{formatPrice(breakdown.subtotal_mrp_paise)}</span>
                   </div>
+
+                  {/* Product / Catalog discount */}
+                  {(breakdown.catalog_discount_paise ?? Math.max(0, breakdown.subtotal_mrp_paise - (breakdown.subtotal_base_paise ?? breakdown.subtotal_paise))) > 0 && (
+                    <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
+                      <span>Product Discount / Savings</span>
+                      <span className="price font-sans tabular-nums">
+                        -{formatPrice(breakdown.catalog_discount_paise ?? Math.max(0, breakdown.subtotal_mrp_paise - (breakdown.subtotal_base_paise ?? breakdown.subtotal_paise)))}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Each named discount on its own line */}
                   {breakdown.discounts.map((disc, i) => (
@@ -293,7 +319,7 @@ export const CartDrawer: React.FC = () => {
                       <span className="truncate max-w-[240px]">
                         ✨ {disc.name} {disc.code ? `(${disc.code})` : ''}
                       </span>
-                      <span>-{formatPrice(disc.discount_paise)}</span>
+                      <span className="price font-sans tabular-nums">-{formatPrice(disc.discount_paise)}</span>
                     </div>
                   ))}
 
@@ -303,19 +329,19 @@ export const CartDrawer: React.FC = () => {
                       {breakdown.shipping_paise === 0 ? (
                         <strong className="text-success font-semibold uppercase">Free</strong>
                       ) : (
-                        formatPrice(breakdown.shipping_paise)
+                        <span className="price font-sans tabular-nums">{formatPrice(breakdown.shipping_paise)}</span>
                       )}
                     </span>
                   </div>
 
                   <div className="flex justify-between text-text-muted">
                     <span>GST (5%)</span>
-                    <span>{formatPrice(breakdown.tax_paise)}</span>
+                    <span className="price font-sans tabular-nums">{formatPrice(breakdown.tax_paise)}</span>
                   </div>
 
                   <div className="flex justify-between text-sm font-semibold text-text pt-2 border-t border-border">
                     <span>Estimated Total</span>
-                    <span className="font-sans text-base font-bold text-brand-crimson dark:text-brand-gold">
+                    <span className="price font-sans text-base font-bold text-brand-crimson dark:text-brand-gold tabular-nums">
                       {formatPrice(breakdown.total_paise)}
                     </span>
                   </div>

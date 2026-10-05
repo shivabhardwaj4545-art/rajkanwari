@@ -141,7 +141,7 @@ export const OrderTrackingPage: React.FC = () => {
                   <p className="font-bold text-text">{item.title}</p>
                   <p className="text-text-muted">Size: {item.size} | Color: {item.color} | Qty: {item.quantity}</p>
                 </div>
-                <p className="font-serif font-bold text-text">
+                <p className="price font-sans font-bold text-text tabular-nums">
                   {((item.pricePaise * item.quantity) / 100).toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}
                 </p>
               </div>
@@ -150,7 +150,7 @@ export const OrderTrackingPage: React.FC = () => {
 
           <div className="flex justify-between items-center text-sm font-bold text-text pt-12">
             <span>Total Paid</span>
-            <span className="font-serif text-20 text-brand-crimson dark:text-brand-gold">{formattedTotal}</span>
+            <span className="price font-sans text-20 text-brand-crimson dark:text-brand-gold tabular-nums">{formattedTotal}</span>
           </div>
         </div>
 
@@ -230,7 +230,7 @@ export const CustomerOrdersPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-16">
-                  <span className="font-serif text-18 font-bold text-brand-crimson dark:text-brand-gold">{formattedTotal}</span>
+                  <span className="price font-sans text-18 font-bold text-brand-crimson dark:text-brand-gold tabular-nums">{formattedTotal}</span>
                   <Link to={`/orders/${order.id}`}>
                     <Badge variant="outline">Track Order</Badge>
                   </Link>

@@ -159,12 +159,12 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
 
                 {/* Price block */}
                 <div className="mt-3 flex items-baseline gap-3">
-                  <span className="font-sans text-2xl font-bold text-brand-crimson dark:text-brand-gold tracking-tight">
+                  <span className="price font-sans text-2xl font-bold text-brand-crimson dark:text-brand-gold tracking-tight tabular-nums">
                     {formatPrice(product.price.final_price_paise)}
                   </span>
                   {product.price.effective_discount_percent > 0 && (
                     <>
-                      <span className="font-sans text-sm text-text-muted line-through font-medium">
+                      <span className="price font-sans text-sm text-text-muted line-through font-medium tabular-nums">
                         {formatPrice(product.price.mrp_paise)}
                       </span>
                       <span className="rounded bg-brand-crimson/15 text-brand-crimson dark:text-brand-gold text-xs font-semibold px-2 py-0.5">

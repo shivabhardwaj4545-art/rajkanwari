@@ -659,9 +659,9 @@ export const AdminOffersPage: React.FC = () => {
                     <span>Live Mathematical Calculation Preview</span>
                   </div>
                   <div className="text-text font-medium text-xs">
-                    &ldquo;A <span className="font-semibold">{livePreviewCalculation.original}</span> handcrafted kurta becomes{' '}
-                    <strong className="text-brand-crimson text-sm">{livePreviewCalculation.final}</strong>{' '}
-                    (Saving {livePreviewCalculation.saved})&rdquo;
+                    &ldquo;A <span className="price font-sans font-semibold tabular-nums">{livePreviewCalculation.original}</span> handcrafted kurta becomes{' '}
+                    <strong className="price font-sans text-brand-crimson text-sm tabular-nums">{livePreviewCalculation.final}</strong>{' '}
+                    (Saving <span className="price font-sans tabular-nums">{livePreviewCalculation.saved}</span>)&rdquo;
                   </div>
                 </div>
 

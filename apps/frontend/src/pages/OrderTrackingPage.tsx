@@ -695,7 +695,7 @@ export const OrderTrackingPage: React.FC = () => {
                       </p>
                     </div>
                     <span className="w-1/6 text-center text-text-muted">x{it.quantity}</span>
-                    <div className="w-1/3 text-right font-semibold text-text">
+                    <div className="w-1/3 text-right font-semibold text-text price font-sans tabular-nums">
                       {formatPrice((it.price_at_purchase - it.discount_at_purchase) * it.quantity)}
                     </div>
                   </div>
@@ -706,29 +706,29 @@ export const OrderTrackingPage: React.FC = () => {
               <div className="py-3 border-t border-dashed border-border space-y-1.5 text-[11px]">
                 <div className="flex justify-between text-text-muted">
                   <span>SUBTOTAL</span>
-                  <span>{formatPrice(order.subtotal)}</span>
+                  <span className="price font-sans tabular-nums">{formatPrice(order.subtotal)}</span>
                 </div>
 
                 {order.discount_amount > 0 && (
                   <div className="flex justify-between text-emerald-600 font-semibold">
                     <span>SAVINGS & PROMOTIONS</span>
-                    <span>-{formatPrice(order.discount_amount)}</span>
+                    <span className="price font-sans tabular-nums">-{formatPrice(order.discount_amount)}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between text-text-muted">
                   <span>SHIPPING / DELIVERY</span>
-                  <span>{order.shipping_cost === 0 ? 'FREE' : formatPrice(order.shipping_cost)}</span>
+                  <span>{order.shipping_cost === 0 ? 'FREE' : <span className="price font-sans tabular-nums">{formatPrice(order.shipping_cost)}</span>}</span>
                 </div>
 
                 <div className="flex justify-between text-text-muted">
                   <span>TAXES (5% GST INCL.)</span>
-                  <span>{formatPrice(order.tax)}</span>
+                  <span className="price font-sans tabular-nums">{formatPrice(order.tax)}</span>
                 </div>
 
                 <div className="pt-2.5 border-t border-double border-border flex justify-between text-sm font-bold text-brand-crimson dark:text-brand-gold">
                   <span>TOTAL AMOUNT</span>
-                  <span>{formatPrice(order.total_amount)}</span>
+                  <span className="price font-sans tabular-nums">{formatPrice(order.total_amount)}</span>
                 </div>
               </div>
 
@@ -794,7 +794,7 @@ export const OrderTrackingPage: React.FC = () => {
                           Size: {it.size} • Color: {it.color} • Qty: {it.quantity}
                         </span>
                       </div>
-                      <span className="font-semibold text-text shrink-0">
+                      <span className="font-semibold text-text shrink-0 price font-sans tabular-nums">
                         {formatPrice((it.price_at_purchase - it.discount_at_purchase) * it.quantity)}
                       </span>
                     </div>

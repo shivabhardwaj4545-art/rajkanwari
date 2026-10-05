@@ -40,7 +40,9 @@ export interface NamedDiscount {
 export interface CartBreakdown {
   items: CartLineItem[];
   subtotal_mrp_paise: number;
-  subtotal_paise: number; // after base product discounts
+  subtotal_base_paise: number;
+  catalog_discount_paise: number;
+  subtotal_paise: number; // after base product discounts, auto offers, and coupons
   total_discount_paise: number;
   discounts: NamedDiscount[];
   coupon?: {
@@ -99,6 +101,8 @@ export async function calculateCart(
     return {
       items: [],
       subtotal_mrp_paise: 0,
+      subtotal_base_paise: 0,
+      catalog_discount_paise: 0,
       subtotal_paise: 0,
       total_discount_paise: 0,
       discounts: [],
@@ -406,11 +410,14 @@ export async function calculateCart(
 
   // 8. Total Amount
   const totalPaise = currentSubtotal + shippingPaise + taxPaise;
-  const totalDiscountPaise = discounts.reduce((acc, d) => acc + d.discount_paise, 0);
+  const catalogDiscountPaise = Math.max(0, subtotalMrp - subtotalBase);
+  const totalDiscountPaise = catalogDiscountPaise + discounts.reduce((acc, d) => acc + d.discount_paise, 0);
 
   return {
     items: lineItems,
     subtotal_mrp_paise: subtotalMrp,
+    subtotal_base_paise: subtotalBase,
+    catalog_discount_paise: catalogDiscountPaise,
     subtotal_paise: currentSubtotal,
     total_discount_paise: totalDiscountPaise,
     discounts,
