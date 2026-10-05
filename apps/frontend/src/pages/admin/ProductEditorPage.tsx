@@ -1053,6 +1053,9 @@ export const ProductEditorPage: React.FC = () => {
                     <img
                       src={imgUrl}
                       alt={`Product preview ${idx + 1}`}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
+                      }}
                       className="w-full h-full object-cover object-top"
                     />
 
@@ -1480,6 +1483,9 @@ export const ProductEditorPage: React.FC = () => {
                   <img
                     src={images[0]}
                     alt="Preview"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
+                    }}
                     className="w-full h-full object-cover object-top"
                   />
                 ) : (

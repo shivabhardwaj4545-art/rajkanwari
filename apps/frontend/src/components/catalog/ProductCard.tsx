@@ -23,7 +23,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
   const isInWishlist = useWishlistStore((s) => s.isInWishlist(product.id));
   const toggleWishlist = useWishlistStore((s) => s.toggleWishlist);
 
-  const DEFAULT_ETHNIC_IMAGE = 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80';
+  const DEFAULT_ETHNIC_IMAGE = '/placeholder.svg';
   const primaryImg = product.images?.[0] || DEFAULT_ETHNIC_IMAGE;
   const secondaryImg = product.images?.[1];
 

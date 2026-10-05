@@ -154,11 +154,10 @@ export const CartDrawer: React.FC = () => {
                         {/* Thumbnail */}
                         <div className="h-20 w-16 flex-shrink-0 overflow-hidden rounded-md border border-border bg-surface-alt">
                           <img
-                            src={item.image_url}
+                            src={item.image_url || '/placeholder.svg'}
                             alt={item.product_name}
                             onError={(e) => {
-                              (e.target as HTMLImageElement).src =
-                                'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=300&q=80';
+                              (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
                             }}
                             className="h-full w-full object-cover object-top"
                           />

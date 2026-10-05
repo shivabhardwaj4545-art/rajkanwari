@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const DEFAULT_ETHNIC_IMAGE_FALLBACK =
-  'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=400&q=80';
+export const DEFAULT_PRODUCT_PLACEHOLDER = '/placeholder.svg';
 
 interface ImageWithFallbackProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src'> {
   src?: string | null | undefined;
@@ -10,19 +9,25 @@ interface ImageWithFallbackProps extends Omit<React.ImgHTMLAttributes<HTMLImageE
 
 export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   src,
-  fallbackSrc,
+  fallbackSrc = DEFAULT_PRODUCT_PLACEHOLDER,
   alt = 'Product image',
   className = '',
   ...props
 }) => {
-  const resolvedFallback: string = fallbackSrc || DEFAULT_ETHNIC_IMAGE_FALLBACK;
-  const initialSrc: string = (src || resolvedFallback) as string;
+  const resolvedFallback = fallbackSrc || DEFAULT_PRODUCT_PLACEHOLDER;
+  const initialSrc = (src && src.trim()) ? src : resolvedFallback;
 
   const [imgSrc, setImgSrc] = useState<string>(initialSrc);
   const [hasError, setHasError] = useState(false);
 
+  useEffect(() => {
+    const nextSrc = (src && src.trim()) ? src : resolvedFallback;
+    setImgSrc(nextSrc);
+    setHasError(false);
+  }, [src, resolvedFallback]);
+
   const handleError = () => {
-    if (!hasError) {
+    if (!hasError && imgSrc !== resolvedFallback) {
       setHasError(true);
       setImgSrc(resolvedFallback);
     }
@@ -38,3 +43,4 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
     />
   );
 };
+

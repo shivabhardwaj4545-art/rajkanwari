@@ -12,11 +12,23 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName 
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const displayImages = images.length > 0 ? images : ['/placeholder.jpg'];
-  const currentImage = displayImages[selectedIndex] || displayImages[0];
+  const validImages = (images || []).filter((img) => typeof img === 'string' && img.trim().length > 0);
+  const displayImages = validImages.length > 0 ? validImages : ['/placeholder.svg'];
+  const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set());
+
+  // Reset failed URLs if image list changes
+  React.useEffect(() => {
+    setFailedUrls(new Set());
+    setSelectedIndex(0);
+  }, [images]);
+
+  const rawCurrentImage = displayImages[selectedIndex] || displayImages[0] || '/placeholder.svg';
+  const isCurrentBroken = failedUrls.has(rawCurrentImage);
+  const currentImage = isCurrentBroken ? '/placeholder.svg' : rawCurrentImage;
+  const isPlaceholderActive = currentImage === '/placeholder.svg' || currentImage.endsWith('/placeholder.svg');
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || isPlaceholderActive) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
@@ -31,6 +43,14 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName 
     setSelectedIndex((prev) => (prev < displayImages.length - 1 ? prev + 1 : 0));
   };
 
+  const handleImageError = (failedSrc: string) => {
+    setFailedUrls((prev) => {
+      const next = new Set(prev);
+      next.add(failedSrc);
+      return next;
+    });
+  };
+
   return (
     <div className="flex flex-col-reverse lg:flex-row gap-4">
       {/* ── Thumbnail Rail ──────────────────────────────────────────────── */}
@@ -38,6 +58,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName 
         <div className="flex lg:flex-col gap-2.5 overflow-x-auto lg:overflow-y-auto max-h-[560px] pb-2 lg:pb-0 scrollbar-none">
           {displayImages.map((img, idx) => {
             const isSelected = selectedIndex === idx;
+            const thumbSrc = failedUrls.has(img) ? '/placeholder.svg' : img;
             return (
               <button
                 key={idx}
@@ -51,8 +72,15 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName 
                 aria-label={`View image ${idx + 1} of ${productName}`}
               >
                 <img
-                  src={img}
+                  src={thumbSrc}
                   alt={`${productName} thumbnail ${idx + 1}`}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.endsWith('/placeholder.svg')) {
+                      target.src = '/placeholder.svg';
+                    }
+                    handleImageError(img);
+                  }}
                   className="h-full w-full object-cover object-top"
                 />
               </button>
@@ -65,8 +93,10 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName 
       <div className="relative flex-1">
         <div
           ref={containerRef}
-          className="relative aspect-[3/4] w-full overflow-hidden rounded-xl border border-border bg-surface-alt cursor-crosshair group"
-          onMouseEnter={() => setIsZoomed(true)}
+          className={`relative aspect-[3/4] w-full overflow-hidden rounded-xl border border-border bg-surface-alt group ${
+            isPlaceholderActive ? 'cursor-default' : 'cursor-crosshair'
+          }`}
+          onMouseEnter={() => !isPlaceholderActive && setIsZoomed(true)}
           onMouseLeave={() => setIsZoomed(false)}
           onMouseMove={handleMouseMove}
         >
@@ -74,13 +104,20 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName 
           <img
             src={currentImage}
             alt={productName}
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (!target.src.endsWith('/placeholder.svg')) {
+                target.src = '/placeholder.svg';
+              }
+              handleImageError(rawCurrentImage);
+            }}
             className={`h-full w-full object-cover object-top transition-transform duration-200 ${
-              isZoomed ? 'lg:opacity-0' : 'opacity-100'
+              isZoomed && !isPlaceholderActive ? 'lg:opacity-0' : 'opacity-100'
             }`}
           />
 
           {/* High resolution desktop zoom magnification */}
-          {isZoomed && (
+          {isZoomed && !isPlaceholderActive && (
             <div
               className="hidden lg:block absolute inset-0 bg-no-repeat pointer-events-none transition-opacity duration-150"
               style={{
@@ -91,11 +128,13 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName 
             />
           )}
 
-          {/* Zoom hint badge */}
-          <div className="hidden lg:flex absolute bottom-3 right-3 items-center gap-1.5 rounded-full bg-surface/80 px-2.5 py-1 text-[11px] font-medium text-text-muted backdrop-blur-md border border-border pointer-events-none">
-            <ZoomIn size={13} />
-            <span>Hover to zoom</span>
-          </div>
+          {/* Zoom hint badge (only when real zoomable image is present) */}
+          {!isPlaceholderActive && (
+            <div className="hidden lg:flex absolute bottom-3 right-3 items-center gap-1.5 rounded-full bg-surface/80 px-2.5 py-1 text-[11px] font-medium text-text-muted backdrop-blur-md border border-border pointer-events-none">
+              <ZoomIn size={13} />
+              <span>Hover to zoom</span>
+            </div>
+          )}
 
           {/* Navigation Arrows for multi-images */}
           {displayImages.length > 1 && (

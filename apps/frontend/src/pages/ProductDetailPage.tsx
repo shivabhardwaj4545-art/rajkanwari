@@ -602,8 +602,11 @@ export const ProductDetailPage: React.FC = () => {
                 >
                   <div className="aspect-[3/4] w-full overflow-hidden bg-surface-alt flex-shrink-0">
                     <img
-                      src={rp.images[0] || '/placeholder.jpg'}
+                      src={rp.images?.[0] || '/placeholder.svg'}
                       alt={rp.name}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
+                      }}
                       loading="lazy"
                       className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                     />

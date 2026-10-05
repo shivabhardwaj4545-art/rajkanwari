@@ -301,8 +301,11 @@ export const CustomerOrdersPage: React.FC = () => {
                             className="h-12 w-12 rounded-lg border-2 border-surface bg-surface-alt overflow-hidden shadow-xs shrink-0"
                           >
                             <img
-                              src={thumb || '/placeholder.png'}
+                              src={thumb || '/placeholder.svg'}
                               alt="Item preview"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
+                              }}
                               className="h-full w-full object-cover object-top"
                             />
                           </div>

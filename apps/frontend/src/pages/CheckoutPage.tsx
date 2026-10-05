@@ -1022,8 +1022,11 @@ export const CheckoutPage: React.FC = () => {
                 <div key={item.variant_id} className="pt-3 first:pt-0 flex gap-3 items-center">
                   <div className="h-14 w-12 rounded-md overflow-hidden bg-surface-alt border border-border shrink-0">
                     <img
-                      src={item.image_url || '/placeholder.png'}
+                      src={item.image_url || '/placeholder.svg'}
                       alt={item.product_name}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
+                      }}
                       className="h-full w-full object-cover object-top"
                     />
                   </div>

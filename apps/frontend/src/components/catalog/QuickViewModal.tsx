@@ -118,33 +118,51 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
 
           <div className="grid grid-cols-1 md:grid-cols-2">
             {/* Gallery / Images */}
-            <div className="relative bg-surface-alt aspect-[3/4] flex flex-col justify-between p-4">
-              <div className="relative h-full w-full overflow-hidden rounded-lg">
-                <img
-                  src={product.images[activeImgIndex] || product.images[0]}
-                  alt={product.name}
-                  className="h-full w-full object-cover object-top"
-                />
-              </div>
+            {(() => {
+              const validImages = (product.images || []).filter((img) => Boolean(img && img.trim()));
+              const displayImages = validImages.length > 0 ? validImages : ['/placeholder.svg'];
+              const currentImg = displayImages[activeImgIndex] || displayImages[0] || '/placeholder.svg';
 
-              {/* Thumbnails if > 1 image */}
-              {product.images.length > 1 && (
-                <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
-                  {product.images.map((img, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setActiveImgIndex(idx)}
-                      className={`h-14 w-11 flex-shrink-0 rounded overflow-hidden border-2 transition-all ${
-                        activeImgIndex === idx ? 'border-brand-gold' : 'border-transparent opacity-70'
-                      }`}
-                    >
-                      <img src={img} alt="thumbnail" className="h-full w-full object-cover object-top" />
-                    </button>
-                  ))}
+              return (
+                <div className="relative bg-surface-alt aspect-[3/4] flex flex-col justify-between p-4">
+                  <div className="relative h-full w-full overflow-hidden rounded-lg">
+                    <img
+                      src={currentImg}
+                      alt={product.name}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
+                      }}
+                      className="h-full w-full object-cover object-top"
+                    />
+                  </div>
+
+                  {/* Thumbnails if > 1 image */}
+                  {displayImages.length > 1 && (
+                    <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+                      {displayImages.map((img, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setActiveImgIndex(idx)}
+                          className={`h-14 w-11 flex-shrink-0 rounded overflow-hidden border-2 transition-all ${
+                            activeImgIndex === idx ? 'border-brand-gold' : 'border-transparent opacity-70'
+                          }`}
+                        >
+                          <img
+                            src={img}
+                            alt="thumbnail"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
+                            }}
+                            className="h-full w-full object-cover object-top"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              );
+            })()}
 
             {/* Info and Variant Selection */}
             <div className="p-6 flex flex-col justify-between">

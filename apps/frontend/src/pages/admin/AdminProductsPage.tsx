@@ -373,6 +373,9 @@ export const AdminProductsPage: React.FC = () => {
                         <img
                           src={prod.primary_image}
                           alt={prod.name}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
+                          }}
                           className="w-full h-full object-cover object-top"
                         />
                       ) : (
@@ -519,6 +522,9 @@ export const AdminProductsPage: React.FC = () => {
                     <img
                       src={prod.primary_image}
                       alt={prod.name}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
+                      }}
                       className="w-full h-full object-cover object-top"
                     />
                   ) : (
