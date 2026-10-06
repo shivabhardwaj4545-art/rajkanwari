@@ -135,7 +135,7 @@ export const AdminProductsPage: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `rajkanwari-products-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `shikkis-products-${new Date().toISOString().slice(0, 10)}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();

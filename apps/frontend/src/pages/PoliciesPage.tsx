@@ -168,7 +168,7 @@ export const PoliciesPage: React.FC = () => {
                     1. Order Processing Time
                   </h3>
                   <p>
-                    Each piece at Rajkanwari is curated and thoroughly quality-checked before dispatch.
+                    Each piece at Shikkis is curated and thoroughly quality-checked before dispatch.
                     Standard orders are packed and dispatched from our Jodhpur flagship boutique within{' '}
                     <strong className="text-text font-semibold">24 to 48 hours</strong> (excluding Sundays and national holidays).
                   </p>
@@ -325,7 +325,7 @@ export const PoliciesPage: React.FC = () => {
                     onToggle={() => setOpenFaqIndex(openFaqIndex === 4 ? null : 4)}
                     answer={
                       <p>
-                        Orders can be cancelled or modified within 2 hours of placement before dispatch. Please reach out to our team immediately at <strong className="text-text">hello@rajkanwari.com</strong> or call <strong className="text-text">+91 75685 72265 / +91 86194 74459</strong>.
+                        Orders can be cancelled or modified within 2 hours of placement before dispatch. Please reach out to our team immediately at <strong className="text-text">hello@shikkis.com</strong> or call <strong className="text-text">+91 75685 72265 / +91 86194 74459</strong>.
                       </p>
                     }
                   />
@@ -353,7 +353,7 @@ export const PoliciesPage: React.FC = () => {
                       <h3 className="font-serif text-lg font-semibold text-text">Boutique Address</h3>
                     </div>
                     <p className="text-sm text-text-muted leading-relaxed">
-                      <strong className="text-text font-medium block">Rajkanwari — House of Ethnic Wear</strong>
+                      <strong className="text-text font-medium block">Shikkis — Curated Style</strong>
                       269, 2nd C Road, Near Nikky Tiles,<br />
                       Sardarpura (Near 11th B Road / Jaljog Circle),<br />
                       Jodhpur, Rajasthan - 342001
@@ -382,7 +382,7 @@ export const PoliciesPage: React.FC = () => {
                 <div className="p-6 rounded-2xl border border-border bg-surface-alt/20 space-y-3">
                   <h3 className="font-serif text-lg font-medium text-text">Signature Specialty: Buy Back Concept</h3>
                   <p className="text-sm text-text-muted leading-relaxed">
-                    Rajkanwari is renowned in Rajasthan for introducing a unique <strong className="text-text font-semibold">Buy Back concept</strong> for designer wear. Whether you are looking for heavy bridal lehengas, authentic Rajputi poshaks, Anarkalis, Gowns, or Indo-Western fusion wear, our Jodhpur atelier offers tailored customization and consultation.
+                    Shikkis is renowned in Rajasthan for introducing a unique <strong className="text-text font-semibold">Buy Back concept</strong> for designer wear. Whether you are looking for heavy bridal lehengas, authentic Rajputi poshaks, Anarkalis, Gowns, or Indo-Western fusion wear, our Jodhpur atelier offers tailored customization and consultation.
                   </p>
                 </div>
               </div>

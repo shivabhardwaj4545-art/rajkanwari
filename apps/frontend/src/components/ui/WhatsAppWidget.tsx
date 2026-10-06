@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 const QUICK_PROMPTS = [
   'Hi! I would like to inquire about Bridal Lehengas.',
   'Hello, I want details regarding Rajputi Poshak customization.',
-  'Hi Rajkanwari, can I know your boutique store address in Jodhpur?',
+  'Hi Shikkis, can I know your boutique store address in Jodhpur?',
 ];
 
 export const WhatsAppWidget: React.FC = () => {
@@ -13,7 +13,7 @@ export const WhatsAppWidget: React.FC = () => {
   const [message, setMessage] = useState('');
 
   const handleSend = (customMsg?: string) => {
-    const textToSend = customMsg || message || 'Hello Rajkanwari! I would like to inquire about your ethnic wear collection.';
+    const textToSend = customMsg || message || 'Hello Shikkis! I would like to inquire about your ethnic wear collection.';
     const phoneNumber = '917568572265';
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(textToSend)}`;
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
@@ -35,21 +35,21 @@ export const WhatsAppWidget: React.FC = () => {
             <div className="bg-[#075E54] text-white p-4 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20 font-serif font-bold text-lg text-white border border-white/30">
-                  R
+                  S
                   <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-[#25D366] ring-2 ring-[#075E54]" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-sm leading-tight">Rajkanwari Jodhpur</h4>
+                  <h4 className="font-semibold text-sm leading-tight">Shikkis Boutique</h4>
                   <p className="text-[11px] text-emerald-100 flex items-center gap-1 mt-0.5">
                     <CheckCircle2 size={11} className="text-emerald-300" />
-                    <span>Online | Flagship Boutique</span>
+                    <span>Online | Flagship Atelier</span>
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <a
-                  href="https://wa.me/917568572265?text=Hi%20Rajkanwari!%20I%20would%20like%20to%20connect%20directly."
+                  href="https://wa.me/917568572265?text=Hi%20Shikkis!%20I%20would%20like%20to%20connect%20directly."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#25D366] text-white text-[11px] font-bold hover:bg-[#1EBE5B] transition-colors shadow-xs"
@@ -75,10 +75,10 @@ export const WhatsAppWidget: React.FC = () => {
               <div className="bg-surface p-3.5 rounded-2xl rounded-tl-xs shadow-sm border border-border/60 max-w-[88%] space-y-1.5">
                 <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-brand-gold">
                   <Sparkles size={12} />
-                  <span>Rajkanwari Concierge</span>
+                  <span>Shikkis Concierge</span>
                 </div>
                 <p className="text-xs text-text leading-relaxed">
-                  Namaste! 🙏 Welcome to Rajkanwari — House of Ethnic Wear. How can we assist you with your bridal or festive ensemble today?
+                  Namaste! 🙏 Welcome to Shikkis — Curated Style. How can we assist you with your bridal or festive ensemble today?
                 </p>
                 <span className="block text-[10px] text-text-muted text-right mt-1">Just now</span>
               </div>
@@ -132,7 +132,7 @@ export const WhatsAppWidget: React.FC = () => {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        aria-label="Contact Rajkanwari on WhatsApp"
+        aria-label="Contact Shikkis on WhatsApp"
         className="pointer-events-auto relative flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl hover:scale-110 active:scale-95 transition-all border-2 border-white dark:border-stone-900 group"
       >
         <span className="absolute -inset-1 rounded-full bg-[#25D366]/40 animate-ping z-0 pointer-events-none" />

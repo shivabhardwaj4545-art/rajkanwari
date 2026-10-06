@@ -43,7 +43,7 @@ router.get('/', async (_req, res) => {
 
   res.json({
     status: 'ok',
-    store: 'Rajkanwari — House of Ethnic Wear',
+    store: "Shikki's — Curated Style",
     db: dbStatus,
     dbError,
     products: productCount,

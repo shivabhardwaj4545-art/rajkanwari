@@ -8,7 +8,7 @@ export interface PriceProps {
 }
 
 /**
- * Universal Price Component for Rajkanwari.
+ * Universal Price Component for Shikkis.
  * Ensures consistent Indian Rupee (₹) symbol rendering with Inter tabular lining numbers
  * and prevents accidental font-serif / oldstyle figure inheritance.
  */

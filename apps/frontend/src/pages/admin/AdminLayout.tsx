@@ -122,7 +122,7 @@ export const AdminLayout: React.FC = () => {
         <div className="text-center space-y-3">
           <div className="h-10 w-10 mx-auto rounded-full border-2 border-brand-gold border-t-transparent animate-spin" />
           <p className="text-sm font-serif text-text">Restoring Store Owner Session...</p>
-          <p className="text-[11px] text-text-muted">Rajkanwari — Curated Style</p>
+          <p className="text-[11px] text-text-muted">Shikki's — Curated Style</p>
         </div>
       </div>
     );
@@ -137,7 +137,7 @@ export const AdminLayout: React.FC = () => {
           </div>
           <h1 className="font-serif text-2xl font-semibold text-text mb-2">403 — Owner Access Required</h1>
           <p className="text-xs text-text-muted mb-6 leading-relaxed">
-            The Rajkanwari Admin Console is strictly restricted to store owners. You are currently logged in as{' '}
+            The Shikki's Admin Console is strictly restricted to store owners. You are currently logged in as{' '}
             <span className="font-semibold text-text">{user?.email || 'Guest'}</span> ({user?.role || 'none'}).
           </p>
 

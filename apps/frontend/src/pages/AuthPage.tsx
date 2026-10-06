@@ -141,7 +141,7 @@ export const AuthPage: React.FC = () => {
 
       localStorage.setItem('rajkanwari_access_token', res.accessToken);
       await initAuth();
-      setSuccessMsg('Account created successfully! Welcome to Rajkanwari.');
+      setSuccessMsg('Account created successfully! Welcome to Shikkis.');
       setTimeout(() => navigate('/catalog'), 800);
     } catch (err: any) {
       setErrorMsg(err?.message || 'Registration failed. Email might already be registered.');
@@ -163,12 +163,12 @@ export const AuthPage: React.FC = () => {
           <Link
             to="/"
             className="inline-block text-text focus:outline-none"
-            aria-label="Rajkanwari Home"
+            aria-label="Shikki's Home"
           >
             <BrandLogo variant="full" size="lg" />
           </Link>
           <p className="mt-3 text-xs uppercase tracking-widest text-brand-gold font-semibold">
-            House of Ethnic Wear • Account Portal
+            Curated Style • Account Portal
           </p>
         </div>
 

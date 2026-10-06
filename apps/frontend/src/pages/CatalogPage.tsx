@@ -269,7 +269,7 @@ export const CatalogPage: React.FC = () => {
       {/* ── Page Header ──────────────────────────────────────────────────── */}
       <div className="mb-8 pb-6 border-b border-border">
         <span className="text-xs font-semibold uppercase tracking-widest text-brand-gold">
-          Rajkanwari Collection
+          Shikkis Collection
         </span>
         <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-text mt-1">
           {currentCategoryName}

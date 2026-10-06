@@ -30,12 +30,12 @@ export const Footer: React.FC = () => (
           <Link
             to="/"
             className="inline-block text-text focus:outline-none"
-            aria-label="Rajkanwari - House of Ethnic Wear"
+            aria-label="Shikki's — Curated Style"
           >
             <BrandLogo variant="full" size="lg" />
           </Link>
           <p className="text-sm text-text-muted max-w-md leading-relaxed">
-            Rajkanwari — House of Ethnic Wear, Jodhpur. Curated designer bridal lehengas, Rajputi poshaks &amp; festive couture.
+            Shikkis — Curated Style. Luxury designer bridal lehengas, Rajputi poshaks &amp; festive couture.
           </p>
 
           {/* ── Contact ─────────────────────────────────────────────────────── */}
@@ -55,11 +55,11 @@ export const Footer: React.FC = () => (
               </a>
             </span>
             <a
-              href="mailto:hello@rajkanwari.com"
+              href="mailto:hello@shikkis.com"
               className="flex items-center gap-2 hover:text-text transition-colors"
             >
               <Mail size={14} className="text-brand-gold shrink-0" aria-hidden />
-              hello@rajkanwari.com
+              hello@shikkis.com
             </a>
           </address>
         </div>
@@ -89,7 +89,7 @@ export const Footer: React.FC = () => (
       {/* ── Bottom row ─────────────────────────────────────────────────────── */}
       <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-border pt-6">
         <p className="text-xs text-text-muted">
-          © {new Date().getFullYear()} Rajkanwari — House of Ethnic Wear. Flagship Boutique: Jodhpur, Rajasthan. All rights reserved.
+          © {new Date().getFullYear()} Shikkis — Curated Style. Flagship Boutique: Jodhpur, Rajasthan. All rights reserved.
         </p>
 
         {/* Social Links */}
@@ -98,7 +98,7 @@ export const Footer: React.FC = () => (
             href="https://www.instagram.com/rajkanwari_ethnic_wear/?hl=en"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Follow Rajkanwari on Instagram"
+            aria-label="Follow Shikkis on Instagram"
             className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border-border/80 bg-surface/80 text-text-muted hover:text-brand-crimson hover:border-brand-gold hover:bg-surface transition-all hover:scale-105"
           >
             <Instagram size={17} aria-hidden />
@@ -107,30 +107,30 @@ export const Footer: React.FC = () => (
             href="https://www.facebook.com/p/Rajkanwari-House-of-Ethnic-Wear-100077052254113/"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Follow Rajkanwari on Facebook"
+            aria-label="Follow Shikkis on Facebook"
             className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border-border/80 bg-surface/80 text-text-muted hover:text-brand-crimson hover:border-brand-gold hover:bg-surface transition-all hover:scale-105"
           >
             <Facebook size={17} aria-hidden />
           </a>
           <a
-            href="https://wa.me/917568572265?text=Hello%20Rajkanwari,%20I%20would%20like%20to%20inquire%20about%20your%20collection"
+            href="https://wa.me/917568572265?text=Hello%20Shikkis,%20I%20would%20like%20to%20inquire%20about%20your%20collection"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Chat with Rajkanwari on WhatsApp"
+            aria-label="Chat with Shikkis on WhatsApp"
             className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border-border/80 bg-surface/80 text-text-muted hover:text-[#25D366] hover:border-[#25D366] hover:bg-surface transition-all hover:scale-105"
           >
             <MessageCircle size={17} aria-hidden />
           </a>
           <a
             href="tel:+917568572265"
-            aria-label="Call Rajkanwari Flagship Boutique"
+            aria-label="Call Shikkis Flagship Boutique"
             className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border-border/80 bg-surface/80 text-text-muted hover:text-brand-crimson hover:border-brand-gold hover:bg-surface transition-all hover:scale-105"
           >
             <Phone size={16} aria-hidden />
           </a>
           <a
-            href="mailto:hello@rajkanwari.com"
-            aria-label="Email Rajkanwari"
+            href="mailto:hello@shikkis.com"
+            aria-label="Email Shikkis"
             className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full border border-border/80 bg-surface/80 text-text-muted hover:text-brand-crimson hover:border-brand-gold hover:bg-surface transition-all hover:scale-105"
           >
             <Mail size={16} aria-hidden />

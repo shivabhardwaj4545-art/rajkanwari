@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import type { ProductItem } from '@/lib/api';
 
-const STORAGE_KEY = 'rajkanwari-wishlist';
-const ALT_STORAGE_KEY = 'shikkis-wishlist';
+const STORAGE_KEY = 'shikkis-wishlist';
+const ALT_STORAGE_KEY = 'rajkanwari-wishlist';
 
 interface WishlistState {
   items: ProductItem[];

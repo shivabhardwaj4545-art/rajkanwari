@@ -369,7 +369,7 @@ export const AdminBannersPage: React.FC = () => {
                   </span>
                 )}
                 <span className="inline-block font-serif tracking-widest text-[11px] uppercase font-extrabold text-brand-gold [text-shadow:_0_1px_8px_rgba(0,0,0,0.9)]">
-                  RAJKANWARI &bull; CURATED STYLE
+                  SHIKKI'S &bull; CURATED STYLE
                 </span>
                 <h2 className="font-serif text-2xl sm:text-4xl font-normal leading-tight" style={textStyle}>
                   {activeBanner.title}

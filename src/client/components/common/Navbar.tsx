@@ -31,13 +31,15 @@ export const Navbar: React.FC = () => {
           {mobileMenuOpen ? <X className="w-24 h-24" /> : <Menu className="w-24 h-24" />}
         </button>
 
-        {/* Brand Logo with Lotus Flourish matching Screenshot 1 */}
+        {/* Brand Logo with Shikki's Gold Seal */}
         <Link to="/" className="flex items-center gap-8 group">
-          <svg className="w-28 h-28 text-brand-primary dark:text-brand-gold fill-current" viewBox="0 0 24 24">
-            <path d="M12 2C10.5 5 8 8 4 9c0 0 4 2 6 7 2-5 6-7 6-7-4-1-6.5-4-4-7zm0 20c-3 0-6-1.5-8-4 4 0 6.5-2 8-5 1.5 3 4 5 8 5-2 2.5-5 4-8 4z" />
-          </svg>
+          <img
+            src="/images/shikkis_logo_square.png"
+            alt="Shikki's Logo"
+            className="w-28 h-28 object-contain rounded-md ring-1 ring-brand-gold/40 shadow-xs"
+          />
           <span className="font-serif text-22 sm:text-26 font-bold tracking-widest text-text uppercase">
-            RAJKUNWARI
+            SHIKKI'S
           </span>
         </Link>
 

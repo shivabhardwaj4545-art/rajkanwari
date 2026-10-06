@@ -204,7 +204,7 @@ export const Header: React.FC = () => {
             to="/"
             id="site-wordmark"
             className="flex items-center text-text focus:outline-none"
-            aria-label="Rajkanwari - House of Ethnic Wear"
+            aria-label="Shikki's — Curated Style"
           >
             <BrandLogo variant="full" size="md" />
           </Link>

@@ -93,7 +93,7 @@ export const HomePage: React.FC = () => {
             {
               id: 'fallback_02',
               title: "Make Room For What's New",
-              subtitle: 'Too Rajkunwari To Blend In. Discover our newest handcrafted arrivals & festive edits.',
+              subtitle: 'Curated Style By Shikkis. Discover our newest handcrafted arrivals & festive edits.',
               image_url: '/images/hero-timeless-elegance.jpg',
               cta_text: 'Shop New Arrivals',
               cta_link: '/catalog?sort=newest',
@@ -329,7 +329,7 @@ export const HomePage: React.FC = () => {
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ duration: prefersReducedMotion ? 0 : 3, ease: 'easeOut' }}
                     src={resolvedUrl}
-                    alt={currentBanner?.title || 'Rajkanwari House of Ethnic Wear'}
+                    alt={currentBanner?.title || "Shikki's — Curated Style"}
                     onError={(e) => {
                       const target = e.currentTarget;
                       if (!target.src.includes('banner_festive_trio.jpg')) {
@@ -418,7 +418,7 @@ export const HomePage: React.FC = () => {
                               </span>
                             )}
                             <span className="text-xs sm:text-sm font-extrabold uppercase tracking-[0.25em] text-brand-gold block [text-shadow:_0_1px_8px_rgba(0,0,0,0.9)]">
-                              RAJKANWARI • CURATED STYLE
+                              SHIKKI'S • CURATED STYLE
                             </span>
                             <motion.h1
                               initial={{ opacity: 0, y: 20 }}
@@ -752,7 +752,7 @@ export const HomePage: React.FC = () => {
             >
               <img
                 src="/images/newsletter_ethnic_flatlay.jpg"
-                alt="Rajkanwari Luxury Accessories"
+                alt="Shikki's Luxury Accessories"
                 className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
                 loading="lazy"
               />
@@ -819,7 +819,7 @@ export const HomePage: React.FC = () => {
                 SUBSCRIBE NEWSLETTER
               </h2>
               <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-sans max-w-md mx-auto">
-                Join our private community of Rajkanwari. We'll send you curated product updates once a month.
+                Join our private community of Shikki's. We'll send you curated product updates once a month.
               </p>
             </div>
 
@@ -831,7 +831,7 @@ export const HomePage: React.FC = () => {
                 className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-medium flex items-center justify-center gap-2"
               >
                 <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                <span>Thank you for subscribing! Welcome to the Rajkanwari community.</span>
+                <span>Thank you for subscribing! Welcome to the Shikki's community.</span>
               </motion.div>
             ) : (
               <form onSubmit={handleNewsletterSubmit} className="space-y-2 max-w-md mx-auto">
@@ -937,7 +937,7 @@ export const HomePage: React.FC = () => {
             >
               <img
                 src="/images/newsletter_model_portrait.jpg"
-                alt="Rajkanwari Brand Ambassador"
+                alt="Shikki's Brand Ambassador"
                 className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
                 loading="lazy"
               />

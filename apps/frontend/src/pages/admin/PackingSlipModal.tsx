@@ -78,16 +78,23 @@ export const PackingSlipModal: React.FC<PackingSlipModalProps> = ({ data, onClos
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 text-sm printable-area">
           {/* Top Brand & Barcode Header */}
           <div className="flex justify-between items-start border-b-2 border-black pb-4">
-            <div>
-              <h1 className="text-2xl font-serif font-black tracking-wider text-black">
-                RAJKANWARI
-              </h1>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-600">
-                House of Ethnic Wear • Premium Storefront & Express Dispatch
-              </p>
-              <p className="text-[11px] text-gray-700 mt-1 leading-snug">
-                100 Feet Rd, Indiranagar, Bengaluru, KA 560038 | Tel: +91 98200 11223
-              </p>
+            <div className="flex items-center gap-3">
+              <img
+                src="/images/shikkis_logo_square.png"
+                alt="Shikki's Logo"
+                className="w-12 h-12 rounded-lg object-contain border border-gray-300"
+              />
+              <div>
+                <h1 className="text-2xl font-serif font-black tracking-wider text-black">
+                  SHIKKI'S
+                </h1>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-600">
+                  Curated Style • Premium Storefront &amp; Express Dispatch
+                </p>
+                <p className="text-[11px] text-gray-700 mt-0.5 leading-snug">
+                  100 Feet Rd, Indiranagar, Bengaluru, KA 560038 | Tel: +91 98200 11223
+                </p>
+              </div>
             </div>
             <div className="text-right">
               <div className="inline-block px-3 py-1 bg-black text-white text-xs font-mono font-bold uppercase rounded tracking-widest mb-1">
@@ -194,9 +201,9 @@ export const PackingSlipModal: React.FC<PackingSlipModalProps> = ({ data, onClos
                   SHIPPER / RETURN ADDRESS
                 </span>
               </div>
-              <p className="font-bold text-sm text-gray-900">RAJKANWARI LUXURY WAREHOUSE</p>
+              <p className="font-bold text-sm text-gray-900">SHIKKI'S LUXURY ATELIER &amp; DISPATCH</p>
               <p className="text-xs text-gray-700 leading-relaxed">
-                House of Ethnic Wear
+                Curated Style
                 <br />
                 100 Feet Rd, Indiranagar, Stage 2
                 <br />

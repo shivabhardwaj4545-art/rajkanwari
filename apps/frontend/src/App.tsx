@@ -40,7 +40,7 @@ const App: React.FC = () => {
           <div className="min-h-screen bg-bg flex items-center justify-center">
             <div className="text-center space-y-3">
               <div className="h-10 w-10 mx-auto rounded-full border-2 border-brand-gold border-t-transparent animate-spin" />
-              <p className="text-xs text-text-muted font-serif">Loading Rajkanwari Admin Console...</p>
+              <p className="text-xs text-text-muted font-serif">Loading Shikkis Admin Console...</p>
             </div>
           </div>
         }

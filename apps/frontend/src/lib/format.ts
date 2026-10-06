@@ -1,6 +1,6 @@
 /**
  * Indian Rupee (INR, en-IN) currency formatter.
- * All money in Rajkanwari is stored as INTEGER paise (₹1 = 100 paise).
+ * All money in Shikkis is stored as INTEGER paise (₹1 = 100 paise).
  */
 export function formatPrice(paise: number): string {
   const rupees = Math.round(paise / 100);
